@@ -43,4 +43,4 @@ To run make commands, you need to have:
   - [x] page send a /refresh request on load with thwe refresh token
 - [ ] loading states
 - [x] fix: delete
-- [ ] add: prisma
+- [x] add: prisma
