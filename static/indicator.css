@@ -1,0 +1,9 @@
+.indicator {
+  opacity: "0";
+  height: "0";
+}
+
+.indicator.htmx-request {
+  opacity: "1";
+  height: "100%";
+}

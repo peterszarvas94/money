@@ -14,8 +14,10 @@
 
 To run make commands, you need to have:
 
-- gin
-- tailwindcss cli
+- `gin` for dev serve
+- `tailwindcss` cli for css class generation
+- `bun` for schema migrations with prisma
+- `turso` cli for pushing migrations
 
 ## Todo
 
@@ -41,3 +43,4 @@ To run make commands, you need to have:
   - [x] page send a /refresh request on load with thwe refresh token
 - [ ] loading states
 - [x] fix: delete
+- [ ] add: prisma

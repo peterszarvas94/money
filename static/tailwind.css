@@ -568,6 +568,16 @@ video {
   }
 }
 
+.indicator {
+  opacity: 0;
+  height: 0;
+}
+
+.indicator.htmx-request {
+  opacity: 1;
+  height: 100%;
+}
+
 .absolute {
   position: absolute;
 }
@@ -684,6 +694,15 @@ video {
   padding: 0.25rem;
 }
 
+.p-2 {
+  padding: 0.5rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -692,11 +711,6 @@ video {
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .pb-1 {

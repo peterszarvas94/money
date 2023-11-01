@@ -12,11 +12,12 @@
     <script src="/static/typeahead.js"></script>
     <script src="/static/signaler.js" type="module"></script>
     <script src="/static/htmx-extensions.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/tailwind.css" />
+    <link rel="stylesheet" type="text/css" href="/static/indicator.css" />
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   </head>
 
-  <body class="flex flex-col p-2 gap-2" hx-ext="token,error">
+  <body class="flex flex-col px-2 gap-2 py-2" hx-ext="token,error">
     {{template "content" .}}
   </body>
 </html>
