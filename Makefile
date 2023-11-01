@@ -11,7 +11,7 @@ dev:
 
 # Generate tailwindcss classes for development
 tw:
-	tailwindcss -i tailwind.css -o static/style.css --watch
+	tailwindcss -i tailwind.base.css -o static/tailwind.css --watch
 
 # Build
 build:
