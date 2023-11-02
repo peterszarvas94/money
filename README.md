@@ -1,4 +1,8 @@
-# HTTG
+# Pengoe
+
+Simple solution for splitting money and tracking expenses with friends.
+
+## Stack
 
 - Htmx for interactivity
 - Turso db
