@@ -25,12 +25,9 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	baseHtml := "templates/base.html"
 	indexHtml := "templates/index.html"
-	todosHtml := "templates/todos.html"
-	todoHtml := "templates/todo.html"
-	deleteHtml := "templates/delete.html"
 	loading := "templates/loading.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, indexHtml, todosHtml, todoHtml, deleteHtml, loading)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, indexHtml, loading)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "index/tmpl", tmplErr.Error())
 		http.Error(w, "Intenal server error at tmpl", http.StatusInternalServerError)
@@ -39,18 +36,11 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	utils.Log(utils.INFO, "index/tmpl", "Template parsed successfully")
 
-	todos, todosErr := utils.GetTodos()
-	if todosErr != nil {
-		utils.Log(utils.ERROR, "index/todos", todosErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
 
 	utils.Log(utils.INFO, "index/todos", "Todos retrieved successfully")
 
-	data := utils.TodosData{
+	data := utils.HomePageData{
 		Session: session,
-		Todos:   todos,
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

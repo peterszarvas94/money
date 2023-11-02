@@ -1,95 +1,41 @@
 {{define "content"}}
 
-<h1 class="font-bold text-3xl py-4">GO x HTMX</h1>
-
-{{if not .Session.LoggedIn}}
-
-<div class="flex items-center gap-2 flex-wrap">
-  <a
-    aria-label="Sign up"
-    class="bg-yellow-200 border border-black rounded p-1 w-fit cursor-pointer"
-    href="/signup"
-    hx-boost="true"
-  >
-    Sign up
-  </a>
-  <a
-    aria-label="Sign in"
-    hx-boost="true"
-    href="/signin"
-    class="bg-red-200 border border-black rounded p-1 w-fit"
-  >
-    Sign in
-  </a>
-</div>
-
-{{else}}
-
-<div class="flex items-center gap-2 flex-wrap">
-  <form hx-boost="true" method="post" action="/signout/" hx-ext="signout">
-    <button
-      aria-label="Sign out"
-      type="submit"
-      class="bg-red-200 border border-black rounded p-1 w-fit"
-    >
-      Sign out
-    </button>
-  </form>
-  <div>Logged in as</div>
-  <div class="font-bold">
-    {{.Session.User.Username}} ({{.Session.User.Email}})
+<body class="bg-background text-text">
+  <div class="flex justify-center">
+    <h1
+      class="bg-gradient-to-r text-transparent from-primary to-accent bg-clip-text font-bold text-5xl py-10 tracking-tight w-fit">
+      pengoe</h2>
   </div>
-</div>
-<form
-  hx-post="/todos"
-  hx-target="#todos li:last-child"
-  hx-swap="beforebegin"
-  hx-indicator="#spinner"
-  hx-ext="protected"
-  hx-on::after-request="this.reset();"
-  class="flex gap-2 flex-wrap"
->
-  <input
-    aria-label="New todo"
-    name="text"
-    placeholder="new todo"
-    class="border border-black rounded-md p-1"
-  />
-  <button
-    aria-label="Submit"
-    type="submit"
-    class="bg-green-200 border border-black rounded p-1"
-  >
-    Submit
-  </button>
-</form>
+  <p class="pt-6 pb-10 text-center">
+    Simple solution for splitting money and tracking expenses with friends.
+  </p>
+
+  {{if not .Session.LoggedIn}}
+
+  <div class="flex justify-center gap-2 flex-wrap">
+    <a aria-label="Sign up" class="bg-primary rounded px-2 py-1 w-fit" href="/signup" hx-boost="true">
+      Sign up
+    </a>
+    <a aria-label="Sign in" hx-boost="true" href="/signin" class="bg-secondary px-2 py-1 rounded p-1 w-fit">
+      Sign in
+    </a>
+  </div>
+
+  {{else}}
+
+  <div class="flex items-center gap-2 flex-wrap">
+    <form hx-boost="true" method="post" action="/signout/" hx-ext="signout">
+      <button aria-label="Sign out" type="submit" class="bg-red-200 border border-black rounded p-1 w-fit">
+        Sign out
+      </button>
+    </form>
+    <div>Logged in as</div>
+    <div class="font-bold">
+      {{.Session.User.Username}} ({{.Session.User.Email}})
+    </div>
+  </div>
+</body>
 
 {{end}}
-
-<h2 class="font-bold text-xl py-4">Todos</h2>
-
-{{template "todos" .}}
-
-<h2 class="font-bold text-xl py-4">
-  Custom elements for client-side scripting
-</h2>
-
-<!-- custom element -->
-
-<h3 class="font-bold pb-1">Counter</h3>
-<ce-counter start="2"></ce-counter>
-
-<h3 class="font-bold pt-2">Events</h3>
-<ce-updater ce-event="test-event"></ce-updater>
-<ce-receiver ce-event="test-event"></ce-receiver>
-
-<h3 class="font-bold pt-2">Signals</h3>
-<ce-signaler></ce-signaler>
-
-<h3 class="font-bold pt-2">Dropdown</h3>
-<ce-dropdown items="apple,banana,melon,strawberry,cherry"></ce-dropdown>
-
-<h3 class="font-bold pt-2">Typeahead</h3>
-<ce-typeahead items="apple,banana,melon,strawberry,cherry"></ce-typeahead>
 
 {{end}}

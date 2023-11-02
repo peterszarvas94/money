@@ -8,25 +8,20 @@ type UserData struct {
 	Email    string
 }
 
-type TodoData struct {
-	Id   int
-	Text string
-}
 
 type SessionData struct {
 	LoggedIn bool
 	User     UserData
 }
 
+type HomePageData struct {
+	Session SessionData
+}
+
 type NewTodoData struct {
 	Session SessionData
 	Id      int
 	Text    string
-}
-
-type TodosData struct {
-	Session SessionData
-	Todos   []TodoData
 }
 
 type SigninData struct {

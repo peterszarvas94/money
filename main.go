@@ -16,8 +16,6 @@ func main() {
 	r.GET("/signin", handlers.SigninPageHandler)
 	r.POST("/signin", handlers.SigninHandler)
 	r.POST("/signout", handlers.SignoutHandler)
-	r.POST("/todos", handlers.NewTodoHandler)
-	r.DELETE("/todos/:id", handlers.DeleteTodoHandler)
 	r.GET("/check", handlers.CheckUserHandler)
 	r.POST("/refresh", handlers.RefreshTokenHandler)
 

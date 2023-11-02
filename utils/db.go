@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -34,131 +33,6 @@ func db() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-/*
-GetTodos is a function that returns all todos from the database.
-*/
-func GetTodos() ([]TodoData, error) {
-	db, dbErr := db()
-	if dbErr != nil {
-		return nil, dbErr
-	}
-
-	rows, queryErr := db.Query("SELECT * FROM todos")
-	if queryErr != nil {
-		return nil, queryErr
-	}
-	defer rows.Close()
-
-	todos := []TodoData{}
-	for rows.Next() {
-		var id int
-		var text string
-		scanErr := rows.Scan(&id, &text)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-
-		todo := TodoData{
-			Id:   id,
-			Text: text,
-		}
-		todos = append(todos, todo)
-	}
-
-	return todos, nil
-}
-
-/*
-AddTodo is a function that adds a new todo to the database.
-*/
-func AddTodo(newText string, r *http.Request) (NewTodoData, error) {
-	db, dbErr := db()
-	if dbErr != nil {
-		return NewTodoData{}, dbErr
-	}
-
-	_, mutationErr := db.Exec("INSERT INTO todos (text) VALUES (?)", newText)
-	if mutationErr != nil {
-		return NewTodoData{}, mutationErr
-	}
-
-	query, queryErr := db.Query("SELECT * FROM todos WHERE text = ?", newText)
-	if queryErr != nil {
-		return NewTodoData{}, queryErr
-	}
-
-	var id int
-	var text string
-
-	for query.Next() {
-		scanErr := query.Scan(&id, &text)
-		if scanErr != nil {
-			return NewTodoData{}, scanErr
-		}
-	}
-
-	session := CheckSession(r)
-
-	todo := NewTodoData{
-		Id:      id,
-		Text:    text,
-		Session: session,
-	}
-
-	return todo, nil
-}
-
-/*
-GetTodoById is a function that returns a todo from the database by id.
-*/
-func GetTodoById(id int) (TodoData, error) {
-	db, dbErr := db()
-	if dbErr != nil {
-		Log(ERROR, "getTodobyId/db", dbErr.Error())
-		return TodoData{}, dbErr
-	}
-
-	query, queryErr := db.Query("SELECT * FROM todos WHERE id = ?", id)
-	if queryErr != nil {
-		Log(ERROR, "getTodobyId/query", queryErr.Error())
-		return TodoData{}, queryErr
-	}
-
-	var text string
-
-	for query.Next() {
-		scanErr := query.Scan(&id, &text)
-		if scanErr != nil {
-			Log(ERROR, "getTodobyId/scan", scanErr.Error())
-			return TodoData{}, scanErr
-		}
-	}
-
-	todo := TodoData{
-		Id:   id,
-		Text: text,
-	}
-
-	return todo, nil
-}
-
-/*
-DeleteTodoById is a function that deletes a todo from the database by id.
-*/
-func DeleteTodoById(id int) error {
-	db, dbErr := db()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	_, mutationErr := db.Exec("DELETE FROM todos WHERE id = ?", id)
-	if mutationErr != nil {
-		return mutationErr
-	}
-
-	return nil
 }
 
 func AddUser(newUsername string, newEmail string, newPassword string) (UserData, error) {
