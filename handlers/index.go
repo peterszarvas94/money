@@ -36,9 +36,6 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	utils.Log(utils.INFO, "index/tmpl", "Template parsed successfully")
 
-
-	utils.Log(utils.INFO, "index/todos", "Todos retrieved successfully")
-
 	data := utils.PageData{
 		Session: session,
 		Title: "pengoe",

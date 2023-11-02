@@ -8,7 +8,6 @@ type UserData struct {
 	Email    string
 }
 
-
 type SessionData struct {
 	LoggedIn bool
 	User     UserData
@@ -19,11 +18,6 @@ type PageData struct {
 	Title   string
 }
 
-type NewTodoData struct {
-	Session SessionData
-	Id      int
-	Text    string
-}
 
 type SigninData struct {
 	User  string
