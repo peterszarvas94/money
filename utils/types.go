@@ -14,8 +14,9 @@ type SessionData struct {
 	User     UserData
 }
 
-type HomePageData struct {
+type PageData struct {
 	Session SessionData
+	Title   string
 }
 
 type NewTodoData struct {

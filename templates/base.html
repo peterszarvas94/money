@@ -1,9 +1,11 @@
-{{template "base" .}} {{define "base"}}
+{{template "base" .}}
+
+{{define "base"}}
 <!doctype html>
 <html lang="en">
 
 <head>
-  <title>Go Web Server</title>
+  {{template "title" .Title}}
   <script src="https://unpkg.com/htmx.org@1.9.5"></script>
   <script src="/static/htmx-extensions.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/tailwind.css" />
