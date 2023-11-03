@@ -12,7 +12,7 @@ Simple solution for splitting money and tracking expenses with friends.
 ## Commands
 
 - `make dev` - start dev server on port 3000
-  - optional env: LOG_LEVEL=INFO/WARNING/ERROR/FATAL
+  - optional env: `LOG_LEVEL=INFO/WARNING/ERROR/FATAL`
 - `make tw` - generate tailwind styles for dev
 - `make build` - build docker image
 - `make run` - run docker image

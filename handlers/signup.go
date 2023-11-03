@@ -14,12 +14,14 @@ getSignupTmpl helper function to parse the signup template.
 */
 func getSignupTmpl() (*template.Template, error) {
 	baseHtml := "templates/base.html"
+	titleHtml := "templates/title.html"
 	signupHtml := "templates/signup.html"
 	errorHtml := "templates/error.html"
 	incorrectHtml := "templates/incorrect.html"
 	correctHtml := "templates/correct.html"
+	iconHtml := "templates/icon.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, signupHtml, errorHtml, incorrectHtml, correctHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, titleHtml, signupHtml, errorHtml, incorrectHtml, correctHtml, iconHtml)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "signup/signupTmpl", tmplErr.Error())
 		return nil, tmplErr
@@ -71,7 +73,11 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	resErr := tmpl.Execute(w, nil)
+	pageData := utils.SignupData{
+		Title: "pengoe - signup",
+	}
+
+	resErr := tmpl.Execute(w, pageData)
 	if resErr != nil {
 		utils.Log(utils.ERROR, "signup/get/res", resErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -98,6 +104,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	email := html.EscapeString(r.FormValue("email"))
 	password := html.EscapeString(r.FormValue("password"))
 
+	// successful signup, redirect to signin
 	_, userErr := utils.AddUser(username, email, password)
 	if userErr == nil {
 		utils.Log(utils.INFO, "signup/post/user", "User added successfully")
@@ -105,6 +112,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		return
 	}
 
+	// unsuccessful signup, render signup page with error message
 	utils.Log(utils.ERROR, "signup/post/user", userErr.Error())
 
 	_, invalid := mail.ParseAddress(email)
@@ -151,6 +159,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			Username: usernameExists,
 			Email:    emailExists,
 		},
+		Title: "pengoe - signup",
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

@@ -26,8 +26,9 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	baseHtml := "templates/base.html"
 	titleHtml := "templates/title.html"
 	indexHtml := "templates/index.html"
+	iconHtml := "templates/icon.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, titleHtml, indexHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, titleHtml, indexHtml, iconHtml)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "index/tmpl", tmplErr.Error())
 		http.Error(w, "Intenal server error at tmpl", http.StatusInternalServerError)

@@ -18,7 +18,6 @@ type PageData struct {
 	Title   string
 }
 
-
 type SigninData struct {
 	User  string
 	Error string
@@ -34,9 +33,11 @@ type SignupData struct {
 	Email    string
 	Error    string
 	Exists   ExistsData
+	Title    string
 }
 
 type TokenVariant string
+
 const (
 	Access  TokenVariant = "access"
 	Refresh TokenVariant = "refresh"
