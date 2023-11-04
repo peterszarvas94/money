@@ -21,6 +21,9 @@ module.exports = {
         redhat: "'Red Hat Display', sanf-serif",
         slab: "'Roboto Slab', serif",
       },
+      fontSize: {
+        giant: '20rem',
+      },
     },
   },
   plugins: [],

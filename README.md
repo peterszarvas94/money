@@ -32,7 +32,11 @@ To run make commands, you need to have:
 
 ## Todo
 
-- [ ] signup page
+- [x] signup page
+  - [ ] add username field
+  - [ ] add svg to background
 - [ ] signin page
 - [ ] dashboard page
 - [ ] loading states
+- [ ] add models to backend (e.g. User.new, User.login...)
+- [ ] viewtransition api

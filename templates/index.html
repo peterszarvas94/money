@@ -1,49 +1,40 @@
 {{define "content"}}
 
-<div
-  class="from-background to-secondary font-slab text-text h-screen bg-gradient-to-br"
->
-  <div class="flex items-center justify-center gap-2 py-14">
-    <div class="text-primary text-5xl">{{template "icon"}}</div>
-    <h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
-      pengoe
-    </h1>
-  </div>
-  <div class="flex flex-col items-center gap-4 pb-10">
-    <p class="text-center text-2xl">
-      <span class="tracking-extreme">split</span> money and
-      <span class="border-primary border-b">track</span> expenses
-    </p>
-    <p class="text-center text-xl">
-      for small groups and <span class="">friends</span>
-    </p>
-  </div>
+<section class="flex flex-col items-center gap-4 pb-10">
+  <p class="text-center text-2xl">
+    <span class="tracking-extreme">split</span> money and
+    <span class="border-primary border-b">track</span> expenses
+  </p>
+  <p class="text-center text-xl">
+    for small groups and <span class="">friends</span>
+  </p>
+</section>
 
-  {{if not .Session.LoggedIn}}
+{{if not .Session.LoggedIn}}
 
-  <div class="flex flex-wrap justify-center gap-4">
-    <a
-      aria-label="Sign up"
-      class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
-      href="/signup"
-      hx-boost="true"
-    >
-      Want to try?
-    </a>
-    <a
-      aria-label="Sign in"
-      hx-boost="true"
-      href="/signin"
-      class="border-text bg-text text-secondary hover:border-accent hover:bg-accent focus:bg-accent focus:text-secondary focus:border-accent flex h-10 w-fit items-center rounded-lg border px-2 focus:outline-none"
-    >
-      Sign in
-    </a>
-  </div>
+<nav class="flex flex-wrap justify-center gap-4">
+  <a
+    aria-label="Sign up"
+    class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+    href="/signup"
+    hx-boost="true"
+  >
+    Want to try?
+  </a>
+  <a
+    aria-label="Sign in"
+    hx-boost="true"
+    href="/signin"
+    class="border-text bg-text text-secondary hover:border-accent hover:bg-accent focus:bg-accent focus:text-secondary focus:border-accent flex h-10 w-fit items-center rounded-lg border px-2 focus:outline-none"
+  >
+    Sign in
+  </a>
+</nav>
 
-  {{else}}
+{{else}}
 
-  <div>else</div>
-  <!--
+<div>else</div>
+<!--
   <div class="flex flex-wrap items-center gap-2">
     <form hx-boost="true" method="post" action="/signout/" hx-ext="signout">
       <button
@@ -60,12 +51,5 @@
     </div>
   </div>
   -->
-  {{end}}
-
-  <div class="text-secondary flex justify-center pt-20 text-[20rem]">
-    {{template "icon"}}
-  </div>
-</div>
-
-{{end}}
+{{end}} {{end}}
 

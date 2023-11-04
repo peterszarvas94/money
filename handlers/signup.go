@@ -15,13 +15,17 @@ getSignupTmpl helper function to parse the signup template.
 func getSignupTmpl() (*template.Template, error) {
 	baseHtml := "templates/base.html"
 	titleHtml := "templates/title.html"
+	welcomeHtml := "templates/welcome.html"
+	iconHtml := "templates/icon.html"
 	signupHtml := "templates/signup.html"
 	errorHtml := "templates/error.html"
 	incorrectHtml := "templates/incorrect.html"
 	correctHtml := "templates/correct.html"
-	iconHtml := "templates/icon.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, titleHtml, signupHtml, errorHtml, incorrectHtml, correctHtml, iconHtml)
+	tmpl, tmplErr := template.ParseFiles(
+		baseHtml, titleHtml, welcomeHtml, signupHtml, iconHtml,
+		errorHtml, incorrectHtml, correctHtml,
+	)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "signup/signupTmpl", tmplErr.Error())
 		return nil, tmplErr

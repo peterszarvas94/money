@@ -1,83 +1,71 @@
 {{define "content"}}
 
-<div
-  class="from-background to-secondary font-slab text-text h-screen bg-gradient-to-br"
->
-  <div class="flex items-center justify-center gap-2 py-14">
-    <div class="text-primary text-5xl">{{template "icon"}}</div>
-    <h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
-      pengoe
-    </h1>
-  </div>
-
-  <div class="flex justify-center bg-transparent">
-    <form
-      hx-post="/signup"
-      hx-target="body"
-      hx-push-url="true"
-      hx-ext="auth"
-      class="flex w-full max-w-sm flex-col gap-4"
-    >
-      <div class="border-text flex items-center rounded border">
-        <input
-          aria-label="Username"
-          name="username"
-          placeholder="Username"
-          value="{{.Username}}"
-          class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
-          required
-          hx-get="/check"
-          hx-trigger="keyup changed delay:500ms"
-          hx-target="#username-check"
-          hx-push-url="false"
-        />
-        <div id="username-check">
-          {{if and .Error .Exists.Username}} {{template "incorrect"}} {{end}}
-          {{if and .Error (not .Exists.Username)}} {{template "correct"}}
-          {{end}}
-        </div>
-      </div>
-
-      <div class="border-text flex items-center rounded border">
-        <input
-          aria-label="Email"
-          name="email"
-          type="email"
-          placeholder="Email"
-          value="{{.Email}}"
-          class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
-          required
-          hx-get="/check"
-          hx-trigger="keyup changed delay:500ms"
-          hx-target="#email-check"
-          hx-push-url="false"
-        />
-        <div id="email-check">
-          {{if and .Error .Exists.Email}} {{template "incorrect"}} {{end}} {{ if
-          and .Error (not .Exists.Email)}} {{template "correct"}} {{end}}
-        </div>
-      </div>
-
+<div class="flex justify-center bg-transparent">
+  <form
+    hx-post="/signup"
+    hx-target="body"
+    hx-push-url="true"
+    hx-ext="auth"
+    class="flex w-full max-w-sm flex-col gap-4"
+  >
+    <div class="border-text flex items-center rounded border">
       <input
-        aria-label="Password"
-        name="password"
-        type="password"
-        class="borde-text grow rounded border bg-transparent px-2 py-1 focus:outline-none"
-        placeholder="Password"
+        aria-label="Username"
+        name="username"
+        placeholder="Username"
+        value="{{.Username}}"
+        class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
         required
+        hx-get="/check"
+        hx-trigger="keyup changed delay:500ms"
+        hx-target="#username-check"
+        hx-push-url="false"
       />
-
-      <div class="flex justify-center">
-        <button
-          aria-label="Sign up"
-          type="submit"
-          class="border-accent text-accent hover:bg-accent hover:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:bg-accent focus:text-secondary focus:outline-none"
-        >
-          Sign up
-        </button>
+      <div id="username-check">
+        {{if and .Error .Exists.Username}} {{template "incorrect"}} {{end}} {{if
+        and .Error (not .Exists.Username)}} {{template "correct"}} {{end}}
       </div>
-    </form>
-  </div>
+    </div>
+
+    <div class="border-text flex items-center rounded border">
+      <input
+        aria-label="Email"
+        name="email"
+        type="email"
+        placeholder="Email"
+        value="{{.Email}}"
+        class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
+        required
+        hx-get="/check"
+        hx-trigger="keyup changed delay:500ms"
+        hx-target="#email-check"
+        hx-push-url="false"
+      />
+      <div id="email-check">
+        {{if and .Error .Exists.Email}} {{template "incorrect"}} {{end}} {{ if
+        and .Error (not .Exists.Email)}} {{template "correct"}} {{end}}
+      </div>
+    </div>
+
+    <input
+      aria-label="Password"
+      name="password"
+      type="password"
+      class="borde-text grow rounded border bg-transparent px-2 py-1 focus:outline-none"
+      placeholder="Password"
+      required
+    />
+
+    <div class="flex justify-center">
+      <button
+        aria-label="Sign up"
+        type="submit"
+        class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+      >
+        Sign up
+      </button>
+    </div>
+  </form>
 </div>
 {{if .Error}} {{template "error" .Error}} {{end}} {{end}}
 
