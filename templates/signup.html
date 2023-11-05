@@ -1,6 +1,6 @@
 {{define "content"}}
 
-<div class="flex justify-center bg-transparent">
+<div class="flex bg-transparent flex-col items-center gap-10">
   <form
     hx-post="/signup"
     hx-target="body"
@@ -8,6 +8,48 @@
     hx-ext="auth"
     class="flex w-full max-w-sm flex-col gap-4"
   >
+    <div class="flex w-full gap-4">
+      <div class="border-text flex w-full items-center rounded border">
+        <input
+          aria-label="Firstname"
+          name="firstname"
+          placeholder="Firstname"
+          value="{{.Firstname}}"
+          class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
+          required
+          hx-get="/check"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#firstname-check"
+          hx-push-url="false"
+        />
+        <div id="firstname-check">
+          {{if and .Error .Exists.Firstname}} {{template "incorrect"}} {{end}}
+          {{if and .Error (not .Exists.Firstname)}} {{template "correct"}}
+          {{end}}
+        </div>
+      </div>
+
+      <div class="border-text flex w-full items-center rounded border">
+        <input
+          aria-label="Lastname"
+          name="lastname"
+          placeholder="Lastname"
+          value="{{.Lastname}}"
+          class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
+          required
+          hx-get="/check"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#lastname-check"
+          hx-push-url="false"
+        />
+        <div id="lastname-check">
+          {{if and .Error .Exists.Lastname}} {{template "incorrect"}} {{end}}
+          {{if and .Error (not .Exists.Lastname)}} {{template "correct"}}
+          {{end}}
+        </div>
+      </div>
+    </div>
+
     <div class="border-text flex items-center rounded border">
       <input
         aria-label="Username"
@@ -66,6 +108,17 @@
       </button>
     </div>
   </form>
+
+  <div class="flex w-full max-w-sm justify-center gap-2">
+    <div>Already joined?</div>
+    <a
+      href="/signin"
+      hx-boost="true"
+      class="border-primary focus:border-accent hover:border-accent border-b focus:outline-none"
+    >
+      Sign in here.
+    </a>
+  </div>
 </div>
 {{if .Error}} {{template "error" .Error}} {{end}} {{end}}
 

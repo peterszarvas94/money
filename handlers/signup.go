@@ -14,7 +14,6 @@ getSignupTmpl helper function to parse the signup template.
 */
 func getSignupTmpl() (*template.Template, error) {
 	baseHtml := "templates/base.html"
-	titleHtml := "templates/title.html"
 	welcomeHtml := "templates/welcome.html"
 	iconHtml := "templates/icon.html"
 	signupHtml := "templates/signup.html"
@@ -23,7 +22,7 @@ func getSignupTmpl() (*template.Template, error) {
 	correctHtml := "templates/correct.html"
 
 	tmpl, tmplErr := template.ParseFiles(
-		baseHtml, titleHtml, welcomeHtml, signupHtml, iconHtml,
+		baseHtml, welcomeHtml, signupHtml, iconHtml,
 		errorHtml, incorrectHtml, correctHtml,
 	)
 	if tmplErr != nil {
@@ -78,7 +77,8 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	pageData := utils.SignupData{
-		Title: "pengoe - signup",
+		Title: "pengoe - Sign up",
+		Descrtipion: "Sign up to pengoe",
 	}
 
 	resErr := tmpl.Execute(w, pageData)
@@ -163,7 +163,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			Username: usernameExists,
 			Email:    emailExists,
 		},
-		Title: "pengoe - signup",
+		Title: "pengoe - Sign up",
+		Descrtipion: "Sign up to pengoe",
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

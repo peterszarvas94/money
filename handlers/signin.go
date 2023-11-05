@@ -14,10 +14,12 @@ getSigninTmpl helper function to parse the signin template.
 */
 func getSigninTmpl() (*template.Template, error) {
 	baseHtml := "templates/base.html"
+	welcomeHtml := "templates/welcome.html"
 	signinHtml := "templates/signin.html"
+	iconHtml := "templates/icon.html"
 	errorHtml := "templates/error.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, signinHtml, errorHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, welcomeHtml, signinHtml, iconHtml, errorHtml)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}
@@ -48,7 +50,12 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	resErr := tmpl.Execute(w, nil)
+	data := utils.SigninData{
+		Title: "pengoe - Sign in",
+		Descrtipion: "Sign in to pengoe",
+	}
+
+	resErr := tmpl.Execute(w, data)
 	if resErr != nil {
 		utils.Log(utils.ERROR, "signin/get/res", resErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -127,6 +134,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	signinData := utils.SigninData{
 		User:  user,
 		Error: "Invalid username or password",
+		Title: "pengoe - Sign in",
+		Descrtipion: "Sign in to pengoe",
 	}
 
 	tmpl, tmplErr := getSigninTmpl()

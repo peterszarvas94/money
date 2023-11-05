@@ -24,12 +24,11 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	}
 
 	baseHtml := "templates/base.html"
-	titleHtml := "templates/title.html"
 	welcomeHtml := "templates/welcome.html"
 	iconHtml := "templates/icon.html"
 	indexHtml := "templates/index.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, titleHtml, welcomeHtml, iconHtml, indexHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, welcomeHtml, iconHtml, indexHtml)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "index/tmpl", tmplErr.Error())
 		http.Error(w, "Intenal server error at tmpl", http.StatusInternalServerError)
@@ -41,6 +40,7 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	data := utils.PageData{
 		Session: session,
 		Title: "pengoe",
+		Descrtipion: "pengoe - Split money and track expenses with friends",
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

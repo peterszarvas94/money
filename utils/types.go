@@ -16,11 +16,14 @@ type SessionData struct {
 type PageData struct {
 	Session SessionData
 	Title   string
+	Descrtipion string
 }
 
 type SigninData struct {
 	User  string
 	Error string
+	Title string
+	Descrtipion string
 }
 
 type ExistsData struct {
@@ -29,11 +32,14 @@ type ExistsData struct {
 }
 
 type SignupData struct {
+	Firstname string
+	Lastname string
 	Username string
 	Email    string
 	Error    string
 	Exists   ExistsData
 	Title    string
+	Descrtipion string
 }
 
 type TokenVariant string
