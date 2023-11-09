@@ -1,0 +1,20 @@
+{{define "page"}}
+  <body hx-ext="protected,description" class="flex flex-col gap-2 items-start">
+    {{if .Session.LoggedIn}}
+      <div>this is dashboard</div>
+      <a href="/" hx-boost="true" hx-ext="access" class="underline">home</a>
+      <button
+        type="submit"
+        hx-post="/signout"
+        hx-ext="signout"
+        hx-target="body"
+        class="underline"
+      >
+        Sign out
+      </button>
+    {{else}}
+      {{template "spinner"}}
+    {{end}}
+  </body>
+{{end}}
+

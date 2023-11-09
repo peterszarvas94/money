@@ -2,8 +2,11 @@ package utils
 
 import (
 	"errors"
+	"pengoe/types"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,13 +18,13 @@ It takes an id and a tokenvariant as arguments.
 Example:
 NewToken(1, ACCESS)
 */
-func NewToken(id int, variant TokenVariant) (JWT, error) {
+func NewToken(id int, variant types.TokenVariant) (types.JWT, error) {
 	currentTime := time.Now().Unix()
 	expirationTime := currentTime + 3600
 
 	secret, found := os.LookupEnv("JWT_SECRET")
 	if !found {
-		return JWT{}, errors.New("Error: JWT_SECRET environment variable not found")
+		return types.JWT{}, errors.New("Error: JWT_SECRET environment variable not found")
 	}
 
 	idStr := strconv.Itoa(id)
@@ -35,10 +38,10 @@ func NewToken(id int, variant TokenVariant) (JWT, error) {
 
 	signedToken, signErr := token.SignedString([]byte(secret))
 	if signErr != nil {
-		return JWT{}, signErr
+		return types.JWT{}, signErr
 	}
 
-	return JWT{
+	return types.JWT{
 		Token:   signedToken,
 		Expires: expirationTime,
 	}, nil
@@ -69,4 +72,33 @@ func ValidateToken(token string) (jwt.MapClaims, error) {
 	}
 
 	return claims, nil
+}
+
+/*
+GetAccessToken is a function that returns the access token from the authorization header.
+*/
+func GetAccessToken(r *http.Request) (string, error) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return "", errors.New("No authorization header")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return "", errors.New("Invalid authorization header")
+	}
+
+	return parts[1], nil
+}
+
+/*
+GetRefreshToken is a function that returns the refresh token from the refresh cookie.
+*/
+func GetRefreshToken(r *http.Request) (string, error) {
+	cookie, cookieErr := r.Cookie("refresh")
+	if cookieErr != nil {
+		return "", cookieErr
+	}
+
+	return cookie.Value, nil
 }

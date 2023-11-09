@@ -1,7 +1,9 @@
 package handlers
 
 import (
-	"go-htmx/utils"
+	"pengoe/db"
+	"pengoe/services"
+	"pengoe/utils"
 	"html"
 	"html/template"
 	"net/http"
@@ -9,22 +11,24 @@ import (
 )
 
 /*
-CheckUserHandler checks if the username or email is taken.
+CheckUserHandler checks if the username or email isaftaken.
 Sends icons.
 */
 func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
-	// If the user is logged in, redirect them to the home page
-	session := utils.CheckSession(r)
-	if session.LoggedIn {
-		utils.Log(utils.ERROR, "check/session", "User is already logged in")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	// connect to db
+	dbManager := db.NewDBManager()
+	db, dbErr := dbManager.GetDB()
+	if dbErr != nil {
+		utils.Log(utils.ERROR, "check/db", dbErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+	defer db.Close()
 
-	utils.Log(utils.INFO, "check/session", "User is not logged in")
+	userService := services.NewUserService(db)
 
 	// Parse the "correct" and "incorrect" templates
-	correct := "templates/correct.html"
+	correct := "templates/components/correct.html"
 	correctTmpl, correctTmplErr := template.ParseFiles(correct)
 	if correctTmplErr != nil {
 		utils.Log(utils.ERROR, "check/correct", correctTmplErr.Error())
@@ -34,7 +38,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	utils.Log(utils.INFO, "check/correct", "Template parsed successfully")
 
-	incorrect := "templates/incorrect.html"
+	incorrect := "templates/components/incorrect.html"
 	incorrectTmpl, incorrectTmplErr := template.ParseFiles(incorrect)
 	if incorrectTmplErr != nil {
 		utils.Log(utils.ERROR, "check/incorrect", incorrectTmplErr.Error())
@@ -58,17 +62,18 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	username := html.EscapeString(r.FormValue("username"))
 
 	if username != "" {
-		_, userErr := utils.GetUserByUsername(username)
+		_, userErr := userService.GetByUsername(username)
 		if userErr != nil {
 			utils.Log(utils.INFO, "check/usename", userErr.Error())
 
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			resErr := correctTmpl.Execute(w, nil)
 			if resErr != nil {
-				utils.Log(utils.ERROR, "check/username/correct", resErr.Error())
+				utils.Log(utils.ERROR, "check/username/correctres", resErr.Error())
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 			}
-
+			
+			utils.Log(utils.INFO, "check/username/correctres", "Template rendered successfully")
 			return
 		}
 
@@ -78,10 +83,11 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		resErr := incorrectTmpl.Execute(w, nil)
 		if resErr != nil {
-			utils.Log(utils.ERROR, "check/username/incorrect", resErr.Error())
+			utils.Log(utils.ERROR, "check/username/incorrectres", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
+		utils.Log(utils.INFO, "check/username/incorrectres", "Template rendered successfully")
 		return
 	}
 
@@ -90,7 +96,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	if email != "" {
 		_, emailParseErr := mail.ParseAddress(email)
-		_, userErr := utils.GetUserByEmail(email)
+		_, userErr := userService.GetByEmail(email)
 		if userErr != nil && emailParseErr == nil {
 			utils.Log(utils.INFO, "check/email", userErr.Error())
 

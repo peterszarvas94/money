@@ -1,8 +1,10 @@
 package handlers
 
 import (
-	"fmt"
-	"go-htmx/utils"
+	"pengoe/db"
+	"pengoe/services"
+	"pengoe/types"
+	"pengoe/utils"
 	"html/template"
 	"net/http"
 )
@@ -13,22 +15,11 @@ Handler for home page "/".
 func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	utils.Log(utils.INFO, "index/path", r.URL.Path)
 
-	session := utils.CheckSession(r)
+	baseHtml := "templates/layouts/base.html"
+	indexHtml := "templates/pages/index.html"
+	iconHtml := "templates/components/icon.html"
 
-	if session.LoggedIn {
-		sessionId := fmt.Sprint(session.User.Id)
-		sessionLog := fmt.Sprintf("Session found: %s", sessionId)
-		utils.Log(utils.INFO, "index/checkSession", sessionLog)
-	} else {
-		utils.Log(utils.INFO, "index/checkSession", "No session")
-	}
-
-	baseHtml := "templates/base.html"
-	welcomeHtml := "templates/welcome.html"
-	iconHtml := "templates/icon.html"
-	indexHtml := "templates/index.html"
-
-	tmpl, tmplErr := template.ParseFiles(baseHtml, welcomeHtml, iconHtml, indexHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, indexHtml, iconHtml)
 	if tmplErr != nil {
 		utils.Log(utils.ERROR, "index/tmpl", tmplErr.Error())
 		http.Error(w, "Intenal server error at tmpl", http.StatusInternalServerError)
@@ -37,18 +28,39 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	utils.Log(utils.INFO, "index/tmpl", "Template parsed successfully")
 
-	data := utils.PageData{
-		Session: session,
-		Title: "pengoe",
-		Descrtipion: "pengoe - Split money and track expenses with friends",
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	dbManager := db.NewDBManager()
+	db, dbErr := dbManager.GetDB()
+	if dbErr != nil {
+		utils.Log(utils.ERROR, "signup/get/db", dbErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+	userService := services.NewUserService(db)
+
+	loggedIn := false
+
+
+	user, sessionErr := userService.CheckAccessToken(r)
+	if sessionErr == nil && user != nil {
+		loggedIn = true
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	data := types.Page{
+		Title:       "pengoe - Home",
+		Descrtipion: "Home page for pengoe",
+		Session: types.Session{
+			LoggedIn: loggedIn,
+		},
+	}
 
 	resErr := tmpl.Execute(w, data)
 	if resErr != nil {
 		utils.Log(utils.ERROR, "index/res", resErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
 	utils.Log(utils.INFO, "index/res", "Template rendered successfully")

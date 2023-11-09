@@ -1,4 +1,3 @@
-{{template "base" .}} {{define "base"}}
 <!doctype html>
 <html lang="en">
   <head>
@@ -18,9 +17,6 @@
     <meta name="description" content="{{.Descrtipion}}" />
   </head>
 
-  <body>
-    {{template "page" .}}
-  </body>
+  {{template "page" .}}
 </html>
-{{end}}
 

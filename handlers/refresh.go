@@ -1,7 +1,10 @@
 package handlers
 
 import (
-	"go-htmx/utils"
+	"pengoe/db"
+	"pengoe/services"
+	"pengoe/types"
+	"pengoe/utils"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,17 +15,10 @@ RefreshTokenHandler gets a new access token and refresh token
 if the refresh token is valid.
 */
 func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string) {
-	cookies := r.Cookies()
-	var token string
-	for _, cookie := range cookies {
-		if cookie.Name == "refresh" {
-			token = cookie.Value
-		}
-	}
-
-	if token == "" {
-		utils.Log(utils.WARNING, "refresh/token", "No refresh token found")
-		w.WriteHeader(http.StatusUnauthorized)
+	token, rokenErr := utils.GetRefreshToken(r)
+	if rokenErr != nil {
+		utils.Log(utils.ERROR, "refresh/token", rokenErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -30,37 +26,49 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string)
 
 	// check if refresh token is valid
 	claims, jwtErr := utils.ValidateToken(token)
-	userId, subErr := claims.GetSubject()
-	_, dbErr := utils.GetUserById(userId)
-
 	if jwtErr != nil {
-		utils.Log(utils.ERROR, "refresh/jwt", jwtErr.Error())
-	}
-
-	if subErr != nil {
-		utils.Log(utils.ERROR, "refresh/sub", subErr.Error())
-	}
-
-	if dbErr != nil {
-		utils.Log(utils.ERROR, "refresh/db", dbErr.Error())
-	}
-
-	loggedIn := jwtErr == nil && subErr == nil && dbErr == nil
-	if !loggedIn {
-		utils.Log(utils.ERROR, "refresh/token", "Refresh token invalid")
-		w.WriteHeader(http.StatusUnauthorized)
+		utils.Log(utils.ERROR, "refresh/token", jwtErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	userIdInt, userIdErr := strconv.Atoi(userId)
+	// get user id from claims
+	userIdStr, subErr := claims.GetSubject()
+	if subErr != nil {
+		utils.Log(utils.ERROR, "refresh/sub", subErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// convert user id to int
+	userId, userIdErr := strconv.Atoi(userIdStr)
 	if userIdErr != nil {
-		utils.Log(utils.ERROR, "refersh/userid", userIdErr.Error())
+		utils.Log(utils.ERROR, "refresh/userid", userIdErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// connect to db
+	dbManager := db.NewDBManager()
+	db, dbErr := dbManager.GetDB()
+	if dbErr != nil {
+		utils.Log(utils.ERROR, "signup/post/db", dbErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+	userService := services.NewUserService(db)
+
+	// check if user exists
+	_, dbErr = userService.GetById(userId)
+	if dbErr != nil {
+		utils.Log(utils.ERROR, "refresh/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	// get new access token
-	accessToken, accessTokenErr := utils.NewToken(userIdInt, utils.Access)
+	accessToken, accessTokenErr := utils.NewToken(userId, types.Access)
 	if accessTokenErr != nil {
 		utils.Log(utils.ERROR, "refresh/token", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -68,14 +76,12 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string)
 	}
 
 	// get new refresh token as well
-	refreshToken, refreshTokenErr := utils.NewToken(userIdInt, utils.Refresh)
+	refreshToken, refreshTokenErr := utils.NewToken(userId, types.Refresh)
 	if refreshTokenErr != nil {
 		utils.Log(utils.ERROR, "refresh/token", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
-	utils.Log(utils.INFO, "refresh/token", "Refresh token created successfully")
 
 	expires := time.Unix(refreshToken.Expires, 0)
 

@@ -1,4 +1,4 @@
-module go-htmx
+module pengoe
 
 go 1.21.1
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-htmx/handlers"
-	"go-htmx/utils"
+	"pengoe/handlers"
+	"pengoe/utils"
 	"net/http"
 	"os"
 )
@@ -18,6 +18,7 @@ func main() {
 	r.POST("/signout", handlers.SignoutHandler)
 	r.GET("/check", handlers.CheckUserHandler)
 	r.POST("/refresh", handlers.RefreshTokenHandler)
+	r.GET("/dashboard", handlers.DashboardPageHandler)
 
 	r.SetStaticPath("/static")
 
