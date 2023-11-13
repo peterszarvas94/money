@@ -35,9 +35,11 @@ To run make commands, you need to have:
 - [x] signup page
   - [x] add username field
   - [x] add svg to background
-  - [ ] fix tokens
+  - [x] fix tokens
+  - [x] update handler for new schema
 - [x] signin page
-- [ ] dashboard page
-- [ ] loading states
-- [ ] add services to backend
+- [x] dashboard page
+- [x] loading states
+- [x] add services to backend
 - [ ] viewtransition api
+- [ ] dashboard page

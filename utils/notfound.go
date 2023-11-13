@@ -9,8 +9,8 @@ import (
 Notfound handles the 404 error.
 */
 func Notfound(w http.ResponseWriter, r *http.Request) {
-	baseHtml := "templates/base.html"
-	notfoundHtml := "templates/404.html"
+	baseHtml := "templates/layouts/base.html"
+	notfoundHtml := "templates/pages/404.html"
 
 	tmpl, tmplErr := template.ParseFiles(baseHtml, notfoundHtml)
 	if tmplErr != nil {
@@ -37,8 +37,8 @@ func Notfound(w http.ResponseWriter, r *http.Request) {
 MethodNotAllowed handles the 405 error.
 */
 func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	baseHtml := "templates/base.html"
-	notallowedHtml := "templates/405.html"
+	baseHtml := "templates/layouts/base.html"
+	notallowedHtml := "templates/pages/405.html"
 
 	tmpl, tmplErr := template.ParseFiles(baseHtml, notallowedHtml)
 	if tmplErr != nil {

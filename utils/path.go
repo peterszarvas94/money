@@ -44,3 +44,20 @@ func GetPathVariables(urlPath, pattern string) map[string]string {
 
 	return variables
 }
+
+/*
+GetQueryParams returns a map of query parameters from a url query
+Example:
+urlQuery: ?id=123&name=John
+returns: map[string]string{"id": "123", "name": "John"}
+*/
+func GetQueryParams(r *http.Request) map[string]string {
+	queryParams := make(map[string]string)
+
+	query := r.URL.Query()
+	for key, value := range query {
+		queryParams[key] = value[0]
+	}
+
+	return queryParams
+}

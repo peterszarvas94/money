@@ -1,88 +1,81 @@
 {{define "page"}}
-  <body hx-ext="gated,description">
-    <div
-      class="from-background to-secondary font-slab text-text min-h-screen bg-gradient-to-br"
+  <div
+    class="from-background to-secondary font-slab text-text min-h-screen bg-gradient-to-br"
+    hx-ext="gated-page,description"
+    id="page"
+  >
+    <!-- background -->
+    <figure
+      class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
     >
-      <!-- background -->
-      <figure
-        class="z-1 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
-      >
-        {{template "icon"}}
-      </figure>
-      <!-- end of background -->
+      {{template "icon"}}
+    </figure>
+    <!-- end of background -->
 
-      <!-- content -->
-      <section class="z-2 h-fult absolute w-full">
-        <header class="flex justify-center py-14">
+    <!-- content -->
+    <section class="z-10 absolute w-full">
+      <header class="flex justify-center py-14">
+        <a href="/" class="flex items-center justify-center gap-2">
+          <figure class="text-primary text-5xl">{{template "icon"}}</figure>
+          <h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
+            pengoe
+          </h1>
+        </a>
+      </header>
+
+      {{$redirect := index .Data "redirect"}}
+      <main class="flex flex-col items-center gap-10 bg-transparent">
+        <form
+          hx-post="/signin?redirect={{$redirect}}"
+          hx-target="body"
+          hx-replace-url="true"
+          class="flex w-full max-w-sm flex-col gap-4"
+        >
+          {{$usernameOrEmail := index .Data "usernameOrEmail"}}
+          <input
+            aria-label="Username or email"
+            name="user"
+            class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+            placeholder="Username or email"
+            value="{{$usernameOrEmail}}"
+            required
+          />
+          <input
+            aria-label="Password"
+            name="password"
+            type="password"
+            class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+            placeholder="Password"
+            required
+          />
+          <div class="flex justify-center">
+            <button
+              aria-label="Sign up"
+              type="submit"
+              class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+
+        <nav class="flex w-full max-w-sm justify-center gap-2">
+          <div>Not a member yet?</div>
           <a
-            href="/"
-            hx-boost="true"
-            hx-ext="access"
-            class="flex items-center justify-center gap-2"
+            href="/signup?redirect={{$redirect}}"
+            class="border-primary hover:border-accent focus:border-accent border-b focus:outline-none"
           >
-            <figure class="text-primary text-5xl">{{template "icon"}}</figure>
-            <h1
-              class="font-redhat text-accent text-5xl font-bold tracking-tight"
-            >
-              pengoe
-            </h1>
+            Sign up here.
           </a>
-        </header>
-        <main class="flex flex-col items-center gap-10 bg-transparent">
-          <form
-            hx-post="/signin"
-            hx-target="body"
-            hx-replace-url="true"
-            hx-ext="signin"
-            class="flex w-full max-w-sm flex-col gap-4"
-          >
-            {{$usernameOrEmail := index .Data "usernameOrEmail"}}
-            <input
-              aria-label="Username or email"
-              name="user"
-              class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
-              placeholder="Username or email"
-              value="{{$usernameOrEmail}}"
-              required
-            />
-            <input
-              aria-label="Password"
-              name="password"
-              type="password"
-              class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
-              placeholder="Password"
-              required
-            />
-            <div class="flex justify-center">
-              <button
-                aria-label="Sign up"
-                type="submit"
-                class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
-              >
-                Sign in
-              </button>
-            </div>
-          </form>
+        </nav>
 
-          <nav class="flex w-full max-w-sm justify-center gap-2">
-            <div>Not a member yet?</div>
-            <a
-              href="/signup"
-              hx-boost="true"
-              class="border-primary hover:border-accent focus:border-accent border-b focus:outline-none"
-            >
-              Sign up here.
-            </a>
-          </nav>
-
-          {{$error := index .Data "loginError"}}
-          {{if $error}}
-            {{template "error" $error}}
-          {{end}}
-        </main>
-      </section>
-      <!-- end of content -->
-    </div>
-  </body>
+        {{$error := index .Data "loginError"}}
+        {{if $error}}
+          {{template "error" $error}}
+        {{end}}
+      </main>
+    </section>
+    <!-- end of content -->
+  </div>
 {{end}}
 

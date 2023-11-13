@@ -3,10 +3,11 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"net/http"
 	"pengoe/types"
 	"pengoe/utils"
-	"net/http"
 	"strconv"
+	"time"
 )
 
 type UserService interface {
@@ -35,9 +36,14 @@ func (s *userService) New(user *types.User) error {
 	if hashErr != nil {
 		return hashErr
 	}
+
+	now := time.Now()
+
 	_, mutationErr := s.db.Exec(
-		"INSERT INTO users (username, email, firstname, lastname, password) VALUES (?, ?, ?, ?, ?)",
-		user.Username, user.Email, user.Fistname, user.Lastname, hashedPassword,
+		`INSERT INTO user (
+			username, email, firstname, lastname, password, created_at, updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		user.Username, user.Email, user.Fistname, user.Lastname, hashedPassword, now, now,
 	)
 	if mutationErr != nil {
 		return mutationErr
@@ -53,7 +59,7 @@ If correct, it returns the user's id.
 */
 func (s *userService) Login(usernameOrEmail, password string) (int, error) {
 	query, queryErr := s.db.Query(
-		"SELECT id, password as hash FROM users WHERE username = ? OR email = ?",
+		"SELECT id, password as hash FROM user WHERE username = ? OR email = ?",
 		usernameOrEmail, usernameOrEmail,
 	)
 	if queryErr != nil {
@@ -88,7 +94,7 @@ GetByUsername is a function that gets a user from the database by username.
 func (s *userService) GetById(id int) (*types.User, error) {
 	var user types.User
 
-	query, queryErr := s.db.Query("SELECT * FROM users WHERE id = ?", id)
+	query, queryErr := s.db.Query("SELECT * FROM user WHERE id = ?", id)
 	if queryErr != nil {
 		return &user, queryErr
 	}
@@ -98,9 +104,11 @@ func (s *userService) GetById(id int) (*types.User, error) {
 	var firstname string
 	var lastname string
 	var password string
+	var created_at string
+	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password)
+		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
 		if scanErr != nil {
 			return &user, scanErr
 		}
@@ -111,12 +119,14 @@ func (s *userService) GetById(id int) (*types.User, error) {
 	}
 
 	user = types.User{
-		Id:       id,
-		Username: username,
-		Email:    email,
-		Fistname: firstname,
-		Lastname: lastname,
-		Password: password,
+		Id:        id,
+		Username:  username,
+		Email:     email,
+		Fistname:  firstname,
+		Lastname:  lastname,
+		Password:  password,
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
 	}
 
 	return &user, nil
@@ -128,7 +138,7 @@ GetByUsername is a function that gets a user from the database by username.
 func (s *userService) GetByUsername(username string) (*types.User, error) {
 	var user types.User
 
-	query, queryErr := s.db.Query("SELECT * FROM users WHERE username = ?", username)
+	query, queryErr := s.db.Query("SELECT * FROM user WHERE username = ?", username)
 	if queryErr != nil {
 		return &user, queryErr
 	}
@@ -138,9 +148,11 @@ func (s *userService) GetByUsername(username string) (*types.User, error) {
 	var firstname string
 	var lastname string
 	var password string
+	var created_at string
+	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password)
+		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
 		if scanErr != nil {
 			return &user, scanErr
 		}
@@ -151,12 +163,14 @@ func (s *userService) GetByUsername(username string) (*types.User, error) {
 	}
 
 	user = types.User{
-		Id:       id,
-		Username: username,
-		Email:    email,
-		Fistname: firstname,
-		Lastname: lastname,
-		Password: password,
+		Id:        id,
+		Username:  username,
+		Email:     email,
+		Fistname:  firstname,
+		Lastname:  lastname,
+		Password:  password,
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
 	}
 
 	return &user, nil
@@ -168,7 +182,7 @@ GetByEmail is a function that gets a user from the database by email.
 func (s *userService) GetByEmail(email string) (*types.User, error) {
 	var user types.User
 
-	query, queryErr := s.db.Query("SELECT * FROM users WHERE email = ?", email)
+	query, queryErr := s.db.Query("SELECT * FROM user WHERE email = ?", email)
 	if queryErr != nil {
 		return &user, queryErr
 	}
@@ -178,9 +192,11 @@ func (s *userService) GetByEmail(email string) (*types.User, error) {
 	var firstname string
 	var lastname string
 	var password string
+	var created_at string
+	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password)
+		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
 		if scanErr != nil {
 			return &user, scanErr
 		}
@@ -191,12 +207,14 @@ func (s *userService) GetByEmail(email string) (*types.User, error) {
 	}
 
 	user = types.User{
-		Id:       id,
-		Username: username,
-		Email:    email,
-		Fistname: firstname,
-		Lastname: lastname,
-		Password: password,
+		Id:        id,
+		Username:  username,
+		Email:     email,
+		Fistname:  firstname,
+		Lastname:  lastname,
+		Password:  password,
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
 	}
 
 	return &user, nil

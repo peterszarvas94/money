@@ -4,6 +4,7 @@
     <title>{{.Title}}</title>
     <script src="https://unpkg.com/htmx.org@1.9.5"></script>
     <script src="/static/htmx-extensions.js"></script>
+    <script src="/static/after.js" defer></script>
     <link rel="stylesheet" type="text/css" href="/static/tailwind.css" />
     <link rel="stylesheet" type="text/css" href="/static/indicator.css" />
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
@@ -16,7 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="{{.Descrtipion}}" />
   </head>
-
-  {{template "page" .}}
+  <body class="bg-background">
+    {{template "page" .}}
+  </body>
 </html>
 

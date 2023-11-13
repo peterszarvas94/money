@@ -8,6 +8,8 @@ type User struct {
 	Fistname string
 	Lastname string
 	Password string
+	CreatedAt  string
+	UpdatedAt  string
 }
 
 // page

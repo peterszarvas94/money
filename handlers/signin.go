@@ -33,7 +33,9 @@ func getSigninTmpl() (*template.Template, error) {
 SigninPageHandler handles the GET request to /signin.
 */
 func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
-	// connet to the database
+	params := utils.GetQueryParams(r)
+
+	// connect to the database
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
@@ -50,8 +52,12 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
 		utils.Log(utils.INFO, "signin/checkSession", logMsg)
 
-		//w.Header().Set("HX-Redirect", "/dashboard")
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		redirect := params["redirect"]
+		if redirect == "" {
+			redirect = "dashboard"
+		}
+
+		w.Header().Set("HX-Redirect", "/"+redirect)
 		return
 	}
 
@@ -70,6 +76,9 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	data := types.Page{
 		Title:       "pengoe - Sign in",
 		Descrtipion: "Sign in to pengoe",
+		Data: map[string]string{
+			"redirect": params["redirect"],
+		},
 	}
 
 	resErr := tmpl.Execute(w, data)
@@ -86,6 +95,9 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 SigninHandler handles the POST request to /signin.
 */
 func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+
+	fmt.Println(r.URL.Path)
+
 	formErr := r.ParseForm()
 	if formErr != nil {
 		utils.Log(utils.ERROR, "signin/post/parse", formErr.Error())
@@ -183,10 +195,13 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	// set the access token header
 	w.Header().Set("Authorization", "Bearer "+accessToken.Token)
 
-	// for client-side redirection
-	// w.Header().Set("HX-Redirect", "/dashboard")
-	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+	params := utils.GetQueryParams(r)
 
-	utils.Log(utils.INFO, "signin/post/res", "Redirected to /")
+	redirect := params["redirect"]
+	url := "/"+redirect
+
+	http.Redirect(w, r, url, http.StatusSeeOther)
+
+	utils.Log(utils.INFO, "signin/post/res", "Redirected to "+url)
 	return
 }

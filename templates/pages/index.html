@@ -1,93 +1,67 @@
 {{define "page"}}
-  <body hx-ext="gated,description">
-    <div
-      class="from-background to-secondary font-slab text-text min-h-screen bg-gradient-to-br"
+  <div
+    class="from-background to-secondary font-slab text-text min-h-screen bg-gradient-to-br"
+  >
+    <!-- background -->
+    <figure
+      class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
     >
-      <!-- background -->
-      <figure
-        class="z-1 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
-      >
-        {{template "icon"}}
-      </figure>
-      <!-- end of background -->
+      {{template "icon"}}
+    </figure>
+    <!-- end of background -->
 
-      <!-- content -->
-      <section class="z-2 h-fult absolute w-full">
-        <header class="flex justify-center py-14">
-          <a
-            href="/"
-            hx-boost="true"
-            hx-ext="access"
-            class="flex items-center justify-center gap-2"
-          >
-            <figure class="text-primary text-5xl">{{template "icon"}}</figure>
-            <h1
-              class="font-redhat text-accent text-5xl font-bold tracking-tight"
-            >
-              pengoe
-            </h1>
-          </a>
-        </header>
+    <!-- content -->
+    <section class="z-10 absolute w-full">
+      <header class="flex justify-center py-14">
+        <a href="/" class="flex items-center justify-center gap-2">
+          <figure class="text-primary text-5xl">{{template "icon"}}</figure>
+          <h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
+            pengoe
+          </h1>
+        </a>
+      </header>
 
-        <article class="flex flex-col items-center gap-4 pb-10">
-          <p class="text-center text-2xl">
-            <span class="tracking-extreme">split</span> money and
-            <span class="border-primary border-b">track</span> expenses
-          </p>
-          <p class="text-center text-xl">
-            for small groups and <span class="">friends</span>
-          </p>
-        </article>
+      <article class="flex flex-col items-center gap-4 pb-10">
+        <p class="text-center text-2xl">
+          <span class="tracking-extreme">split</span> money and
+          <span class="border-primary border-b">track</span> expenses
+        </p>
+        <p class="text-center text-xl">
+          for small groups and <span class="">friends</span>
+        </p>
+      </article>
 
-        <nav class="flex flex-wrap justify-center gap-4">
-          <a
-            aria-label="Sign in"
-            href="/signin"
-            hx-boost="true"
-            hx-ext="access"
-            class="border-text bg-text text-secondary hover:border-accent hover:bg-accent focus:bg-accent focus:text-secondary focus:border-accent flex h-10 w-fit items-center rounded-lg border px-2 focus:outline-none"
+      <nav class="flex flex-wrap justify-center gap-4">
+        <a
+          aria-label="Dashboard"
+          href="/dashboard"
+          class="border-text bg-text text-secondary hover:border-accent hover:bg-accent focus:bg-accent focus:text-secondary focus:border-accent flex h-10 w-fit items-center rounded-lg border px-2 focus:outline-none"
+        >
+          Dashboard
+        </a>
+        <a
+          aria-label="Sign up"
+          href="/signup?redirect=dashboard"
+          class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+        >
+          <span>First steps</span>
+          <svg
+            stroke="currentColor"
+            fill="currentColor"
+            stroke-width="0"
+            viewBox="0 0 24 24"
+            height="1em"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            Sign in
-          </a>
-          <a
-            aria-label="Sign up"
-            href="/signup"
-            hx-boost="true"
-            hx-ext="access"
-            class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
-          >
-            <span>First steps</span>
-            <svg
-              stroke="currentColor"
-              fill="currentColor"
-              stroke-width="0"
-              viewBox="0 0 24 24"
-              height="1em"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10.061 19.061 17.121 12l-7.06-7.061-2.122 2.122L12.879 12l-4.944.939z"
-              ></path>
-            </svg>
-          </a>
-        </nav>
-
-        {{if .Session.LoggedIn}}
-          <!-- this is gate content, only visible when logged in -->
-          <button
-            type="submit"
-            hx-post="/signout"
-            hx-ext="signout"
-            hx-target="body"
-            class="underline"
-          >
-            Sign out
-          </button>
-        {{end}}
-      </section>
-      <!-- end of content -->
-    </div>
-  </body>
+            <path
+              d="M10.061 19.061 17.121 12l-7.06-7.061-2.122 2.122L12.879 12l-4.944.939z"
+            ></path>
+          </svg>
+        </a>
+      </nav>
+    </section>
+    <!-- end of content -->
+  </div>
 {{end}}
 

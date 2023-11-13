@@ -1,129 +1,156 @@
-{{define "content"}}
-  <div class="flex flex-col items-center gap-10 bg-transparent">
-    <form
-      hx-post="/signup"
-      hx-target="body"
-      hx-push-url="true"
-      hx-ext="auth"
-      class="flex w-full max-w-sm flex-col gap-4"
+{{define "page"}}
+  <div
+    class="from-background to-secondary font-slab text-text min-h-screen bg-gradient-to-br"
+    hx-ext="gated-page,description"
+    id="page"
+  >
+    <!-- background -->
+    <figure
+      class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
     >
-      <div class="flex w-full gap-4">
-        {{$firstname := index .Data "firstnameValue"}}
-        <div class="border-text flex w-full items-center rounded border">
-          <input
-            aria-label="Firstname"
-            name="firstname"
-            placeholder="Firstname"
-            value="{{$firstname}}"
-            class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
-            required
-          />
-        </div>
+      {{template "icon"}}
+    </figure>
+    <!-- end of background -->
 
-        <div class="border-text flex w-full items-center rounded border">
-          {{$lastname := index .Data "lastnameValue"}}
-          <input
-            aria-label="Lastname"
-            name="lastname"
-            placeholder="Lastname"
-            value="{{$lastname}}"
-            class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
-            required
-          />
-        </div>
-      </div>
+    <!-- content -->
+    <section class="z-10 absolute w-full">
+      <header class="flex justify-center py-14">
+        <a href="/" class="flex items-center justify-center gap-2">
+          <figure class="text-primary text-5xl">{{template "icon"}}</figure>
+          <h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
+            pengoe
+          </h1>
+        </a>
+      </header>
 
-        <div class="border-text flex items-center rounded border">
-          {{$username := index .Data "usernameValue"}}
-          <input
-            aria-label="Username"
-            name="username"
-            placeholder="Username"
-            value="{{$username}}"
-            class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
-            required
-            hx-get="/check"
-            hx-trigger="keyup changed delay:500ms"
-            hx-target="#username-check"
-            hx-push-url="false"
-          />
-          <div id="username-check">
-            {{$usernameCheck := index .Data "usernameCheck"}}
-            {{if eq $usernameCheck "incorrect"}}
-              {{template "incorrect" $usernameCheck}}
-            {{else if eq $usernameCheck "correct"}}
-              {{template "correct" $usernameCheck}}
-            {{end}}
-          </div>
-        </div>
-
-      <div class="border-text flex items-center rounded border">
-        {{$email := index .Data "emailValue"}}
-        <input
-          aria-label="Email"
-          name="email"
-          type="email"
-          placeholder="Email"
-          value="{{$email}}"
-          class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
-          required
-          hx-get="/check"
-          hx-trigger="keyup changed delay:500ms"
-          hx-target="#email-check"
-          hx-push-url="false"
-        />
-        <div id="email-check">
-          {{$emailCheck := index .Data "emailCheck"}}
-          {{if eq $emailCheck "incorrect"}}
-            {{template "incorrect" $emailCheck}}
-          {{else if eq $emailCheck "correct"}}
-            {{template "correct" $emailCheck}}
-          {{end}}
-        </div>
-      </div>
-
-      <input
-        aria-label="Password"
-        name="password"
-        type="password"
-        class="borde-text grow rounded border bg-transparent px-2 py-1 focus:outline-none"
-        placeholder="Password"
-        required
-      />
-
-      <div class="flex justify-center">
-        <button
-          aria-label="Sign up"
-          type="submit"
-          class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+      {{$redirect := index .Data "redirect"}}
+      <main class="flex flex-col items-center gap-10 bg-transparent">
+        <form
+          hx-post="/signup?redirect={{$redirect}}"
+          sf
+          hx-target="body"
+          hx-replace-url="true"
+          class="flex w-full max-w-sm flex-col gap-4"
         >
-          Sign up
-        </button>
-      </div>
-    </form>
+          <div class="flex w-full gap-4">
+            {{$firstname := index .Data "firstnameValue"}}
+            <div class="border-text flex w-full items-center rounded border">
+              <input
+                aria-label="Firstname"
+                name="firstname"
+                placeholder="Firstname"
+                value="{{$firstname}}"
+                class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
+                required
+              />
+            </div>
 
-    <div class="flex w-full max-w-sm justify-center gap-2">
-      <div>Already joined?</div>
-      <a
-        href="/signin"
-        hx-boost="true"
-        class="border-primary focus:border-accent hover:border-accent border-b focus:outline-none"
-      >
-        Sign in here.
-      </a>
-    </div>
+            <div class="border-text flex w-full items-center rounded border">
+              {{$lastname := index .Data "lastnameValue"}}
+              <input
+                aria-label="Lastname"
+                name="lastname"
+                placeholder="Lastname"
+                value="{{$lastname}}"
+                class="w-full rounded bg-transparent px-2 py-1 focus:outline-none"
+                required
+              />
+            </div>
+          </div>
 
-    <div class="flex flex-col gap-2">
-      {{$usernameError := index .Data "usernameError"}}
-      {{if $usernameError}}
-        {{template "error" $usernameError}}
-      {{end}}
+          <div class="border-text flex items-center rounded border">
+            {{$username := index .Data "usernameValue"}}
+            <input
+              aria-label="Username"
+              name="username"
+              placeholder="Username"
+              value="{{$username}}"
+              class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
+              required
+              hx-get="/check"
+              hx-trigger="keyup changed delay:500ms"
+              hx-target="#username-check"
+              hx-push-url="false"
+            />
+            <div id="username-check">
+              {{$usernameCheck := index .Data "usernameCheck"}}
+              {{if eq $usernameCheck "incorrect"}}
+                {{template "incorrect" $usernameCheck}}
+              {{else if eq $usernameCheck "correct"}}
+                {{template "correct" $usernameCheck}}
+              {{end}}
+            </div>
+          </div>
 
-      {{$emailError := index .Data "emailError"}}
-      {{if $emailError}}
-        {{template "error" $emailError}}
-      {{end}}
-    <div>
+          <div class="border-text flex items-center rounded border">
+            {{$email := index .Data "emailValue"}}
+            <input
+              aria-label="Email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              value="{{$email}}"
+              class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
+              required
+              hx-get="/check"
+              hx-trigger="keyup changed delay:500ms"
+              hx-target="#email-check"
+              hx-push-url="false"
+            />
+            <div id="email-check">
+              {{$emailCheck := index .Data "emailCheck"}}
+              {{if eq $emailCheck "incorrect"}}
+                {{template "incorrect" $emailCheck}}
+              {{else if eq $emailCheck "correct"}}
+                {{template "correct" $emailCheck}}
+              {{end}}
+            </div>
+          </div>
+
+          <input
+            aria-label="Password"
+            name="password"
+            type="password"
+            class="borde-text grow rounded border bg-transparent px-2 py-1 focus:outline-none"
+            placeholder="Password"
+            required
+          />
+
+          <div class="flex justify-center">
+            <button
+              aria-label="Sign up"
+              type="submit"
+              class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+            >
+              Sign up
+            </button>
+          </div>
+        </form>
+
+        <div class="flex w-full max-w-sm justify-center gap-2">
+          <div>Already joined?</div>
+          <a
+            href="/signin?redirect={{$redirect}}"
+            class="border-primary focus:border-accent hover:border-accent border-b focus:outline-none"
+          >
+            Sign in here.
+          </a>
+        </div>
+
+        <nav class="flex flex-col gap-2">
+          {{$usernameError := index .Data "usernameError"}}
+          {{if $usernameError}}
+            {{template "error" $usernameError}}
+          {{end}}
+
+          {{$emailError := index .Data "emailError"}}
+          {{if $emailError}}
+            {{template "error" $emailError}}
+          {{end}}
+        </nav>
+      </main>
+    </section>
+    <!-- end of content -->
   </div>
 {{end}}
 

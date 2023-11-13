@@ -6,11 +6,16 @@ let accessToken = "";
  * If not, it tries to get an access token.
  * If successful, it reloads the page with the new access token.
  * If something goes wrong, it calls the callback.
- * @param {function} callback - Callback if something goes wrong in client side.
+ * @param {function | undefined} cb - Callback if something goes wrong in client side.
  * Backend handle happy path and errors.
  */
-async function refresh(callback) {
-  // to prevent infinite loop
+async function refresh(cb) {
+  function callback() {
+    if (cb !== undefined) {
+      return cb();
+    }
+  }
+
   if (accessToken !== "") {
     return;
   }
@@ -39,7 +44,7 @@ async function refresh(callback) {
 
   try {
     // reload page with new access token
-   await htmx.ajax("GET", window.location.pathname, {
+    await htmx.ajax("GET", window.location.pathname, {
       headers: {
         Authorization: authHeader,
       },
@@ -52,103 +57,123 @@ async function refresh(callback) {
 }
 
 /**
-  * Add current route to history and redirect to route.
-  * @param {string} route - Route to redirect to
-  */
+ * Add current route to history and redirect to route.
+ * @param {string} route - Route to redirect to
+ */
 function redirect(route) {
   window.history.pushState({}, "", route);
   window.location.reload();
 }
 
-// "protected" extension to redirect to login page if not logged in.
-// 1. Backend send spinner.
-// 2. Frontend tries to get access token, reloads the page with new access token.
-// 3. If unsuccessful, frontend redirect to login page.
-// 4. If successful, backend sends down protected content.
-// e.g.
-// /dashboard
-// <body hx-ext="protected">
-htmx.defineExtension("protected", {
+/**
+ * "protected-page" extension to redirect to login page if not logged in.
+ * 1. Backend send spinner.
+ * 2. Frontend tries to get access token, reloads the page with new access token.
+ * 3. If unsuccessful, frontend redirect to login page.
+ * 4. If successful, backend sends down protected content.
+ * e.g.
+ * /dashboard
+ * <div id="page" hx-ext="protected">
+ */
+htmx.defineExtension("protected-page", {
   onEvent: async function (name, evt) {
-    const isLoadEvent = name === "htmx:load" || name === "htmx:afterOnLoad";
-    const isBody = evt.target === document.body;
-    if (isLoadEvent && isBody) {
+    const processed = name === "htmx:afterProcessNode";
+    const pageElement = evt?.target?.id === "page";
+    if (processed && pageElement) {
+      const path = window.location.pathname.split("/")[1];
       await refresh(() => {
-        redirect("/signin");
+        redirect("/signin?redirect=" + path);
       });
     }
   },
 });
 
-// "gated" extension to load more/different content if logged in.
-// 1. Backend send partial page.
-// 2. Frontend tries to get access token, reloads the page with new access token.
-// 3. If unsuccessful, frontend does nothing.
-// 4. If successful, backend sends down gated content.
-// e.g.
-// <body hx-ext="gated">
-htmx.defineExtension("gated", {
+/**
+ * "gated-page" extension to load more/different content if logged in.
+ * 1. Backend send partial page.
+ * 2. Frontend tries to get access token, reloads the page with new access token.
+ * 3. If unsuccessful, frontend does nothing.
+ * 4. If successful, backend sends down gated content.
+ * e.g.
+ * <body hx-ext="gated">
+ */
+htmx.defineExtension("gated-page", {
   onEvent: async function (name, evt) {
-    const isLoadEvent = name === "htmx:load" || name === "htmx:afterOnLoad";
-    const isBody = evt.target === document.body;
-    if (isLoadEvent && isBody) {
-      await refresh(() => {});
+    const processed = name === "htmx:afterProcessNode";
+    const pageElement = evt?.target?.id === "page";
+    if (processed && pageElement) {
+      await refresh();
     }
   },
 });
 
-// "auth" extension to render error messages on forms
-htmx.defineExtension("auth", {
+/**
+ * "show-client-error" extension to render client error
+ * only used on form submission like signin, signup
+ */
+htmx.defineExtension("show-client-error", {
   onEvent: function (name, evt) {
     if (name == "htmx:beforeOnLoad") {
-      const status = evt.detail.xhr.status;
-      const statusUnauthorized = status === 401;
-      const statusForbidden = status === 403;
-      const statusConflict = status === 409;
-      const displayErrorMessage =
-        statusUnauthorized || statusForbidden || statusConflict;
-      if (displayErrorMessage) {
+      const status = evt?.detail?.xhr?.status;
+      const statusClientError =
+        status === 401 || status === 403 || status === 409;
+      if (statusClientError) {
         evt.detail.shouldSwap = true;
       }
     }
   },
 });
 
-// "delete" extension to delete elements
+/**
+ * "delete" extension to delete elements
+ * only used on delete button
+ */
 htmx.defineExtension("delete", {
   onEvent: function (_name, evt) {
     const status = evt?.detail?.xhr?.status;
-    if (status === 204) {
+    const statusNoContent = status === 204;
+    if (statusNoContent) {
       evt.detail.shouldSwap = true;
     }
   },
 });
 
-// "error" extension to prevent swap on 500 error
-htmx.defineExtension("error", {
+/**
+ * "no-server-error" extension to prevent server error
+ * probably should make it global
+ */
+htmx.defineExtension("no-server-error", {
   onEvent: function (_name, evt) {
-    const erroStatus = evt?.detail?.xhr?.status;
-    if (erroStatus === 500) {
+    const status = evt?.detail?.xhr?.status;
+    const statusServerError = status === 500;
+    if (statusServerError) {
       evt.detail.shouldSwap = false;
     }
   },
 });
 
-// "access" extension to include authorization header
-htmx.defineExtension("access", {
-  onEvent: function (name, evt) {
-    if (name === "htmx:beforeRequest") {
-      if (accessToken) {
-        evt.detail.xhr.setRequestHeader(
-          "Authorization",
-          "Bearer " + accessToken,
-        );
-      }
-    }
-  },
-});
+/**
+ * "access" extension to set access token to header
+ * use it in any request that requires access token
+ * e.g. GET /dashboard
+ */
+// htmx.defineExtension("access", {
+//   onEvent: function (name, evt) {
+//     if (name === "htmx:beforeRequest") {
+//       if (accessToken) {
+//         evt.detail.xhr.setRequestHeader(
+//           "Authorization",
+//           "Bearer " + accessToken,
+//         );
+//       }
+//     }
+//   },
+// });
 
-// "signout" extension to clear access token
+/**
+ * "signout" extension to clear access token
+ * use it in signout button
+ */
 htmx.defineExtension("signout", {
   onEvent: function (name, evt) {
     if (name === "htmx:afterRequest") {
@@ -159,7 +184,11 @@ htmx.defineExtension("signout", {
   },
 });
 
-// "signin" extension to set access token from server to variable
+/**
+ * "signin" extension to set access token from server to variable
+ * use it in signin form
+ * probably can avoid, body extensions can do the same (gated-page, protected-page)
+ */
 htmx.defineExtension("signin", {
   onEvent: function (name, evt) {
     if (name === "htmx:afterRequest" && evt.detail.xhr.status == 200) {
@@ -171,7 +200,10 @@ htmx.defineExtension("signin", {
   },
 });
 
-// "description" extension to reload meta tags
+/**
+ * "description" extension to reload meta tag
+ * use this on body
+ */
 htmx.defineExtension("description", {
   onEvent: function (name, evt) {
     if (name === "htmx:afterSwap") {
@@ -180,9 +212,45 @@ htmx.defineExtension("description", {
       const parser = new DOMParser();
       const doc = parser.parseFromString(res, "text/html");
       const newMeta = doc.querySelector("meta[name=description]");
-      const newContent = newMeta.getAttribute("content");
+      const newContent = newMeta?.getAttribute("content");
       meta.setAttribute("content", newContent);
     }
   },
 });
+
+/**
+ * "receiver" extension to receive event from body
+ * usage:
+ * <button hx-on="click:emit('event')">Click me</button>
+ * <div
+ *   hx-ext="receiver"
+ *   on-event:open="this.classList.remove('hidden')"
+ *   on-event:close="this.classList.add('hidden')"
+ * >
+ *   I was clicked
+ * </div>
+ * */
+htmx.defineExtension("receiver", {
+  onEvent: function (name, evt) {
+    if (name === "htmx:afterProcessNode") {
+      const e = evt?.target;
+      const attributes = e.attributes;
+      for (a of attributes) {
+        if (a.name.startsWith("on-event:")) {
+          const event = a.name.split(":")[1];
+          const action = a.value;
+          document.body.addEventListener(event, () => {
+            if (document.contains(e)) {
+              new Function(action).call(e);
+            }
+          });
+        }
+      }
+    }
+  },
+});
+
+function emit(name) {
+  document.body.dispatchEvent(new CustomEvent(name));
+}
 

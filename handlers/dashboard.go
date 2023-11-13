@@ -16,9 +16,10 @@ getDashboardTmpl helper function to parse the dashboard template.
 func getDashboardTmpl() (*template.Template, error) {
 	baseHtml := "templates/layouts/base.html"
 	dashboardHtml := "templates/pages/dashboard.html"
+	iconHtml := "templates/components/icon.html"
 	spinnerHtml := "templates/components/spinner.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, spinnerHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, iconHtml, spinnerHtml)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}

@@ -1,8 +1,70 @@
-CREATE TABLE "users" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "username" TEXT NOT NULL UNIQUE,
-    "email" TEXT NOT NULL UNIQUE,
-    "firstname" TEXT NOT NULL,
-    "lastname" TEXT NOT NULL,
-    "password" TEXT NOT NULL
-);
+-- Turso SQLite3 Database Schema
+CREATE TABLE
+  user (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    firstname TEXT NOT NULL,
+    lastname TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+CREATE TABLE
+  account (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    currency TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+CREATE TABLE
+  access (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    role TEXT CHECK (role IN ('admin', 'viewer')) NOT NULL,
+    user_id INTEGER NOT NULL,
+    account_id INTEGER NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (account_id) REFERENCES account (id)
+  );
+
+CREATE TABLE
+  recipient (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    access_id INTEGER NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (access_id) REFERENCES access (id)
+  );
+
+CREATE TABLE
+  event (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    income INTEGER NOT NULL,
+    reserved INTEGER NOT NULL,
+    delivery_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    account_id INTEGER NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES account (id)
+  );
+
+CREATE TABLE
+  payment (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    factor INTEGER NOT NULL,
+    extra INTEGER NOT NULL,
+    event_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES event (id),
+    FOREIGN KEY (recipient_id) REFERENCES recipient (id)
+  );
+

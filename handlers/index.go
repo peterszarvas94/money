@@ -42,7 +42,6 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	loggedIn := false
 
-
 	user, sessionErr := userService.CheckAccessToken(r)
 	if sessionErr == nil && user != nil {
 		loggedIn = true

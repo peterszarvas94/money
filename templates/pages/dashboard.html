@@ -1,20 +1,44 @@
 {{define "page"}}
-  <body hx-ext="protected,description" class="flex flex-col gap-2 items-start">
-    {{if .Session.LoggedIn}}
-      <div>this is dashboard</div>
-      <a href="/" hx-boost="true" hx-ext="access" class="underline">home</a>
-      <button
-        type="submit"
-        hx-post="/signout"
-        hx-ext="signout"
-        hx-target="body"
-        class="underline"
-      >
-        Sign out
+  <div class="text-text" hx-ext="protected-page,description" id="page">
+    <!-- background -->
+    <!-- <figure -->
+    <!--   class="z-1 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10" -->
+    <!-- > -->
+    <!--   {{template "icon"}} -->
+    <!-- </figure> -->
+    <!-- end of background -->
+
+    <!-- content -->
+
+    <aside
+      class="bg-secondary absolute z-10 hidden min-h-screen w-40"
+      hx-ext="receiver"
+      on-event:open="this.classList.remove('hidden')"
+      on-event:close="this.classList.add('hidden')"
+    >
+      <button hx-on:click="emit('close')">
+        <figure class="text-accent text-5xl">{{template "icon"}}</figure>
       </button>
-    {{else}}
-      {{template "spinner"}}
-    {{end}}
-  </body>
+    </aside>
+    <main class="bg-subsidary absolute z-0 min-h-screen w-full">
+      <button hx-on:click="emit('open')">
+        <figure class="text-accent text-5xl">{{template "icon"}}</figure>
+      </button>
+      {{if .Session.LoggedIn}}
+        <button
+          type="submit"
+          hx-post="/signout"
+          hx-ext="signout"
+          hx-target="body"
+          hx-replace-url="true"
+          class="underline"
+        >
+          Sign out
+        </button>
+      {{else}}
+        {{template "spinner"}}
+      {{end}}
+    </main>
+  </div>
 {{end}}
 
