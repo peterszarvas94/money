@@ -6,13 +6,14 @@ module.exports = {
       colors: {
         text: '#ffffff',
         background: '#140004',
+        backgroundalt: '#140E20',
         primary: '#016b57',
+        subsidary: '#345367',
         secondary: '#002638',
         accent: '#06fe55',
         highlight: '#f9f871',
         warning: '#ea9a27',
         info: '#cef6ff',
-        subsidary: '#345367',
       },
       letterSpacing: {
         extreme: '0.2em',
@@ -23,6 +24,9 @@ module.exports = {
       },
       fontSize: {
         giant: '20rem',
+      },
+      borderRadius: {
+        "inner": "0.39rem",
       },
     },
   },

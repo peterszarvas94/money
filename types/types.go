@@ -25,24 +25,6 @@ type Page struct {
 	Data					map[string]string
 }
 
-// type SigninData struct {
-// 	Page            Page
-// 	UsernameOrEmail string
-// 	Error           string
-// }
-//
-// type Exists struct {
-// 	Username bool
-// 	Email    bool
-// }
-//
-// type SignupData struct {
-// 	Page   Page
-// 	User   User
-// 	Exists Exists
-// 	Error  string
-// }
-
 type TokenVariant string
 
 const (

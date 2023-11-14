@@ -241,6 +241,7 @@ htmx.defineExtension("receiver", {
           const action = a.value;
           document.body.addEventListener(event, () => {
             if (document.contains(e)) {
+              // evals action in the context of e
               new Function(action).call(e);
             }
           });
@@ -250,7 +251,10 @@ htmx.defineExtension("receiver", {
   },
 });
 
+/**
+ * Emits an event on body.
+ * @param {string} name - Event name
+ */
 function emit(name) {
   document.body.dispatchEvent(new CustomEvent(name));
 }
-

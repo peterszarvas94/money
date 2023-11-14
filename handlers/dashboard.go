@@ -10,6 +10,20 @@ import (
 	"pengoe/utils"
 )
 
+type Account struct {
+	Id       int
+	Text     string
+	Selected bool
+	New      bool
+}
+
+type DashboardPage struct {
+	Title       string
+	Descrtipion string
+	Session     types.Session
+	Accounts    []Account
+}
+
 /*
 getDashboardTmpl helper function to parse the dashboard template.
 */
@@ -17,9 +31,10 @@ func getDashboardTmpl() (*template.Template, error) {
 	baseHtml := "templates/layouts/base.html"
 	dashboardHtml := "templates/pages/dashboard.html"
 	iconHtml := "templates/components/icon.html"
+	accountHtml := "templates/components/account.html"
 	spinnerHtml := "templates/components/spinner.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, iconHtml, spinnerHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, iconHtml, accountHtml, spinnerHtml)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}
@@ -53,12 +68,32 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		data := types.Page{
+		data := DashboardPage{
 			Title:       "pengoe - Dashboard",
 			Descrtipion: "Dashboard for pengoe",
 			Session: types.Session{
 				LoggedIn: true,
 				User:     *user,
+			},
+			Accounts: []Account{
+				{
+					Id:   1,
+					Text: "Account 1",
+				},
+				{
+					Id:       2,
+					Text:     "Account 2",
+					Selected: true,
+				},
+				{
+					Id:   3,
+					Text: "Account 3",
+				},
+				{
+					Id:   0,
+					Text: "New account",
+					New:  true,
+				},
 			},
 		}
 
@@ -67,7 +102,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 			utils.Log(utils.ERROR, "dashboard/loggedin/tmpl", tmplErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
-	
+
 		utils.Log(utils.INFO, "dashboard/tmpl", "Template parsed successfully")
 
 		resErr := tmpl.Execute(w, data)
