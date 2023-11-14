@@ -80,9 +80,10 @@ htmx.defineExtension("protected-page", {
     const processed = name === "htmx:afterProcessNode";
     const pageElement = evt?.target?.id === "page";
     if (processed && pageElement) {
-      const path = window.location.pathname.split("/")[1];
+      const path = window.location.pathname;
+      const encodedPath = encodeURIComponent(path);
       await refresh(() => {
-        redirect("/signin?redirect=" + path);
+        redirect("/signin?redirect=" + encodedPath);
       });
     }
   },
@@ -257,4 +258,28 @@ htmx.defineExtension("receiver", {
  */
 function emit(name) {
   document.body.dispatchEvent(new CustomEvent(name));
+}
+
+/**
+ * Toggles tabindex of element.
+ * @param {HTMLElement} element - Element to toggle tabindex
+ */
+function toggleTabIndex(element) {
+  if (element.tabIndex === -1) {
+    element.tabIndex = 0;
+  } else {
+    element.tabIndex = -1;
+  }
+}
+
+/**
+ * Toggles focus and blur on element.
+ * @param {HTMLElement} element - Element to toggle focus
+ */
+function toggleFocus(element) {
+  if (element === document.activeElement) {
+    element.blur();
+  } else {
+    element.focus();
+  }
 }

@@ -2,41 +2,79 @@
   <div hx-ext="protected-page,description" id="page">
     {{if .Session.LoggedIn}}
 
-      <!-- menu -->
+      <!-- left panel -->
       <aside
         class="bg-backgroundalt absolute z-10 min-h-screen w-40 -translate-x-full transform transition-transform duration-500"
         hx-ext="receiver"
         on-event:menu-open="
           this.classList.remove('-translate-x-full');
           this.classList.add('translate-x-0');
+          this.querySelectorAll('button').forEach((el) => {
+            toggleTabIndex(el);
+          });
         "
         on-event:menu-close="
           this.classList.remove('translate-x-0');
           this.classList.add('-translate-x-full');
+          this.querySelectorAll('button').forEach((el) => {
+            toggleTabIndex(el);
+            el.blur();
+          });
         "
       >
-        <button hx-on:click="emit('menu-close')" class="p-2 text-xl">
-          <svg
-            stroke="currentColor"
-            fill="currentColor"
-            stroke-width="0"
-            viewBox="0 0 24 24"
-            height="1em"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
+        <div class="flex items-center justify-start">
+          <button
+            hx-on:click="emit('menu-close'); console.log(1)"
+            class="p-4 text-xl"
+            tabindex="-1"
+            hx-ext="receiver"
+            on-event:menu-open="
+            this.focus();
+          "
           >
-            <path
-              d="M21 17.9995V19.9995H3V17.9995H21ZM6.59619 3.90332L8.01041 5.31753L4.82843 8.49951L8.01041 11.6815L6.59619 13.0957L2 8.49951L6.59619 3.90332ZM21 10.9995V12.9995H12V10.9995H21ZM21 3.99951V5.99951H12V3.99951H21Z"
-            ></path>
-          </svg>
-        </button>
+            <!-- menu left icon -->
+            <svg
+              stroke="currentColor"
+              fill="currentColor"
+              stroke-width="0"
+              viewBox="0 0 24 24"
+              height="1em"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 17.9995V19.9995H3V17.9995H21ZM6.59619 3.90332L8.01041 5.31753L4.82843 8.49951L8.01041 11.6815L6.59619 13.0957L2 8.49951L6.59619 3.90332ZM21 10.9995V12.9995H12V10.9995H21ZM21 3.99951V5.99951H12V3.99951H21Z"
+              ></path>
+            </svg>
+          </button>
+          <a
+            href="/"
+            class="flex items-center justify-center rounded-lg border border-gray-500 px-2 py-1"
+          >
+            Home
+          </a>
+        </div>
       </aside>
-      <!-- end of menu -->
+      <!-- end of left panel -->
 
       <!-- content -->
       <main class="absolute z-0 min-h-screen w-full bg-white text-black">
         <div class="flex w-full items-start justify-between">
-          <button hx-on:click="emit('menu-open')" class="p-2 text-xl">
+          <button
+            hx-on:click="emit('menu-open')"
+            class="p-4 text-xl"
+            tabindex="0"
+            hx-ext="receiver"
+            on-event:menu-open="
+              toggleTabIndex(this);
+              this.blur();
+            "
+            on-event:menu-close="
+              toggleTabIndex(this);
+              this.focus();
+            "
+          >
+            <!-- menu right icon -->
             <svg
               stroke="currentColor"
               fill="currentColor"
@@ -51,12 +89,15 @@
               ></path>
             </svg>
           </button>
+
+          <!-- account selector -->
           <div class="p-2" hx-on:click="emit('accounts-toggle')">
             <button
-              class="flex cursor-pointer items-center gap-2 rounded-lg hover:bg-gray-100 p-2"
+              class="flex cursor-pointer items-center gap-2 rounded-lg p-2"
               hx-ext="receiver"
               on-event:accounts-toggle="
-                this.classList.toggle('bg-gray-100');
+                this.classList.toggle('bg-primary');
+                this.classList.toggle('text-text');
               "
             >
               {{range .Accounts}}
@@ -64,7 +105,16 @@
                   <div>{{.Text}}</div>
                 {{end}}
               {{end}}
-              <div class="text-xs">
+
+
+              <!-- chevron down icon -->
+              <div
+                class="text-xs"
+                hx-ext="receiver"
+                on-event:accounts-toggle="
+                  this.classList.toggle('text-accent');
+                "
+              >
                 <svg
                   stroke="currentColor"
                   fill="currentColor"
@@ -80,12 +130,17 @@
                 </svg>
               </div>
             </button>
+
+            <!-- account selector dropdown -->
             <div
               class="border-primary absolute top-14 w-fit rounded-lg border opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200"
               hx-ext="receiver"
               on-event:accounts-toggle="
                 this.classList.toggle('opacity-0');
                 this.classList.toggle('opacity-100');
+                this.querySelectorAll('button').forEach((el) => {
+                  toggleTabIndex(el);
+                });
               "
             >
               <ul>
@@ -95,29 +150,58 @@
               </ul>
             </div>
           </div>
-          <div class="p-2 text-2xl">
-            <svg
-              stroke="currentColor"
-              fill="none"
-              stroke-width="0"
-              viewBox="0 0 15 15"
-              height="1em"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
+
+          <!-- profile -->
+          <div class="p-4">
+            <button onclick="emit('profile-toggle')" class="text-2xl">
+              <!-- profile pic icon -->
+              <svg
+                stroke="currentColor"
+                fill="none"
+                stroke-width="0"
+                viewBox="0 0 15 15"
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.877014 7.49988C0.877014 3.84219 3.84216 0.877045 7.49985 0.877045C11.1575 0.877045 14.1227 3.84219 14.1227 7.49988C14.1227 11.1575 11.1575 14.1227 7.49985 14.1227C3.84216 14.1227 0.877014 11.1575 0.877014 7.49988ZM7.49985 1.82704C4.36683 1.82704 1.82701 4.36686 1.82701 7.49988C1.82701 8.97196 2.38774 10.3131 3.30727 11.3213C4.19074 9.94119 5.73818 9.02499 7.50023 9.02499C9.26206 9.02499 10.8093 9.94097 11.6929 11.3208C12.6121 10.3127 13.1727 8.97172 13.1727 7.49988C13.1727 4.36686 10.6328 1.82704 7.49985 1.82704ZM10.9818 11.9787C10.2839 10.7795 8.9857 9.97499 7.50023 9.97499C6.01458 9.97499 4.71624 10.7797 4.01845 11.9791C4.97952 12.7272 6.18765 13.1727 7.49985 13.1727C8.81227 13.1727 10.0206 12.727 10.9818 11.9787ZM5.14999 6.50487C5.14999 5.207 6.20212 4.15487 7.49999 4.15487C8.79786 4.15487 9.84999 5.207 9.84999 6.50487C9.84999 7.80274 8.79786 8.85487 7.49999 8.85487C6.20212 8.85487 5.14999 7.80274 5.14999 6.50487ZM7.49999 5.10487C6.72679 5.10487 6.09999 5.73167 6.09999 6.50487C6.09999 7.27807 6.72679 7.90487 7.49999 7.90487C8.27319 7.90487 8.89999 7.27807 8.89999 6.50487C8.89999 5.73167 8.27319 5.10487 7.49999 5.10487Z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </button>
+
+            <!-- profile dropdown -->
+            <div
+              class="border-primary absolute right-4 top-11 w-fit rounded-lg border opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200"
+              hx-ext="receiver"
+              on-event:profile-toggle="
+                this.classList.toggle('opacity-0');
+                this.classList.toggle('opacity-100');
+                this.querySelectorAll('button').forEach((el) => {
+                  toggleTabIndex(el);
+                });
+              "
             >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M0.877014 7.49988C0.877014 3.84219 3.84216 0.877045 7.49985 0.877045C11.1575 0.877045 14.1227 3.84219 14.1227 7.49988C14.1227 11.1575 11.1575 14.1227 7.49985 14.1227C3.84216 14.1227 0.877014 11.1575 0.877014 7.49988ZM7.49985 1.82704C4.36683 1.82704 1.82701 4.36686 1.82701 7.49988C1.82701 8.97196 2.38774 10.3131 3.30727 11.3213C4.19074 9.94119 5.73818 9.02499 7.50023 9.02499C9.26206 9.02499 10.8093 9.94097 11.6929 11.3208C12.6121 10.3127 13.1727 8.97172 13.1727 7.49988C13.1727 4.36686 10.6328 1.82704 7.49985 1.82704ZM10.9818 11.9787C10.2839 10.7795 8.9857 9.97499 7.50023 9.97499C6.01458 9.97499 4.71624 10.7797 4.01845 11.9791C4.97952 12.7272 6.18765 13.1727 7.49985 13.1727C8.81227 13.1727 10.0206 12.727 10.9818 11.9787ZM5.14999 6.50487C5.14999 5.207 6.20212 4.15487 7.49999 4.15487C8.79786 4.15487 9.84999 5.207 9.84999 6.50487C9.84999 7.80274 8.79786 8.85487 7.49999 8.85487C6.20212 8.85487 5.14999 7.80274 5.14999 6.50487ZM7.49999 5.10487C6.72679 5.10487 6.09999 5.73167 6.09999 6.50487C6.09999 7.27807 6.72679 7.90487 7.49999 7.90487C8.27319 7.90487 8.89999 7.27807 8.89999 6.50487C8.89999 5.73167 8.27319 5.10487 7.49999 5.10487Z"
-                fill="currentColor"
-              ></path>
-            </svg>
+              <button
+                class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 px-2 py-1"
+                hx-post="/signout"
+                hx-swap="outerHTML"
+                hx-target="body"
+                hx-push-url="true"
+                hx-ext="signout"
+              >
+                Signout
+              </button>
+            </div>
           </div>
         </div>
       </main>
       <!-- end of content -->
     {{else}}
-      <div class="flex p-10 items-center justify-center">
+      <div class="flex items-center justify-center p-10">
         {{template "spinner"}}
       </div>
     {{end}}

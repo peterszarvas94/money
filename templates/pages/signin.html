@@ -23,7 +23,7 @@
         </a>
       </header>
 
-      {{$redirect := index .Data "redirect"}}
+      {{$redirect := .Redirect}}
       <main class="flex flex-col items-center gap-10 bg-transparent">
         <form
           hx-post="/signin?redirect={{$redirect}}"
@@ -31,7 +31,7 @@
           hx-replace-url="true"
           class="flex w-full max-w-sm flex-col gap-4"
         >
-          {{$usernameOrEmail := index .Data "usernameOrEmail"}}
+          {{$usernameOrEmail := index .Values "usernameOrEmail"}}
           <input
             aria-label="Username or email"
             name="user"
@@ -69,7 +69,7 @@
           </a>
         </nav>
 
-        {{$error := index .Data "loginError"}}
+        {{$error := index .Errors "loginError"}}
         {{if $error}}
           {{template "error" $error}}
         {{end}}

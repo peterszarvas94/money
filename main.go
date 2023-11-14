@@ -11,6 +11,7 @@ func main() {
 	r := utils.NewRouter()
 
 	r.GET("/", handlers.HomePageHandler)
+
 	r.GET("/signup", handlers.SignupPageHandler)
 	r.POST("/signup", handlers.NewUserHandler)
 	r.GET("/signin", handlers.SigninPageHandler)
@@ -19,6 +20,7 @@ func main() {
 	r.GET("/check", handlers.CheckUserHandler)
 	r.POST("/refresh", handlers.RefreshTokenHandler)
 	r.GET("/dashboard", handlers.DashboardPageHandler)
+	r.GET("/account/new", handlers.NewAccountPageHandler)
 
 	r.SetStaticPath("/static")
 

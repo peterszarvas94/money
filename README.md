@@ -43,3 +43,5 @@ To run make commands, you need to have:
 - [x] add services to backend
 - [ ] viewtransition api
 - [ ] dashboard page
+  - [x] account selector
+  - [ ] profile button with signout

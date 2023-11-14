@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -56,7 +57,8 @@ func GetQueryParams(r *http.Request) map[string]string {
 
 	query := r.URL.Query()
 	for key, value := range query {
-		queryParams[key] = value[0]
+		encoded := url.QueryEscape(value[0])
+		queryParams[key] = encoded
 	}
 
 	return queryParams

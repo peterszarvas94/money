@@ -6,18 +6,27 @@ import (
 	"html/template"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"pengoe/db"
 	"pengoe/services"
 	"pengoe/types"
 	"pengoe/utils"
 )
 
+type SignupPage struct {
+	Title       string
+	Descrtipion string
+	Session     types.Session
+	Redirect    template.URL
+	Values			map[string]string
+	Errors			map[string]string
+}
+
 /*
 getSignupTmpl helper function to parse the signup template.
 */
 func getSignupTmpl() (*template.Template, error) {
 	baseHtml := "templates/layouts/base.html"
-	welcomeHtml := "templates/layouts/welcome.html"
 	signupHtml := "templates/pages/signup.html"
 	iconHtml := "templates/components/icon.html"
 	errorHtml := "templates/components/error.html"
@@ -26,7 +35,6 @@ func getSignupTmpl() (*template.Template, error) {
 
 	tmpl, tmplErr := template.ParseFiles(
 		baseHtml,
-		welcomeHtml,
 		signupHtml,
 		iconHtml,
 		errorHtml,
@@ -46,6 +54,7 @@ func getSignupTmpl() (*template.Template, error) {
 SignupPageHandler handles the GET request to /signup.
 */
 func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+
 	params := utils.GetQueryParams(r)
 
 	// connet to the database
@@ -65,14 +74,23 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
 		utils.Log(utils.INFO, "signin/checkSession", logMsg)
 
-		redirect := params["redirect"]
-		if redirect == "" {
-			redirect = "dashboard"
+		//decode uri componetns
+		encoded := params["redirect"]
+		redirect, decodeErr := url.QueryUnescape(encoded)
+		if decodeErr != nil {
+			utils.Log(utils.ERROR, "signin/get/decode", decodeErr.Error())
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
 		}
 
-		// fix this with some extension
-		// http...
-		w.Header().Set("HX-Redirect", "/"+redirect)
+		if redirect == "" {
+			redirect = "/dashboard"
+		}
+
+		utils.Log(utils.INFO, "signin/get/decode", "Redirect to "+redirect)
+
+		// todo: change this to http... with some extension?
+		w.Header().Set("HX-Redirect", redirect)
 		return
 	}
 
@@ -88,12 +106,18 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	data := types.Page{
-		Title:       "pengoe - Sign up",
-		Descrtipion: "Sign up to pengoe",
-		Data: map[string]string{
-			"redirect": params["redirect"],
+	redirect := params["redirect"]
+	if redirect == "" {
+		redirect = "%2Fdashboard"
+	}
+
+	data := SignupPage{
+		Title:       "pengoe - Sign in",
+		Descrtipion: "Sign in to pengoe",
+		Session: types.Session{
+			LoggedIn: false,
 		},
+		Redirect: template.URL(redirect),
 	}
 
 	resErr := tmpl.Execute(w, data)
@@ -206,32 +230,6 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			emailCheck = "correct"
 		}
 
-		data := types.Page{
-			Session: types.Session{
-				User: types.User{
-					Username: username,
-					Email:    email,
-					Fistname: firstname,
-					Lastname: lastname,
-				},
-			},
-			Title:       "pengoe - Sign up",
-			Descrtipion: "Sign up to pengoe",
-			Data: map[string]string{
-				"usernameValue": username,
-				"usernameError": usernameError,
-				"usernameCheck": usernameCheck,
-
-				"emailValue": email,
-				"emailError": emailError,
-				"emailCheck": emailCheck,
-
-				"firstnameValue": firstname,
-				"lastnameValue":  lastname,
-				"redirect":       params["redirect"],
-			},
-		}
-
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusConflict)
 
@@ -243,9 +241,35 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		utils.Log(utils.INFO, "signup/post/signupTmpl", "Template parsed successfully")
 
-		res_err := tmpl.Execute(w, data)
-		if res_err != nil {
-			utils.Log(utils.ERROR, "signup/post/res", res_err.Error())
+		redirect := params["redirect"]
+		if redirect == "" {
+			redirect = "%2Fdashboard"
+		}
+
+		data := SignupPage{
+			Title:       "pengoe - Sign in",
+			Descrtipion: "Sign in to pengoe",
+			Session: types.Session{
+				LoggedIn: false,
+			},
+			Redirect: template.URL(redirect),
+			Values: map[string]string{
+				"usernameValue": username,
+				"emailValue": email,
+				"firstnameValue": firstname,
+				"lastnameValue": lastname,
+				"usernameCheck": usernameCheck,
+				"emailCheck": emailCheck,
+			},
+			Errors: map[string]string{
+				"usernameError": usernameError,
+				"emailError": emailError,
+			},
+		}
+
+		resErr := tmpl.Execute(w, data)
+		if resErr != nil {
+			utils.Log(utils.ERROR, "signup/post/res", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
@@ -254,7 +278,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	}
 
 	// successful signup, redirect to signin
-	utils.Log(utils.INFO, "signup/post/user", "User added successfully")
+	utils.Log(utils.INFO, "signup/post/user", "User added successfully, redirect to "+params["redirect"])
+
 	http.Redirect(w, r, "/signin?redirect="+params["redirect"], http.StatusSeeOther)
 	return
 }

@@ -51,7 +51,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "check/db", dbErr.Error())
+		utils.Log(utils.ERROR, "dashboard/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -103,7 +103,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "dashboard/tmpl", "Template parsed successfully")
+		utils.Log(utils.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
 
 		resErr := tmpl.Execute(w, data)
 		if resErr != nil {

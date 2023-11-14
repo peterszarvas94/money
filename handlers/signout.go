@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"pengoe/utils"
 	"net/http"
+	"pengoe/utils"
 	"time"
 )
 
@@ -19,7 +19,7 @@ func SignoutHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/signin?redirect=dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, "/signin?redirect=%2Fdashboard", http.StatusSeeOther)
 
 	utils.Log(utils.INFO, "signout/method", "User logged out and redirected to home page")
 	return

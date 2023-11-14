@@ -6,14 +6,14 @@
   >
     <!-- background -->
     <figure
-      class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
+      class="text-secondary text-giant absolute z-0 flex h-full w-full items-end justify-center pb-10"
     >
       {{template "icon"}}
     </figure>
     <!-- end of background -->
 
     <!-- content -->
-    <section class="z-10 absolute w-full">
+    <section class="absolute z-10 w-full">
       <header class="flex justify-center py-14">
         <a href="/" class="flex items-center justify-center gap-2">
           <figure class="text-primary text-5xl">{{template "icon"}}</figure>
@@ -23,7 +23,7 @@
         </a>
       </header>
 
-      {{$redirect := index .Data "redirect"}}
+      {{$redirect := .Redirect}}
       <main class="flex flex-col items-center gap-10 bg-transparent">
         <form
           hx-post="/signup?redirect={{$redirect}}"
@@ -33,7 +33,7 @@
           class="flex w-full max-w-sm flex-col gap-4"
         >
           <div class="flex w-full gap-4">
-            {{$firstname := index .Data "firstnameValue"}}
+            {{$firstname := index .Values "firstnameValue"}}
             <div class="border-text flex w-full items-center rounded border">
               <input
                 aria-label="Firstname"
@@ -46,7 +46,7 @@
             </div>
 
             <div class="border-text flex w-full items-center rounded border">
-              {{$lastname := index .Data "lastnameValue"}}
+              {{$lastname := index .Values "lastnameValue"}}
               <input
                 aria-label="Lastname"
                 name="lastname"
@@ -59,7 +59,7 @@
           </div>
 
           <div class="border-text flex items-center rounded border">
-            {{$username := index .Data "usernameValue"}}
+            {{$username := index .Values "usernameValue"}}
             <input
               aria-label="Username"
               name="username"
@@ -73,7 +73,7 @@
               hx-push-url="false"
             />
             <div id="username-check">
-              {{$usernameCheck := index .Data "usernameCheck"}}
+              {{$usernameCheck := index .Values "usernameCheck"}}
               {{if eq $usernameCheck "incorrect"}}
                 {{template "incorrect" $usernameCheck}}
               {{else if eq $usernameCheck "correct"}}
@@ -83,7 +83,7 @@
           </div>
 
           <div class="border-text flex items-center rounded border">
-            {{$email := index .Data "emailValue"}}
+            {{$email := index .Values "emailValue"}}
             <input
               aria-label="Email"
               name="email"
@@ -98,7 +98,7 @@
               hx-push-url="false"
             />
             <div id="email-check">
-              {{$emailCheck := index .Data "emailCheck"}}
+              {{$emailCheck := index .Values "emailCheck"}}
               {{if eq $emailCheck "incorrect"}}
                 {{template "incorrect" $emailCheck}}
               {{else if eq $emailCheck "correct"}}
@@ -138,12 +138,12 @@
         </div>
 
         <nav class="flex flex-col gap-2">
-          {{$usernameError := index .Data "usernameError"}}
+          {{$usernameError := index .Errors "usernameError"}}
           {{if $usernameError}}
             {{template "error" $usernameError}}
           {{end}}
 
-          {{$emailError := index .Data "emailError"}}
+          {{$emailError := index .Errors "emailError"}}
           {{if $emailError}}
             {{template "error" $emailError}}
           {{end}}
