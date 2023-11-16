@@ -83,9 +83,12 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// handle static files
 	if router.staticPrefix != "" && strings.HasPrefix(path, router.staticPrefix) {
+		// w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		fs := http.FileServer(http.Dir("static"))
 		staticHandler := http.StripPrefix(router.staticPrefix, fs)
 		staticHandler.ServeHTTP(w, r)
+
 		return
 	}
 

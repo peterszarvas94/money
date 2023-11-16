@@ -50,3 +50,4 @@ To run make commands, you need to have:
 - [ ] new account page
   - [x] handler
   - [ ] form
+- [ ] left panel can be pinned

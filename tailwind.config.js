@@ -28,6 +28,10 @@ module.exports = {
       borderRadius: {
         "inner": "0.39rem",
       },
+      fontSize: {
+        '2xs': '.625rem',
+        '3xs': '.5rem',
+      },
     },
   },
   plugins: [],

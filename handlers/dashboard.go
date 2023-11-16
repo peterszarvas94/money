@@ -10,18 +10,13 @@ import (
 	"pengoe/utils"
 )
 
-type Account struct {
-	Id       int
-	Text     string
-	Selected bool
-	New      bool
-}
-
-type DashboardPage struct {
-	Title       string
-	Descrtipion string
-	Session     types.Session
-	Accounts    []Account
+type dashboardPage struct {
+	Title                string
+	Descrtipion          string
+	Session              types.Session
+	SelectedAccountId    int
+	AccountSelectItems   []types.AccountSelectItem
+	ShowNewAccountButton bool
 }
 
 /*
@@ -30,11 +25,13 @@ getDashboardTmpl helper function to parse the dashboard template.
 func getDashboardTmpl() (*template.Template, error) {
 	baseHtml := "templates/layouts/base.html"
 	dashboardHtml := "templates/pages/dashboard.html"
+	leftpanelHtml := "templates/components/leftpanel.html"
+	topbarHtml := "templates/components/topbar.html"
 	iconHtml := "templates/components/icon.html"
-	accountHtml := "templates/components/account.html"
+	accountSelectItemHtml := "templates/components/account-select-item.html"
 	spinnerHtml := "templates/components/spinner.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, iconHtml, accountHtml, spinnerHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, dashboardHtml, leftpanelHtml, topbarHtml, iconHtml, accountSelectItemHtml, spinnerHtml)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}
@@ -68,31 +65,27 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		data := DashboardPage{
+		data := dashboardPage{
 			Title:       "pengoe - Dashboard",
 			Descrtipion: "Dashboard for pengoe",
 			Session: types.Session{
 				LoggedIn: true,
 				User:     *user,
 			},
-			Accounts: []Account{
+			SelectedAccountId:    1,
+			ShowNewAccountButton: true,
+			AccountSelectItems: []types.AccountSelectItem{
 				{
 					Id:   1,
 					Text: "Account 1",
 				},
 				{
-					Id:       2,
-					Text:     "Account 2",
-					Selected: true,
+					Id:   2,
+					Text: "Account 2",
 				},
 				{
 					Id:   3,
 					Text: "Account 3",
-				},
-				{
-					Id:   0,
-					Text: "New account",
-					New:  true,
 				},
 			},
 		}

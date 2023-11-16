@@ -1,0 +1,74 @@
+{{define "account-select-item-selected"}}
+  <li>
+    <button
+      class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
+      onclick="console.log('{{.Id}}')"
+      tabindex="-1"
+      aria-current="true"
+      aria-label="{{.Text}}"
+    >
+      <div>{{.Text}}</div>
+      <div
+        class="text-primary group-hover:text-accent group-focus:text-accent text-sm"
+      >
+        <svg
+          stroke="currentColor"
+          fill="currentColor"
+          stroke-width="0"
+          viewBox="0 0 448 512"
+          height="1em"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
+          ></path>
+        </svg>
+      </div>
+    </button>
+  </li>
+{{end}}
+
+{{define "account-select-item-new"}}
+  <li>
+    <a
+      href="/account/new"
+      class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
+      tabindex="-1"
+      aria-label="New account"
+    >
+      <div>New account</div>
+      <div
+        class="text-primary group-hover:text-accent group-focus:text-accent text-sm"
+      >
+        <svg
+          stroke="currentColor"
+          fill="currentColor"
+          stroke-width="0"
+          viewBox="0 0 448 512"
+          height="1em"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+          ></path>
+        </svg>
+      </div>
+    </a>
+  </li>
+{{end}}
+
+{{define "account-select-item"}}
+  <li>
+    <button
+      class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
+      onclick="console.log('{{.Id}}')"
+      tabindex="-1"
+      aria-label="{{.Text}}"
+    >
+      <div>{{.Text}}</div>
+    </button>
+  </li>
+{{end}}
+

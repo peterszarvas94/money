@@ -10,10 +10,13 @@ import (
 	"pengoe/utils"
 )
 
-type NewAccountPage struct {
+type newAccountPage struct {
 	Title       string
 	Descrtipion string
 	Session     types.Session
+	SelectedAccountId    int
+	AccountSelectItems   []types.AccountSelectItem
+	ShowNewAccountButton bool
 }
 
 /*
@@ -21,10 +24,14 @@ getNewAccountTmpl helper function to parse the newaccount template.
 */
 func getNewAccountTmpl() (*template.Template, error) {
 	baseHtml := "templates/layouts/base.html"
-	newaccountHtml := "templates/pages/newaccount.html"
+	newAccountHtml := "templates/pages/new-account.html"
+	leftpanelHtml := "templates/components/leftpanel.html"
+	topbarHtml := "templates/components/topbar.html"
+	iconHtml := "templates/components/icon.html"
+	accountSelectItemHtml := "templates/components/account-select-item.html"
 	spinnerHtml := "templates/components/spinner.html"
 
-	tmpl, tmplErr := template.ParseFiles(baseHtml, newaccountHtml, spinnerHtml)
+	tmpl, tmplErr := template.ParseFiles(baseHtml, newAccountHtml, leftpanelHtml, topbarHtml, iconHtml, accountSelectItemHtml, spinnerHtml)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}
@@ -58,12 +65,28 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, pattern strin
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		data := NewAccountPage{
+		data := newAccountPage{
 			Title:       "pengoe - New Account",
 			Descrtipion: "New Account for pengoe",
 			Session: types.Session{
 				LoggedIn: true,
 				User:     *user,
+			},
+			SelectedAccountId: 0,
+			ShowNewAccountButton: false,
+			AccountSelectItems: []types.AccountSelectItem{
+				{
+					Id:   1,
+					Text: "Account 1",
+				},
+				{
+					Id:       2,
+					Text:     "Account 2",
+				},
+				{
+					Id:   3,
+					Text: "Account 3",
+				},
 			},
 		}
 

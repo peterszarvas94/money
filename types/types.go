@@ -18,6 +18,11 @@ type Session struct {
 	User     User
 }
 
+type AccountSelectItem struct {
+	Id       int
+	Text     string
+}
+
 type Page struct {
 	Title         string
 	Descrtipion   string
