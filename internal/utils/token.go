@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"pengoe/types"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,13 +17,13 @@ It takes an id and a tokenvariant as arguments.
 Example:
 NewToken(1, ACCESS)
 */
-func NewToken(id int, variant types.TokenVariant) (types.JWT, error) {
+func NewToken(id int, variant TokenVariant) (JWT, error) {
 	currentTime := time.Now().Unix()
 	expirationTime := currentTime + 3600
 
 	secret, found := os.LookupEnv("JWT_SECRET")
 	if !found {
-		return types.JWT{}, errors.New("Error: JWT_SECRET environment variable not found")
+		return JWT{}, errors.New("Error: JWT_SECRET environment variable not found")
 	}
 
 	idStr := strconv.Itoa(id)
@@ -38,10 +37,10 @@ func NewToken(id int, variant types.TokenVariant) (types.JWT, error) {
 
 	signedToken, signErr := token.SignedString([]byte(secret))
 	if signErr != nil {
-		return types.JWT{}, signErr
+		return JWT{}, signErr
 	}
 
-	return types.JWT{
+	return JWT{
 		Token:   signedToken,
 		Expires: expirationTime,
 	}, nil

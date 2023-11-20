@@ -1,4 +1,4 @@
-package types
+package utils
 
 // db
 type User struct {

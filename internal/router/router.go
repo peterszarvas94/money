@@ -1,4 +1,4 @@
-package utils
+package router
 
 import (
 	"net/http"
@@ -13,6 +13,7 @@ Eg.: /api/v1/user/:id -> GET -> GetUserHandler
 type Router struct {
 	routes       map[string]map[string]HandlerFunc
 	staticPrefix string
+	staticPath   string
 }
 
 type HandlerFunc func(http.ResponseWriter, *http.Request, string)
@@ -28,10 +29,11 @@ func NewRouter() *Router {
 
 /*
 SetStaticPath sets the static path for serving static files.
-Static files should be put in the static folder.
+Accepts URL prefix and path to the static file directory.
 */
-func (r *Router) SetStaticPath(prefix string) {
+func (r *Router) SetStaticPath(prefix, path string) {
 	r.staticPrefix = prefix
+	r.staticPath = path
 }
 
 /*
@@ -85,7 +87,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if router.staticPrefix != "" && strings.HasPrefix(path, router.staticPrefix) {
 		// w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		fs := http.FileServer(http.Dir("static"))
+		fs := http.FileServer(http.Dir(router.staticPath))
 		staticHandler := http.StripPrefix(router.staticPrefix, fs)
 		staticHandler.ServeHTTP(w, r)
 

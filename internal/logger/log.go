@@ -1,16 +1,17 @@
-package utils
+package logger
 
 import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
-type Loglevel int
+type LoglevelEnum int
 
 const (
-	INFO Loglevel = iota
+	INFO LoglevelEnum = iota
 	WARNING
 	ERROR
 	FATAL
@@ -18,8 +19,8 @@ const (
 
 const maxLoglevel = int(FATAL)
 
-//Returns the string representation of the loglevel
-func llToString(ll Loglevel) string {
+// Returns the string representation of the loglevel
+func llToString(ll LoglevelEnum) string {
 	switch ll {
 	case INFO:
 		return "INFO"
@@ -34,8 +35,8 @@ func llToString(ll Loglevel) string {
 	}
 }
 
-//Returns the Loglevel from the string representation
-func llToEnum(ll string) Loglevel {
+// Returns the Loglevel from the string representation
+func llToEnum(ll string) LoglevelEnum {
 	switch ll {
 	case "INFO":
 		return INFO
@@ -52,8 +53,8 @@ func llToEnum(ll string) Loglevel {
 
 // Logs into log.txt in the following format:
 // LEVEL location YYYY-MM-DD HH:MM:SS - message
-func Log(messageLl Loglevel, location string, message string) {
-	fileName := "log.txt"
+func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
+	fileName := "internal/logger/log.txt"
 	now := time.Now().Format("2006-01-02 15:04:05")
 
 	file, fileErr := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -63,37 +64,28 @@ func Log(messageLl Loglevel, location string, message string) {
 	}
 	defer file.Close()
 
-	messageLlStr := llToString(messageLl)
+	messageLoglevelStr := llToString(messageLoglevelEnum)
 
-	formattedMessage := fmt.Sprintf("%s %s %s - %s", messageLlStr, location, now, message)
+	formattedMessage := fmt.Sprintf("%s %s %s - %s", messageLoglevelStr, location, now, message)
 	logger := log.New(file, "", 0)
 
-	ll := GetLogLevel()
+	loglevelEnum := GetLogLevel()
 
-	if messageLl < ll {
+	if messageLoglevelEnum < loglevelEnum {
 		return
 	}
 
-	if messageLl == FATAL {
+	if messageLoglevelEnum == FATAL {
 		logger.Fatal(formattedMessage)
 	} else {
 		logger.Println(formattedMessage)
 	}
 }
 
-// Returns the loggin level from the LOG_LEVEL environment variable, defaulting to INFO
-func GetLogLevel() Loglevel {
-	llStr, ok := os.LookupEnv("LOG_LEVEL")
-	if !ok || llStr == "" {
-		return INFO
-	}
+var Loglevel string
 
-	ll := llToEnum(llStr)
-	llInt := int(ll)
-
-	if llInt < 0 || llInt > maxLoglevel {
-		return INFO
-	}
-
-	return ll
+// Returns the loggin level from the -l flag, defaulting to INFO
+func GetLogLevel() LoglevelEnum {
+	upperLoglevel := strings.ToUpper(Loglevel)
+	return llToEnum(upperLoglevel)
 }

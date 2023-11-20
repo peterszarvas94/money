@@ -1,24 +1,15 @@
 #!make
 
-include .env
-export $(grep -v '^#' .env | sed 's/=.*//' | xargs)
-
-current_date := $(shell date +'%Y-%m-%d-%H:%M:%S')
-
-# Run the development server with gin
-dev:
-	gin -i --appPort 8080 --port 3000 run main.go
-
 # Generate tailwindcss classes for development
 tw:
-	tailwindcss -i tailwind.base.css -o static/tailwind.css --watch
+	tailwindcss -i tailwind.base.css -o web/static/tailwind.css --watch
 
-# Build
+# Docker Build
 build:
-	tailwindcss -i tailwind.css -o static/style.css --minify
+	tailwindcss -i tailwind.base.css -o web/static/tailwind.css --minify
 	docker build -t pengoe .
 
-# Run
+# Docker Run
 run:
 	docker run -p 8080:8080 --env-file .env pengoe
 

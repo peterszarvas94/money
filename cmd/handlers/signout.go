@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"net/http"
-	"pengoe/utils"
+	"pengoe/internal/logger"
 	"time"
 )
 
 /*
 SignoutHandler signs the user out by deleting the refresh token.
 Access token is cleared by the client.
+	"pengoe/utils"
 */
 func SignoutHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	http.SetCookie(w, &http.Cookie{
@@ -21,6 +22,6 @@ func SignoutHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	http.Redirect(w, r, "/signin?redirect=%2Fdashboard", http.StatusSeeOther)
 
-	utils.Log(utils.INFO, "signout/method", "User logged out and redirected to home page")
+	logger.Log(logger.INFO, "signout/method", "User logged out and redirected to home page")
 	return
 }

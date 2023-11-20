@@ -7,16 +7,19 @@ import (
 	"net/http"
 	"net/mail"
 	"net/url"
-	"pengoe/db"
-	"pengoe/services"
-	"pengoe/types"
-	"pengoe/utils"
+	"pengoe/internal/db"
+	"pengoe/internal/logger"
+	"pengoe/internal/services"
+	"pengoe/internal/utils"
+	"pengoe/web/templates/components"
+	"pengoe/web/templates/layouts"
+	"pengoe/web/templates/pages"
 )
 
 type SignupPage struct {
 	Title       string
 	Descrtipion string
-	Session     types.Session
+	Session     utils.Session
 	Redirect    template.URL
 	Values			map[string]string
 	Errors			map[string]string
@@ -26,27 +29,20 @@ type SignupPage struct {
 getSignupTmpl helper function to parse the signup template.
 */
 func getSignupTmpl() (*template.Template, error) {
-	baseHtml := "templates/layouts/base.html"
-	signupHtml := "templates/pages/signup.html"
-	iconHtml := "templates/components/icon.html"
-	errorHtml := "templates/components/error.html"
-	incorrectHtml := "templates/components/incorrect.html"
-	correctHtml := "templates/components/correct.html"
-
 	tmpl, tmplErr := template.ParseFiles(
-		baseHtml,
-		signupHtml,
-		iconHtml,
-		errorHtml,
-		incorrectHtml,
-		correctHtml,
+		layouts.Base,
+		pages.Signup,
+		components.Icon,
+		components.Error,
+		components.Incorrect,
+		components.Correct,
 	)
 	if tmplErr != nil {
-		utils.Log(utils.ERROR, "signup/signupTmpl", tmplErr.Error())
+		logger.Log(logger.ERROR, "signup/signupTmpl", tmplErr.Error())
 		return nil, tmplErr
 	}
 
-	utils.Log(utils.INFO, "signup/signupTmpl", "Template parsed successfully")
+	logger.Log(logger.INFO, "signup/signupTmpl", "Template parsed successfully")
 	return tmpl, nil
 }
 
@@ -61,7 +57,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "signup/get/db", dbErr.Error())
+		logger.Log(logger.ERROR, "signup/get/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -72,13 +68,13 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	user, accessTokenErr := userService.CheckAccessToken(r)
 	if user != nil {
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
-		utils.Log(utils.INFO, "signin/checkSession", logMsg)
+		logger.Log(logger.INFO, "signin/checkSession", logMsg)
 
 		//decode uri componetns
 		encoded := params["redirect"]
 		redirect, decodeErr := url.QueryUnescape(encoded)
 		if decodeErr != nil {
-			utils.Log(utils.ERROR, "signin/get/decode", decodeErr.Error())
+			logger.Log(logger.ERROR, "signin/get/decode", decodeErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -87,22 +83,22 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			redirect = "/dashboard"
 		}
 
-		utils.Log(utils.INFO, "signin/get/decode", "Redirect to "+redirect)
+		logger.Log(logger.INFO, "signin/get/decode", "Redirect to "+redirect)
 
 		// todo: change this to http... with some extension?
 		w.Header().Set("HX-Redirect", redirect)
 		return
 	}
 
-	utils.Log(utils.INFO, "signup/checkSession", accessTokenErr.Error())
+	logger.Log(logger.INFO, "signup/checkSession", accessTokenErr.Error())
 
 	tmpl, tmplErr := getSignupTmpl()
 	if tmplErr != nil {
-		utils.Log(utils.ERROR, "signup/signupTmpl", tmplErr.Error())
+		logger.Log(logger.ERROR, "signup/signupTmpl", tmplErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	utils.Log(utils.INFO, "signup/signupTmpl", "Template parsed successfully")
+	logger.Log(logger.INFO, "signup/signupTmpl", "Template parsed successfully")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -114,7 +110,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	data := SignupPage{
 		Title:       "pengoe - Sign in",
 		Descrtipion: "Sign in to pengoe",
-		Session: types.Session{
+		Session: utils.Session{
 			LoggedIn: false,
 		},
 		Redirect: template.URL(redirect),
@@ -122,11 +118,11 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	resErr := tmpl.Execute(w, data)
 	if resErr != nil {
-		utils.Log(utils.ERROR, "signup/get/res", resErr.Error())
+		logger.Log(logger.ERROR, "signup/get/res", resErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	utils.Log(utils.INFO, "signup/get/res", "Template rendered successfully")
+	logger.Log(logger.INFO, "signup/get/res", "Template rendered successfully")
 	return
 }
 
@@ -138,12 +134,12 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		utils.Log(utils.ERROR, "signup/post/form", formErr.Error())
+		logger.Log(logger.ERROR, "signup/post/form", formErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "signup/post/form", "Form parsed successfully")
+	logger.Log(logger.INFO, "signup/post/form", "Form parsed successfully")
 
 	username := html.EscapeString(r.FormValue("username"))
 	email := html.EscapeString(r.FormValue("email"))
@@ -155,7 +151,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "signup/post/db", dbErr.Error())
+		logger.Log(logger.ERROR, "signup/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -165,7 +161,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	userService := services.NewUserService(db)
 
 	// add user
-	newUser := &types.User{
+	newUser := &utils.User{
 		Username: username,
 		Email:    email,
 		Fistname: firstname,
@@ -177,25 +173,25 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	// unsuccessful signup, render signup page with error message
 	if userErr != nil {
-		utils.Log(utils.ERROR, "signup/post/userservice", userErr.Error())
+		logger.Log(logger.ERROR, "signup/post/userservice", userErr.Error())
 
 		// check if email is valid
 		_, invalid := mail.ParseAddress(email)
 		if invalid != nil {
 			logMsg := fmt.Sprintf("Invalid email: %s", email)
-			utils.Log(utils.ERROR, "signup/post/emailinvalid", logMsg)
+			logger.Log(logger.ERROR, "signup/post/emailinvalid", logMsg)
 		}
 
 		// check if username already exists
 		_, usernameQueryErr := userService.GetByUsername(username)
 		if usernameQueryErr != nil {
-			utils.Log(utils.ERROR, "signup/post/usernamequery", usernameQueryErr.Error())
+			logger.Log(logger.ERROR, "signup/post/usernamequery", usernameQueryErr.Error())
 		}
 
 		// check if email already exists
 		_, emailQueryErr := userService.GetByEmail(email)
 		if emailQueryErr != nil {
-			utils.Log(utils.ERROR, "signup/post/emailquery", emailQueryErr.Error())
+			logger.Log(logger.ERROR, "signup/post/emailquery", emailQueryErr.Error())
 		}
 
 		emailInvalid := invalid != nil
@@ -214,7 +210,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		if usernameExists {
 			logMsg := fmt.Sprintf("Username already exists: %s", username)
-			utils.Log(utils.ERROR, "signup/post/usernameexists", logMsg)
+			logger.Log(logger.ERROR, "signup/post/usernameexists", logMsg)
 			usernameError = "Username already exists"
 			usernameCheck = "incorrect"
 		} else {
@@ -223,7 +219,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		if emailExists {
 			logMsg := fmt.Sprintf("Email already exists: %s", email)
-			utils.Log(utils.ERROR, "signup/post/emailexists", logMsg)
+			logger.Log(logger.ERROR, "signup/post/emailexists", logMsg)
 			emailError = "Email already exists"
 			emailCheck = "incorrect"
 		} else if !emailInvalid {
@@ -235,11 +231,11 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		tmpl, tmplErr := getSignupTmpl()
 		if tmplErr != nil {
-			utils.Log(utils.ERROR, "signup/post/signupTmpl", tmplErr.Error())
+			logger.Log(logger.ERROR, "signup/post/signupTmpl", tmplErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "signup/post/signupTmpl", "Template parsed successfully")
+		logger.Log(logger.INFO, "signup/post/signupTmpl", "Template parsed successfully")
 
 		redirect := params["redirect"]
 		if redirect == "" {
@@ -249,7 +245,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		data := SignupPage{
 			Title:       "pengoe - Sign in",
 			Descrtipion: "Sign in to pengoe",
-			Session: types.Session{
+			Session: utils.Session{
 				LoggedIn: false,
 			},
 			Redirect: template.URL(redirect),
@@ -269,16 +265,16 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		resErr := tmpl.Execute(w, data)
 		if resErr != nil {
-			utils.Log(utils.ERROR, "signup/post/res", resErr.Error())
+			logger.Log(logger.ERROR, "signup/post/res", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "signup/post/res", "Template rendered successfully")
+		logger.Log(logger.INFO, "signup/post/res", "Template rendered successfully")
 		return
 	}
 
 	// successful signup, redirect to signin
-	utils.Log(utils.INFO, "signup/post/user", "User added successfully, redirect to "+params["redirect"])
+	logger.Log(logger.INFO, "signup/post/user", "User added successfully, redirect to "+params["redirect"])
 
 	http.Redirect(w, r, "/signin?redirect="+params["redirect"], http.StatusSeeOther)
 	return

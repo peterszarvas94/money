@@ -6,17 +6,20 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
-	"pengoe/db"
-	"pengoe/services"
-	"pengoe/types"
-	"pengoe/utils"
+	"pengoe/internal/db"
+	"pengoe/internal/logger"
+	"pengoe/internal/services"
+	"pengoe/internal/utils"
+	"pengoe/web/templates/components"
+	"pengoe/web/templates/layouts"
+	"pengoe/web/templates/pages"
 	"time"
 )
 
 type SigninPage struct {
 	Title       string
 	Descrtipion string
-	Session     types.Session
+	Session     utils.Session
 	Redirect    template.URL
 	Values			map[string]string
 	Errors			map[string]string
@@ -26,12 +29,12 @@ type SigninPage struct {
 getSigninTmpl helper function to parse the signin template.
 */
 func getSigninTmpl() (*template.Template, error) {
-	baseHtml := "templates/layouts/base.html"
-	signinHtml := "templates/pages/signin.html"
-	iconHtml := "templates/components/icon.html"
-	errorHtml := "templates/components/error.html"
-
-	tmpl, tmplErr := template.ParseFiles(baseHtml, signinHtml, iconHtml, errorHtml)
+	tmpl, tmplErr := template.ParseFiles(
+		layouts.Base,
+		pages.Signin,
+		components.Icon,
+		components.Error,
+	)
 	if tmplErr != nil {
 		return nil, tmplErr
 	}
@@ -49,7 +52,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "signin/get/db", dbErr.Error())
+		logger.Log(logger.ERROR, "signin/get/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -61,13 +64,13 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	// if the user is logged in
 	if user != nil {
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
-		utils.Log(utils.INFO, "signin/checkSession", logMsg)
+		logger.Log(logger.INFO, "signin/checkSession", logMsg)
 
 		//decode uri componetns
 		encoded := params["redirect"]
 		redirect, decodeErr := url.QueryUnescape(encoded)
 		if decodeErr != nil {
-			utils.Log(utils.ERROR, "signin/get/decode", decodeErr.Error())
+			logger.Log(logger.ERROR, "signin/get/decode", decodeErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -78,21 +81,21 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		w.Header().Set("HX-Redirect", redirect)
 
-		utils.Log(utils.INFO, "signin/get/decode", "Redirecting to "+redirect)
+		logger.Log(logger.INFO, "signin/get/decode", "Redirecting to "+redirect)
 
 		return
 	}
 
 	// not logged in
-	utils.Log(utils.INFO, "signin/checkSession", accessTokenErr.Error())
+	logger.Log(logger.INFO, "signin/checkSession", accessTokenErr.Error())
 
 	tmpl, tmplErr := getSigninTmpl()
 	if tmplErr != nil {
-		utils.Log(utils.ERROR, "signin/signinTmpl", tmplErr.Error())
+		logger.Log(logger.ERROR, "signin/signinTmpl", tmplErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	utils.Log(utils.INFO, "Template parsed successfully", "signin/signinTmpl")
+	logger.Log(logger.INFO, "Template parsed successfully", "signin/signinTmpl")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -104,7 +107,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	data := SigninPage{
 		Title:       "pengoe - Sign in",
 		Descrtipion: "Sign in to pengoe",
-		Session: types.Session{
+		Session: utils.Session{
 			LoggedIn: false,
 		},
 		Redirect: template.URL(redirect),
@@ -112,11 +115,11 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	resErr := tmpl.Execute(w, data)
 	if resErr != nil {
-		utils.Log(utils.ERROR, "signin/get/res", resErr.Error())
+		logger.Log(logger.ERROR, "signin/get/res", resErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	utils.Log(utils.INFO, "signin/get/res", "Template rendered successfully")
+	logger.Log(logger.INFO, "signin/get/res", "Template rendered successfully")
 	return
 }
 
@@ -127,12 +130,12 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		utils.Log(utils.ERROR, "signin/post/parse", formErr.Error())
+		logger.Log(logger.ERROR, "signin/post/parse", formErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "signin/post/parse", "Form parsed successfully")
+	logger.Log(logger.INFO, "signin/post/parse", "Form parsed successfully")
 
 	usernameOrEmail := html.EscapeString(r.FormValue("user"))
 	password := html.EscapeString(r.FormValue("password"))
@@ -141,7 +144,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "signin/post/db", dbErr.Error())
+		logger.Log(logger.ERROR, "signin/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -153,18 +156,18 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	// if the login was unsuccessful
 	if loginErr != nil {
-		utils.Log(utils.ERROR, "signin/post/login", loginErr.Error())
+		logger.Log(logger.ERROR, "signin/post/login", loginErr.Error())
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
 
 		tmpl, tmplErr := getSigninTmpl()
 		if tmplErr != nil {
-			utils.Log(utils.ERROR, "signin/post/errorTmpl", tmplErr.Error())
+			logger.Log(logger.ERROR, "signin/post/errorTmpl", tmplErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "signin/post/errorTmpl", "Template parsed successfully")
+		logger.Log(logger.INFO, "signin/post/errorTmpl", "Template parsed successfully")
 
 		params := utils.GetQueryParams(r)
 
@@ -176,7 +179,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		data := SigninPage{
 			Title:       "pengoe - Sign in",
 			Descrtipion: "Sign in to pengoe",
-			Session: types.Session{
+			Session: utils.Session{
 				LoggedIn: false,
 			},
 		Redirect: template.URL(redirect),
@@ -190,32 +193,32 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 		resErr := tmpl.Execute(w, data)
 		if resErr != nil {
-			utils.Log(utils.ERROR, "signin/post/errorRes", resErr.Error())
+			logger.Log(logger.ERROR, "signin/post/errorRes", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "signin/post/errorRes", "Template rendered successfully")
+		logger.Log(logger.INFO, "signin/post/errorRes", "Template rendered successfully")
 		return
 	}
 
 	// if the login was successful
-	accessToken, accessTokenErr := utils.NewToken(userId, types.Access)
+	accessToken, accessTokenErr := utils.NewToken(userId, utils.Access)
 	if accessTokenErr != nil {
-		utils.Log(utils.ERROR, "signin/post/access", accessTokenErr.Error())
+		logger.Log(logger.ERROR, "signin/post/access", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "signin/post/access", "Access token created successfully")
+	logger.Log(logger.INFO, "signin/post/access", "Access token created successfully")
 
-	refreshToken, refreshTokenErr := utils.NewToken(userId, types.Refresh)
+	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.Refresh)
 	if refreshTokenErr != nil {
-		utils.Log(utils.ERROR, "signin/post/refresh", refreshTokenErr.Error())
+		logger.Log(logger.ERROR, "signin/post/refresh", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "signin/post/refresh", "Refresh token created successfully")
+	logger.Log(logger.INFO, "signin/post/refresh", "Refresh token created successfully")
 
 	expires := time.Unix(refreshToken.Expires, 0)
 
@@ -240,13 +243,13 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	encoded := params["redirect"]
 	redirect, decodeErr := url.QueryUnescape(encoded)
 	if decodeErr != nil {
-		utils.Log(utils.ERROR, "signin/post/decode", decodeErr.Error())
+		logger.Log(logger.ERROR, "signin/post/decode", decodeErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 
-	utils.Log(utils.INFO, "signin/post/res", "Redirected to "+redirect)
+	logger.Log(logger.INFO, "signin/post/res", "Redirected to "+redirect)
 	return
 }

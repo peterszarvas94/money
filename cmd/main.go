@@ -1,14 +1,19 @@
 package main
 
 import (
-	"pengoe/handlers"
-	"pengoe/utils"
+	"flag"
 	"net/http"
 	"os"
+	"pengoe/cmd/handlers"
+	"pengoe/internal/logger"
+	"pengoe/internal/router"
 )
 
 func main() {
-	r := utils.NewRouter()
+	flag.StringVar(&logger.Loglevel, "log", "INFO", "-log INFO|WARNING|ERROR|FATAL")
+	flag.Parse()
+
+	r := router.NewRouter()
 
 	r.GET("/", handlers.HomePageHandler)
 
@@ -22,11 +27,11 @@ func main() {
 	r.GET("/dashboard", handlers.DashboardPageHandler)
 	r.GET("/account/new", handlers.NewAccountPageHandler)
 
-	r.SetStaticPath("/static")
+	r.SetStaticPath("/static", "./web/static")
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
-		utils.Log(utils.FATAL, "main/listen", err.Error())
+		logger.Log(logger.FATAL, "main/listen", err.Error())
 		os.Exit(1)
 	}
 }

@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"pengoe/db"
-	"pengoe/services"
-	"pengoe/utils"
 	"html"
 	"html/template"
 	"net/http"
 	"net/mail"
+	"pengoe/internal/db"
+	"pengoe/internal/logger"
+	"pengoe/internal/services"
+	"pengoe/web/templates/components"
 )
 
 /*
@@ -19,7 +20,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		utils.Log(utils.ERROR, "check/db", dbErr.Error())
+		logger.Log(logger.ERROR, "check/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -28,35 +29,33 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	userService := services.NewUserService(db)
 
 	// Parse the "correct" and "incorrect" templates
-	correct := "templates/components/correct.html"
-	correctTmpl, correctTmplErr := template.ParseFiles(correct)
+	correctTmpl, correctTmplErr := template.ParseFiles(components.Correct)
 	if correctTmplErr != nil {
-		utils.Log(utils.ERROR, "check/correct", correctTmplErr.Error())
+		logger.Log(logger.ERROR, "check/correct", correctTmplErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "check/correct", "Template parsed successfully")
+	logger.Log(logger.INFO, "check/correct", "Template parsed successfully")
 
-	incorrect := "templates/components/incorrect.html"
-	incorrectTmpl, incorrectTmplErr := template.ParseFiles(incorrect)
+	incorrectTmpl, incorrectTmplErr := template.ParseFiles(components.Incorrect)
 	if incorrectTmplErr != nil {
-		utils.Log(utils.ERROR, "check/incorrect", incorrectTmplErr.Error())
+		logger.Log(logger.ERROR, "check/incorrect", incorrectTmplErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "check/incorrect", "Template parsed successfully")
+	logger.Log(logger.INFO, "check/incorrect", "Template parsed successfully")
 
 	// Parse the form
 	parseErr := r.ParseForm()
 	if parseErr != nil {
-		utils.Log(utils.ERROR, "check/parse", parseErr.Error())
+		logger.Log(logger.ERROR, "check/parse", parseErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	utils.Log(utils.INFO, "check/parse", "Form parsed successfully")
+	logger.Log(logger.INFO, "check/parse", "Form parsed successfully")
 
 	// Check if username is taken
 	username := html.EscapeString(r.FormValue("username"))
@@ -64,30 +63,30 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	if username != "" {
 		_, userErr := userService.GetByUsername(username)
 		if userErr != nil {
-			utils.Log(utils.INFO, "check/usename", userErr.Error())
+			logger.Log(logger.INFO, "check/usename", userErr.Error())
 
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			resErr := correctTmpl.Execute(w, nil)
 			if resErr != nil {
-				utils.Log(utils.ERROR, "check/username/correctres", resErr.Error())
+				logger.Log(logger.ERROR, "check/username/correctres", resErr.Error())
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 			}
 			
-			utils.Log(utils.INFO, "check/username/correctres", "Template rendered successfully")
+			logger.Log(logger.INFO, "check/username/correctres", "Template rendered successfully")
 			return
 		}
 
-		utils.Log(utils.WARNING, "check/username", "User exists")
+		logger.Log(logger.WARNING, "check/username", "User exists")
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		resErr := incorrectTmpl.Execute(w, nil)
 		if resErr != nil {
-			utils.Log(utils.ERROR, "check/username/incorrectres", resErr.Error())
+			logger.Log(logger.ERROR, "check/username/incorrectres", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "check/username/incorrectres", "Template rendered successfully")
+		logger.Log(logger.INFO, "check/username/incorrectres", "Template rendered successfully")
 		return
 	}
 
@@ -98,12 +97,12 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		_, emailParseErr := mail.ParseAddress(email)
 		_, userErr := userService.GetByEmail(email)
 		if userErr != nil && emailParseErr == nil {
-			utils.Log(utils.INFO, "check/email", userErr.Error())
+			logger.Log(logger.INFO, "check/email", userErr.Error())
 
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			resErr := correctTmpl.Execute(w, nil)
 			if resErr != nil {
-				utils.Log(utils.ERROR, "check/email/correct", resErr.Error())
+				logger.Log(logger.ERROR, "check/email/correct", resErr.Error())
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 			}
 
@@ -111,22 +110,22 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		}
 
 		if emailParseErr != nil {
-			utils.Log(utils.WARNING, "check/email", emailParseErr.Error())
+			logger.Log(logger.WARNING, "check/email", emailParseErr.Error())
 		}
 
 		if userErr == nil {
-			utils.Log(utils.WARNING, "check/email", "User already exists")
+			logger.Log(logger.WARNING, "check/email", "User already exists")
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		resErr := incorrectTmpl.Execute(w, nil)
 		if resErr != nil {
-			utils.Log(utils.ERROR, "check/email/incorrect", resErr.Error())
+			logger.Log(logger.ERROR, "check/email/incorrect", resErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
 
-		utils.Log(utils.INFO, "check/email/incorrect", "Template rendered successfully")
+		logger.Log(logger.INFO, "check/email/incorrect", "Template rendered successfully")
 		return
 	}
 }

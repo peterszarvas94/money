@@ -4,20 +4,19 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"pengoe/types"
-	"pengoe/utils"
+	"pengoe/internal/utils"
 	"strconv"
 	"time"
 )
 
 type UserService interface {
-	New(user *types.User) error
+	New(user *utils.User) error
 	Login(usernameOrEmail, password string) (int, error)
-	GetById(id int) (*types.User, error)
-	GetByUsername(username string) (*types.User, error)
-	GetByEmail(email string) (*types.User, error)
-	CheckRefreshToken(r *http.Request) (*types.User, error)
-	CheckAccessToken(r *http.Request) (*types.User, error)
+	GetById(id int) (*utils.User, error)
+	GetByUsername(username string) (*utils.User, error)
+	GetByEmail(email string) (*utils.User, error)
+	CheckRefreshToken(r *http.Request) (*utils.User, error)
+	CheckAccessToken(r *http.Request) (*utils.User, error)
 }
 
 type userService struct {
@@ -31,7 +30,7 @@ func NewUserService(db *sql.DB) UserService {
 /*
 New is a function that adds a new user to the database.
 */
-func (s *userService) New(user *types.User) error {
+func (s *userService) New(user *utils.User) error {
 	hashedPassword, hashErr := utils.HashPassword(user.Password)
 	if hashErr != nil {
 		return hashErr
@@ -91,8 +90,8 @@ func (s *userService) Login(usernameOrEmail, password string) (int, error) {
 /*
 GetByUsername is a function that gets a user from the database by username.
 */
-func (s *userService) GetById(id int) (*types.User, error) {
-	var user types.User
+func (s *userService) GetById(id int) (*utils.User, error) {
+	var user utils.User
 
 	query, queryErr := s.db.Query("SELECT * FROM user WHERE id = ?", id)
 	if queryErr != nil {
@@ -118,7 +117,7 @@ func (s *userService) GetById(id int) (*types.User, error) {
 		return &user, sql.ErrNoRows
 	}
 
-	user = types.User{
+	user = utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -135,8 +134,8 @@ func (s *userService) GetById(id int) (*types.User, error) {
 /*
 GetByUsername is a function that gets a user from the database by username.
 */
-func (s *userService) GetByUsername(username string) (*types.User, error) {
-	var user types.User
+func (s *userService) GetByUsername(username string) (*utils.User, error) {
+	var user utils.User
 
 	query, queryErr := s.db.Query("SELECT * FROM user WHERE username = ?", username)
 	if queryErr != nil {
@@ -162,7 +161,7 @@ func (s *userService) GetByUsername(username string) (*types.User, error) {
 		return &user, sql.ErrNoRows
 	}
 
-	user = types.User{
+	user = utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -179,8 +178,8 @@ func (s *userService) GetByUsername(username string) (*types.User, error) {
 /*
 GetByEmail is a function that gets a user from the database by email.
 */
-func (s *userService) GetByEmail(email string) (*types.User, error) {
-	var user types.User
+func (s *userService) GetByEmail(email string) (*utils.User, error) {
+	var user utils.User
 
 	query, queryErr := s.db.Query("SELECT * FROM user WHERE email = ?", email)
 	if queryErr != nil {
@@ -206,7 +205,7 @@ func (s *userService) GetByEmail(email string) (*types.User, error) {
 		return &user, sql.ErrNoRows
 	}
 
-	user = types.User{
+	user = utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -223,7 +222,7 @@ func (s *userService) GetByEmail(email string) (*types.User, error) {
 /*
 CheckRefreshToken is a function that checks if the refreshtoken in cookie is valid.
 */
-func (s *userService) CheckRefreshToken(r *http.Request) (*types.User, error) {
+func (s *userService) CheckRefreshToken(r *http.Request) (*utils.User, error) {
 	refreshToken, cookieErr := r.Cookie("refresh")
 	if cookieErr != nil {
 		return nil, cookieErr
@@ -255,7 +254,7 @@ func (s *userService) CheckRefreshToken(r *http.Request) (*types.User, error) {
 /*
 CheckAccessToken is a function that checks if the accesstoken in auth header is valid.
 */
-func (s *userService) CheckAccessToken(r *http.Request) (*types.User, error) {
+func (s *userService) CheckAccessToken(r *http.Request) (*utils.User, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		return nil, errors.New("No authorization header")

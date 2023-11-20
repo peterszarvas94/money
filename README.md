@@ -11,21 +11,20 @@ Simple solution for splitting money and tracking expenses with friends.
 
 ## Commands
 
-- `make dev` - start dev server on port 3000
-  - optional env: `LOG_LEVEL=INFO/WARNING/ERROR/FATAL`
+- `air` - start dev server in watch mode
+  - optional flag: `air -- -log info/warning/error/fatal`
 - `make tw` - generate tailwind styles for dev
 - `make build` - build docker image
 - `make run` - run docker image
-- `make gen` - generate database schema sql
-- `make push db=DB_NAME` - push schema to an empty turso db
+- `make push db=<db-name>` - push schema to an empty turso db
 
 ### Prerequisites
 
-To run make commands, you need to have:
+To run commands, you need to have:
 
-- `make` for running commands
+- `make` for running some commands
 - `docker` for building and running
-- `gin` for development server
+- `air` for development server
 - `tailwindcss` cli for css class generation
 - `bun` for schema migrations with prisma
 - `turso` cli for pushing migrations
@@ -47,7 +46,7 @@ To run make commands, you need to have:
   - [x] account selector
   - [x] profile button with signout
   - [ ] show account info
-- [ ] new account page
+- [x] new account page
   - [x] handler
-  - [ ] form
+  - [x] form
 - [ ] left panel can be pinned
