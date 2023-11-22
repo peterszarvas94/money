@@ -59,6 +59,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, pattern strin
 	defer db.Close()
 
 	userService := services.NewUserService(db)
+	accountService := services.NewAccountService(db)
 
 	// check if the user is logged in, protected route
 	user, sessionErr := userService.CheckAccessToken(r)
@@ -68,6 +69,23 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, pattern strin
 		logger.Log(logger.INFO, "newaccount/checkSession", logMsg)
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	
+		// get accounts
+		accounts, accountsErr := accountService.GetByUserId(user.Id)
+		if accountsErr != nil {
+			logger.Log(logger.ERROR, "dashboard/accounts", accountsErr.Error())
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		// create account select items
+		accountSelectItems := []utils.AccountSelectItem{}
+		for _, account := range accounts {
+			accountSelectItems = append(accountSelectItems, utils.AccountSelectItem{
+				Id:   account.Id,
+				Text: account.Name,
+			})
+		}
 
 		data := newAccountPage{
 			Title:       "pengoe - New Account",
@@ -78,20 +96,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, pattern strin
 			},
 			SelectedAccountId:    0,
 			ShowNewAccountButton: false,
-			AccountSelectItems: []utils.AccountSelectItem{
-				{
-					Id:   1,
-					Text: "Account 1",
-				},
-				{
-					Id:   2,
-					Text: "Account 2",
-				},
-				{
-					Id:   3,
-					Text: "Account 3",
-				},
-			},
+			AccountSelectItems:   accountSelectItems,
 		}
 
 		tmpl, tmplErr := getNewAccountTmpl()

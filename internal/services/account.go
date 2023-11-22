@@ -8,6 +8,7 @@ import (
 
 type AccountService interface {
 	New(user *utils.Account) (*utils.Account, error)
+	GetByUserId(userId int) ([]*utils.Account, error)
 }
 
 type accountService struct {
@@ -50,4 +51,50 @@ func (s *accountService) New(account *utils.Account) (*utils.Account, error) {
 	}
 
 	return newAccount, nil
+}
+
+/*
+GetByUserId is a function that returns all accounts for a given user.
+*/
+func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
+	rows, rowsErr := s.db.Query(
+		`SELECT 
+			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
+		FROM account
+		INNER JOIN access ON account.id = access.account_id
+		WHERE access.user_id = ?`,
+		userId,
+	)
+	if rowsErr != nil {
+		return nil, rowsErr
+	}
+
+	accounts := []*utils.Account{}
+
+	for rows.Next() {
+		var id int
+		var name string
+		var description string
+		var currency string
+		var createdAt string
+		var updatedAt string
+
+		scanErr := rows.Scan(&id, &name, &description, &currency, &createdAt, &updatedAt)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+
+		account := &utils.Account{
+			Id:          id,
+			Name:        name,
+			Description: description,
+			Currency:    currency,
+			CreatedAt:   createdAt,
+			UpdatedAt:   updatedAt,
+		}
+
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
 }

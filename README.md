@@ -59,4 +59,6 @@ To run commands, you need to have:
   - [x] backend functions
 - [ ] left panel can be pinned
 - [ ] better logger
-- [ ] topbar shows accounts correctly
+- [x] topbar 
+  - [x] shows accounts correctly
+  - [ ] fix empty accountselectitem list 
