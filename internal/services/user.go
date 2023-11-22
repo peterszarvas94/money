@@ -10,8 +10,8 @@ import (
 )
 
 type UserService interface {
-	New(user *utils.User) error
-	Login(usernameOrEmail, password string) (int, error)
+	New(user *utils.User) (*utils.User, error)
+	Login(usernameOrEmail, password string) (*utils.User, error)
 	GetById(id int) (*utils.User, error)
 	GetByUsername(username string) (*utils.User, error)
 	GetByEmail(email string) (*utils.User, error)
@@ -30,25 +30,40 @@ func NewUserService(db *sql.DB) UserService {
 /*
 New is a function that adds a new user to the database.
 */
-func (s *userService) New(user *utils.User) error {
+func (s *userService) New(user *utils.User) (*utils.User, error) {
 	hashedPassword, hashErr := utils.HashPassword(user.Password)
 	if hashErr != nil {
-		return hashErr
+		return nil, hashErr
 	}
 
 	now := time.Now()
 
-	_, mutationErr := s.db.Exec(
+	mutation, mutationErr := s.db.Exec(
 		`INSERT INTO user (
 			username, email, firstname, lastname, password, created_at, updated_at
 		) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		user.Username, user.Email, user.Fistname, user.Lastname, hashedPassword, now, now,
 	)
 	if mutationErr != nil {
-		return mutationErr
+		return nil, mutationErr
 	}
 
-	return nil
+	id, idErr := mutation.LastInsertId()
+	if idErr != nil {
+		return nil, idErr
+	}
+
+	newUser := &utils.User{
+		Id:        int(id),
+		Username:  user.Username,
+		Email:     user.Email,
+		Fistname:  user.Fistname,
+		Lastname:  user.Lastname,
+		CreatedAt: now.String(),
+		UpdatedAt: now.String(),
+	}
+
+	return newUser, nil
 }
 
 /*
@@ -56,35 +71,52 @@ Login is a function that gets a user from the database by username or email,
 and checks if the passwords match.
 If correct, it returns the user's id.
 */
-func (s *userService) Login(usernameOrEmail, password string) (int, error) {
+func (s *userService) Login(usernameOrEmail, password string) (*utils.User, error) {
 	query, queryErr := s.db.Query(
-		"SELECT id, password as hash FROM user WHERE username = ? OR email = ?",
+		`SELECT id, username, email, firstname, lastname, password as hash, created_at, updated_at
+		FROM user WHERE username = ? OR email = ?`,
 		usernameOrEmail, usernameOrEmail,
 	)
 	if queryErr != nil {
-		return 0, queryErr
+		return nil, queryErr
 	}
 
 	var id int
+	var username string
+	var email string
+	var firstname string
+	var lastname string
 	var hash string
+	var created_at string
+	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &hash)
-		if scanErr != nil {
-			return 0, scanErr
+		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &hash, &created_at, &updated_at)
+			if scanErr != nil {
+			return nil, scanErr
 		}
 	}
 
 	if id == 0 {
-		return 0, sql.ErrNoRows
+		return nil, sql.ErrNoRows
 	}
 
 	match := utils.CheckPasswordHash(hash, password)
 	if match != nil {
-		return 0, sql.ErrNoRows
+		return nil, sql.ErrNoRows
 	}
 
-	return id, nil
+	user := utils.User{
+		Id:        id,
+		Username:  username,
+		Email:     email,
+		Fistname:  firstname,
+		Lastname:  lastname,
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
+	}
+
+	return &user, nil
 }
 
 /*
@@ -113,6 +145,7 @@ func (s *userService) GetById(id int) (*utils.User, error) {
 		}
 	}
 
+
 	if id == 0 {
 		return &user, sql.ErrNoRows
 	}
@@ -123,7 +156,6 @@ func (s *userService) GetById(id int) (*utils.User, error) {
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		Password:  password,
 		CreatedAt: created_at,
 		UpdatedAt: updated_at,
 	}
@@ -167,7 +199,6 @@ func (s *userService) GetByUsername(username string) (*utils.User, error) {
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		Password:  password,
 		CreatedAt: created_at,
 		UpdatedAt: updated_at,
 	}
@@ -211,7 +242,6 @@ func (s *userService) GetByEmail(email string) (*utils.User, error) {
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		Password:  password,
 		CreatedAt: created_at,
 		UpdatedAt: updated_at,
 	}

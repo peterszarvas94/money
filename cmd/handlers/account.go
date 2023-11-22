@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"html"
 	"html/template"
 	"net/http"
 	"pengoe/internal/db"
@@ -140,4 +141,92 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, pattern strin
 
 	logger.Log(logger.INFO, "newaccount/notloggedin/res", "Template rendered successfully")
 	return
+}
+
+/*
+NewAccountHandler handles the POST request to /account
+*/
+func NewAccountHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+	formErr := r.ParseForm()
+	if formErr != nil {
+		logger.Log(logger.ERROR, "newaccount/post/form", formErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log(logger.INFO, "newaccount/post/form", "Form parsed successfully")
+
+	name := html.EscapeString(r.FormValue("name"))
+	description := html.EscapeString(r.FormValue("description"))
+	currency := html.EscapeString(r.FormValue("currency"))
+
+	// TODO: handle empty values
+
+	logger.Log(logger.INFO, "newaccount/post/form", "Form values escaped successfully")
+
+	// connect to db
+	dbManager := db.NewDBManager()
+	db, dbErr := dbManager.GetDB()
+	if dbErr != nil {
+		logger.Log(logger.ERROR, "newaccount/post/db", dbErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log(logger.INFO, "newaccount/post/db", "Connected to db successfully")
+
+	defer db.Close()
+
+	userService := services.NewUserService(db)
+	accountService := services.NewAccountService(db)
+	accessService := services.NewAccessService(db)
+
+	// check if the user is logged in, protected route
+	user, sessionErr := userService.CheckAccessToken(r)
+	if user != nil {
+		// logged in user
+		logMsg := fmt.Sprintf("Logged in as %d", user.Id)
+		logger.Log(logger.INFO, "newaccount/post/checkSession", logMsg)
+
+		// create new account
+		account := &utils.Account{
+			Name:        name,
+			Description: description,
+			Currency:    currency,
+		}
+
+		newAccount, newAccountErr := accountService.New(account)
+		if newAccountErr != nil {
+			logger.Log(logger.ERROR, "newaccount/post/newAccount", newAccountErr.Error())
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		logger.Log(logger.INFO, "newaccount/post/newAccount", "Account created successfully")
+
+		// create new access
+		access := &utils.Access{
+			Role:       utils.Admin,
+			UserId:     user.Id,
+			AccountId:  newAccount.Id,
+		}
+		
+		access, newAccessErr := accessService.New(access)
+		if newAccessErr != nil {
+			logger.Log(logger.ERROR, "newaccount/post/newAccess", newAccessErr.Error())
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		logger.Log(logger.INFO, "newaccount/post/newAccess", "Access created successfully")
+
+		w.Header().Set("HX-Redirect", "/dashboard")
+	}
+
+	// not logged in user 
+	if sessionErr != nil {
+		logger.Log(logger.INFO, "newaccount/post/checkSession", sessionErr.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }

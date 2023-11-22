@@ -15,7 +15,7 @@ Simple solution for splitting money and tracking expenses with friends.
   - optional flag: `air -- -log info/warning/error/fatal`
 - `make tw` - generate tailwind styles for dev
 - `make build` - build docker image
-- `make run` - run docker image
+- `m
 - `make push db=<db-name>` - push schema to an empty turso db
 
 ### Prerequisites
@@ -36,17 +36,27 @@ To run commands, you need to have:
   - [x] add svg to background
   - [x] fix tokens
   - [x] update handler for new schema
+  - [x] error message if unauthorized
 - [x] signin page
+  - [x] form
+  - [x] error message if unauthorized
 - [x] dashboard page
-- [x] loading states
+- [ ] loading states
+  - [x] for protected pages
+  - [ ] for button presses
+- [ ] toast notifications
 - [x] add services to backend
 - [ ] viewtransition api
 - [ ] dashboard page
   - [x] handler
   - [x] account selector
   - [x] profile button with signout
-  - [ ] show account info
+  - [ ] show accounts info
+  - [ ] maybe some charts
 - [x] new account page
   - [x] handler
   - [x] form
+  - [x] backend functions
 - [ ] left panel can be pinned
+- [ ] better logger
+- [ ] topbar shows accounts correctly

@@ -68,7 +68,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string)
 	}
 
 	// get new access token
-	accessToken, accessTokenErr := utils.NewToken(userId, utils.Access)
+	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
 		logger.Log(logger.ERROR, "refresh/token", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string)
 	}
 
 	// get new refresh token as well
-	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.Refresh)
+	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
 		logger.Log(logger.ERROR, "refresh/token", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

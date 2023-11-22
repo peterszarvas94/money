@@ -147,6 +147,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	lastname := html.EscapeString(r.FormValue("lastname"))
 	password := html.EscapeString(r.FormValue("password"))
 
+	// TODO: handle empty values
+
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
@@ -169,7 +171,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		Password: password,
 	}
 
-	userErr := userService.New(newUser)
+	_, userErr := userService.New(newUser)
 
 	// unsuccessful signup, render signup page with error message
 	if userErr != nil {

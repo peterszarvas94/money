@@ -158,18 +158,18 @@ htmx.defineExtension("no-server-error", {
  * use it in any request that requires access token
  * e.g. GET /dashboard
  */
-// htmx.defineExtension("access", {
-//   onEvent: function (name, evt) {
-//     if (name === "htmx:beforeRequest") {
-//       if (accessToken) {
-//         evt.detail.xhr.setRequestHeader(
-//           "Authorization",
-//           "Bearer " + accessToken,
-//         );
-//       }
-//     }
-//   },
-// });
+htmx.defineExtension("access", {
+  onEvent: function (name, evt) {
+    if (name === "htmx:beforeRequest") {
+      if (accessToken) {
+        evt.detail.xhr.setRequestHeader(
+          "Authorization",
+          "Bearer " + accessToken,
+        );
+      }
+    }
+  },
+});
 
 /**
  * "signout" extension to clear access token

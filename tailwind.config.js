@@ -23,14 +23,12 @@ module.exports = {
         slab: "'Roboto Slab', serif",
       },
       fontSize: {
+        '2xs': '.625rem',
+        '3xs': '.5rem',
         giant: '20rem',
       },
       borderRadius: {
         "inner": "0.39rem",
-      },
-      fontSize: {
-        '2xs': '.625rem',
-        '3xs': '.5rem',
       },
     },
   },

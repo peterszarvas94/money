@@ -15,4 +15,4 @@ run:
 
 # Push migration
 push:
-	turso db shell $(db) < schema.sql
+	turso db shell $(db) < internal/db/schema.sql

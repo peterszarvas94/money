@@ -152,7 +152,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	userService := services.NewUserService(db)
 
 	// login the user
-	userId, loginErr := userService.Login(usernameOrEmail, password)
+	user, loginErr := userService.Login(usernameOrEmail, password)
 
 	// if the login was unsuccessful
 	if loginErr != nil {
@@ -201,8 +201,10 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		return
 	}
 
+	userId := user.Id
+
 	// if the login was successful
-	accessToken, accessTokenErr := utils.NewToken(userId, utils.Access)
+	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
 		logger.Log(logger.ERROR, "signin/post/access", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -211,7 +213,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	logger.Log(logger.INFO, "signin/post/access", "Access token created successfully")
 
-	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.Refresh)
+	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
 		logger.Log(logger.ERROR, "signin/post/refresh", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
