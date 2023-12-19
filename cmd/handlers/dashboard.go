@@ -15,15 +15,14 @@ import (
 /*
 DashboardPageHandler handles the GET request to /dashboard.
 */
-func DashboardPageHandler(w http.ResponseWriter, r *http.Request) {
+func DashboardPageHandler(w http.ResponseWriter, r *http.Request) error {
 
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "dashboard/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 
@@ -42,9 +41,8 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request) {
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(user.Id)
 		if accountsErr != nil {
-			logger.Log(logger.ERROR, "dashboard/accounts", accountsErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return accountsErr
 		}
 
 		// create account select items
@@ -75,13 +73,11 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
 
 		logger.Log(logger.INFO, "dashboard/loggedin/res", "Template rendered successfully")
-		return
+		return nil
 	}
 
 	// not logged in user
-	logger.Log(logger.INFO, "dashboard/checkSession", sessionErr.Error())
-
-	logger.Log(logger.INFO, "dashboad/notloggedin/tmpl", "Template parsed successfully")
+	logger.Log(logger.WARNING, "dashboard/checkSession", sessionErr.Error())
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -98,5 +94,5 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request) {
 	handler.ServeHTTP(w, r)
 
 	logger.Log(logger.INFO, "dashboard/notloggedin/res", "Template rendered successfully")
-	return
+	return nil
 }

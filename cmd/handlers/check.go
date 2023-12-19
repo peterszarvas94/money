@@ -16,14 +16,13 @@ import (
 CheckUserHandler checks if the username or email isaftaken.
 Sends icons.
 */
-func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
+func CheckUserHandler(w http.ResponseWriter, r *http.Request) error {
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "check/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 
@@ -32,9 +31,8 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the form
 	parseErr := r.ParseForm()
 	if parseErr != nil {
-		logger.Log(logger.ERROR, "check/parse", parseErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return parseErr
 	}
 
 	logger.Log(logger.INFO, "check/parse", "Form parsed successfully")
@@ -54,7 +52,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
 			handler.ServeHTTP(w, r)
 
 			logger.Log(logger.INFO, "check/username/correctres", "Template rendered successfully")
-			return
+			return nil
 		}
 
 		logger.Log(logger.WARNING, "check/username", "User exists")
@@ -66,7 +64,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r)
 
 		logger.Log(logger.INFO, "check/username/incorrectres", "Template rendered successfully")
-		return
+		return nil
 	}
 
 	// Check if email is taken
@@ -84,7 +82,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
 			handler := templ.Handler(component)
 			handler.ServeHTTP(w, r)
 
-			return
+			return nil
 		}
 
 		if emailParseErr != nil {
@@ -102,6 +100,8 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r)
 
 		logger.Log(logger.INFO, "check/email/incorrect", "Template rendered successfully")
-		return
+		return nil
 	}
+
+	return nil
 }

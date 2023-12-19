@@ -28,16 +28,15 @@ type SigninPage struct {
 /*
 SigninPageHandler handles the GET request to /signin.
 */
-func SigninPageHandler(w http.ResponseWriter, r *http.Request) {
+func SigninPageHandler(w http.ResponseWriter, r *http.Request) error {
 	params := utils.GetQueryParams(r)
 
 	// connect to the database
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "signin/get/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 	userService := services.NewUserService(db)
@@ -53,9 +52,8 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request) {
 		encoded := params["redirect"]
 		redirect, decodeErr := url.QueryUnescape(encoded)
 		if decodeErr != nil {
-			logger.Log(logger.ERROR, "signin/get/decode", decodeErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return decodeErr
 		}
 
 		if redirect == "" {
@@ -66,7 +64,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request) {
 
 		logger.Log(logger.INFO, "signin/get/decode", "Redirecting to "+redirect)
 
-		return
+		return nil
 	}
 
 	// not logged in
@@ -97,19 +95,18 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request) {
 	handler.ServeHTTP(w, r);
 
 	logger.Log(logger.INFO, "signin/get/res", "Template rendered successfully")
-	return
+	return nil
 }
 
 /*
 SigninHandler handles the POST request to /signin.
 */
-func SigninHandler(w http.ResponseWriter, r *http.Request) {
+func SigninHandler(w http.ResponseWriter, r *http.Request) error {
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		logger.Log(logger.ERROR, "signin/post/parse", formErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return formErr
 	}
 
 	logger.Log(logger.INFO, "signin/post/parse", "Form parsed successfully")
@@ -121,9 +118,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "signin/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 	userService := services.NewUserService(db)
@@ -133,7 +129,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 
 	// if the login was unsuccessful
 	if loginErr != nil {
-		logger.Log(logger.ERROR, "signin/post/login", loginErr.Error())
+		logger.Log(logger.WARNING, "signin/post/login", loginErr.Error())
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -163,7 +159,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r);
 
 		logger.Log(logger.INFO, "signin/post/errorRes", "Template rendered successfully")
-		return
+		return nil
 	}
 
 	userId := user.Id
@@ -171,18 +167,16 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 	// if the login was successful
 	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
-		logger.Log(logger.ERROR, "signin/post/access", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return accessTokenErr
 	}
 
 	logger.Log(logger.INFO, "signin/post/access", "Access token created successfully")
 
 	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
-		logger.Log(logger.ERROR, "signin/post/refresh", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return refreshTokenErr
 	}
 
 	logger.Log(logger.INFO, "signin/post/refresh", "Refresh token created successfully")
@@ -210,13 +204,12 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 	encoded := params["redirect"]
 	redirect, decodeErr := url.QueryUnescape(encoded)
 	if decodeErr != nil {
-		logger.Log(logger.ERROR, "signin/post/decode", decodeErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return decodeErr
 	}
 
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 
 	logger.Log(logger.INFO, "signin/post/res", "Redirected to "+redirect)
-	return
+	return nil
 }

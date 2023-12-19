@@ -14,12 +14,11 @@ import (
 RefreshTokenHandler gets a new access token and refresh token
 if the refresh token is valid.
 */
-func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) error {
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
-		logger.Log(logger.ERROR, "refresh/token", rokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return rokenErr
 	}
 
 	logger.Log(logger.INFO, "refresh/token", "Refresh token received")
@@ -27,34 +26,30 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// check if refresh token is valid
 	claims, jwtErr := utils.ValidateToken(token)
 	if jwtErr != nil {
-		logger.Log(logger.ERROR, "refresh/token", jwtErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return jwtErr
 	}
 
 	// get user id from claims
 	userIdStr, subErr := claims.GetSubject()
 	if subErr != nil {
-		logger.Log(logger.ERROR, "refresh/sub", subErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return subErr
 	}
 
 	// convert user id to int
 	userId, userIdErr := strconv.Atoi(userIdStr)
 	if userIdErr != nil {
-		logger.Log(logger.ERROR, "refresh/userid", userIdErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return userIdErr
 	}
 
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "signup/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 	userService := services.NewUserService(db)
@@ -62,25 +57,22 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// check if user exists
 	_, dbErr = userService.GetById(userId)
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "refresh/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 
 	// get new access token
 	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
-		logger.Log(logger.ERROR, "refresh/token", accessTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return accessTokenErr
 	}
 
 	// get new refresh token as well
 	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
-		logger.Log(logger.ERROR, "refresh/token", refreshTokenErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return refreshTokenErr
 	}
 
 	expires := time.Unix(refreshToken.Expires, 0)
@@ -101,4 +93,8 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// send access token in header
 	w.Header().Set("Authorization", "Bearer "+accessToken.Token)
 	w.WriteHeader(http.StatusOK)
+
+	logger.Log(logger.INFO, "refresh/res", "New tokens sent")
+
+	return nil
 }

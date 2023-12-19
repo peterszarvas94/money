@@ -15,25 +15,34 @@ func main() {
 
 	r := router.NewRouter()
 
+	// home page
 	r.GET("/", handlers.HomePageHandler)
 	
+	// signup
 	r.GET("/signup", handlers.SignupPageHandler)
 	r.POST("/signup", handlers.NewUserHandler)
 
+	// signin
 	r.GET("/signin", handlers.SigninPageHandler)
 	r.POST("/signin", handlers.SigninHandler)
 
+	// signout
 	r.POST("/signout", handlers.SignoutHandler)
 
+	// check useraname and email
 	r.GET("/check", handlers.CheckUserHandler)
 
+	// refresh token
 	r.POST("/refresh", handlers.RefreshTokenHandler)
 
+	// dashboard
 	r.GET("/dashboard", handlers.DashboardPageHandler)
 
+	// new account page
 	r.GET("/account/new", handlers.NewAccountPageHandler)
 	r.POST("/account", handlers.NewAccountHandler)
 
+	// static files
 	r.SetStaticPath("/static", "./web/static")
 
 	err := http.ListenAndServe(":8080", r)

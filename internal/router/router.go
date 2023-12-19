@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"pengoe/internal/logger"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ type Router struct {
 	staticPath   string
 }
 
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(http.ResponseWriter, *http.Request) error
 
 /*
 Utility function for creating a new router.
@@ -98,7 +99,10 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for pattern, handlers := range router.routes {
 		if matches(pattern, path) {
 			if handler, exists := handlers[method]; exists {
-				handler(w, r)
+				handlerErr := handler(w, r)
+				if handlerErr != nil {
+					logger.Log(logger.ERROR, "handler", handlerErr.Error())
+				}
 				return
 			}
 
@@ -113,6 +117,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Notfound(w, r)
+	return
 }
 
 /*

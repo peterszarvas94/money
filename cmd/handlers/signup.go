@@ -28,7 +28,7 @@ type SignupPage struct {
 /*
 SignupPageHandler handles the GET request to /signup.
 */
-func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
+func SignupPageHandler(w http.ResponseWriter, r *http.Request) error {
 
 	params := utils.GetQueryParams(r)
 
@@ -36,9 +36,8 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "signup/get/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 	userService := services.NewUserService(db)
@@ -54,8 +53,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
 		redirect, decodeErr := url.QueryUnescape(encoded)
 		if decodeErr != nil {
 			logger.Log(logger.ERROR, "signin/get/decode", decodeErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return decodeErr
 		}
 
 		if redirect == "" {
@@ -66,7 +64,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
 
 		// todo: change this to http... with some extension?
 		w.Header().Set("HX-Redirect", redirect)
-		return
+		return nil
 	}
 
 	logger.Log(logger.INFO, "signup/checkSession", accessTokenErr.Error())
@@ -102,20 +100,19 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
 	handler.ServeHTTP(w, r)
 
 	logger.Log(logger.INFO, "signup/get/res", "Template rendered successfully")
-	return
+	return nil
 }
 
 /*
 NewUserHandler handles the POST request to /signup.
 */
-func NewUserHandler(w http.ResponseWriter, r *http.Request) {
+func NewUserHandler(w http.ResponseWriter, r *http.Request) error {
 	params := utils.GetQueryParams(r)
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		logger.Log(logger.ERROR, "signup/post/form", formErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return formErr
 	}
 
 	logger.Log(logger.INFO, "signup/post/form", "Form parsed successfully")
@@ -132,9 +129,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "signup/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 
@@ -154,25 +150,25 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// unsuccessful signup, render signup page with error message
 	if userErr != nil {
-		logger.Log(logger.ERROR, "signup/post/userservice", userErr.Error())
+		logger.Log(logger.WARNING, "signup/post/userservice", userErr.Error())
 
 		// check if email is valid
 		_, invalid := mail.ParseAddress(email)
 		if invalid != nil {
 			logMsg := fmt.Sprintf("Invalid email: %s", email)
-			logger.Log(logger.ERROR, "signup/post/emailinvalid", logMsg)
+			logger.Log(logger.WARNING, "signup/post/emailinvalid", logMsg)
 		}
 
 		// check if username already exists
 		_, usernameQueryErr := userService.GetByUsername(username)
 		if usernameQueryErr != nil {
-			logger.Log(logger.ERROR, "signup/post/usernamequery", usernameQueryErr.Error())
+			logger.Log(logger.WARNING, "signup/post/usernamequery", usernameQueryErr.Error())
 		}
 
 		// check if email already exists
 		_, emailQueryErr := userService.GetByEmail(email)
 		if emailQueryErr != nil {
-			logger.Log(logger.ERROR, "signup/post/emailquery", emailQueryErr.Error())
+			logger.Log(logger.WARNING, "signup/post/emailquery", emailQueryErr.Error())
 		}
 
 		emailInvalid := invalid != nil
@@ -191,7 +187,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		if usernameExists {
 			logMsg := fmt.Sprintf("Username already exists: %s", username)
-			logger.Log(logger.ERROR, "signup/post/usernameexists", logMsg)
+			logger.Log(logger.WARNING, "signup/post/usernameexists", logMsg)
 			usernameError = "Username already exists"
 			usernameCheck = "incorrect"
 		} else {
@@ -200,7 +196,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		if emailExists {
 			logMsg := fmt.Sprintf("Email already exists: %s", email)
-			logger.Log(logger.ERROR, "signup/post/emailexists", logMsg)
+			logger.Log(logger.WARNING, "signup/post/emailexists", logMsg)
 			emailError = "Email already exists"
 			emailCheck = "incorrect"
 		} else if !emailInvalid {
@@ -239,12 +235,12 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r)
 
 		logger.Log(logger.INFO, "signup/post/res", "Template rendered successfully")
-		return
+		return nil
 	}
 
 	// successful signup, redirect to signin
 	logger.Log(logger.INFO, "signup/post/user", "User added successfully, redirect to "+params["redirect"])
 
 	http.Redirect(w, r, "/signin?redirect="+params["redirect"], http.StatusSeeOther)
-	return
+	return nil
 }

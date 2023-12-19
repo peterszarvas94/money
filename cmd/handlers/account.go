@@ -25,15 +25,14 @@ type newAccountPage struct {
 /*
 NewAccountPageHandler handles the GET request to /account/new
 */
-func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) {
+func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) error {
 
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "newaccount/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 	defer db.Close()
 
@@ -54,7 +53,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) {
 		if accountsErr != nil {
 			logger.Log(logger.ERROR, "dashboard/accounts", accountsErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return accountsErr
 		}
 
 		// create account select items
@@ -81,14 +80,12 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) {
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "newaccount/loggedin/tmpl", "Template parsed successfully")
-
 		logger.Log(logger.INFO, "newaccount/loggedin/res", "Template rendered successfully")
-		return
+		return nil
 	}
 
 	// not logged in user
-	logger.Log(logger.INFO, "newaccount/checkSession", sessionErr.Error())
+	logger.Log(logger.WARNING, "newaccount/checkSession", sessionErr.Error())
 
 	data := pages.NewAccountProps{
 		Title:       "pengoe - New Account",
@@ -102,23 +99,20 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) {
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
 
-	logger.Log(logger.INFO, "newaccount/notloggedin/tmpl", "Template parsed successfully")
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	logger.Log(logger.INFO, "newaccount/notloggedin/res", "Template rendered successfully")
-	return
+	return nil
 }
 
 /*
 NewAccountHandler handles the POST request to /account
 */
-func NewAccountHandler(w http.ResponseWriter, r *http.Request) {
+func NewAccountHandler(w http.ResponseWriter, r *http.Request) error {
 	formErr := r.ParseForm()
 	if formErr != nil {
-		logger.Log(logger.ERROR, "newaccount/post/form", formErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return formErr
 	}
 
 	logger.Log(logger.INFO, "newaccount/post/form", "Form parsed successfully")
@@ -135,9 +129,8 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request) {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.ERROR, "newaccount/post/db", dbErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return dbErr
 	}
 
 	logger.Log(logger.INFO, "newaccount/post/db", "Connected to db successfully")
@@ -164,9 +157,8 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 		newAccount, newAccountErr := accountService.New(account)
 		if newAccountErr != nil {
-			logger.Log(logger.ERROR, "newaccount/post/newAccount", newAccountErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return newAccountErr
 		}
 
 		logger.Log(logger.INFO, "newaccount/post/newAccount", "Account created successfully")
@@ -180,9 +172,8 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 		access, newAccessErr := accessService.New(access)
 		if newAccessErr != nil {
-			logger.Log(logger.ERROR, "newaccount/post/newAccess", newAccessErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			return newAccessErr
 		}
 
 		logger.Log(logger.INFO, "newaccount/post/newAccess", "Access created successfully")
@@ -192,8 +183,9 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	// not logged in user
 	if sessionErr != nil {
-		logger.Log(logger.INFO, "newaccount/post/checkSession", sessionErr.Error())
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return sessionErr
 	}
+
+	return nil
 }
