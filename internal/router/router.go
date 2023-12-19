@@ -16,7 +16,7 @@ type Router struct {
 	staticPath   string
 }
 
-type HandlerFunc func(http.ResponseWriter, *http.Request, string)
+type HandlerFunc func(http.ResponseWriter, *http.Request)
 
 /*
 Utility function for creating a new router.
@@ -98,7 +98,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for pattern, handlers := range router.routes {
 		if matches(pattern, path) {
 			if handler, exists := handlers[method]; exists {
-				handler(w, r, pattern)
+				handler(w, r)
 				return
 			}
 

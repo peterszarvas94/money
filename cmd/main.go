@@ -16,7 +16,7 @@ func main() {
 	r := router.NewRouter()
 
 	r.GET("/", handlers.HomePageHandler)
-
+	
 	r.GET("/signup", handlers.SignupPageHandler)
 	r.POST("/signup", handlers.NewUserHandler)
 

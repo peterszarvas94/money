@@ -11,7 +11,7 @@ SignoutHandler signs the user out by deleting the refresh token.
 Access token is cleared by the client.
 	"pengoe/utils"
 */
-func SignoutHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func SignoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh",
 		Value:    "",

@@ -2,50 +2,20 @@ package handlers
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
-	"pengoe/web/templates/components"
-	"pengoe/web/templates/layouts"
 	"pengoe/web/templates/pages"
+
+	"github.com/a-h/templ"
 )
-
-type dashboardPage struct {
-	Title                string
-	Descrtipion          string
-	Session              utils.Session
-	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
-	ShowNewAccountButton bool
-}
-
-/*
-getDashboardTmpl helper function to parse the dashboard template.
-*/
-func getDashboardTmpl() (*template.Template, error) {
-	tmpl, tmplErr := template.ParseFiles(
-		layouts.Base,
-		pages.Dashboard,
-		components.LeftPanel,
-		components.TopBar,
-		components.Icon,
-		components.AccountSelectItem,
-		components.Spinner,
-	)
-	if tmplErr != nil {
-		return nil, tmplErr
-	}
-
-	return tmpl, nil
-}
 
 /*
 DashboardPageHandler handles the GET request to /dashboard.
 */
-func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func DashboardPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// connect to db
 	dbManager := db.NewDBManager()
@@ -86,31 +56,23 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 			})
 		}
 
-		data := dashboardPage{
+		data := pages.DashboardProps{
 			Title:       "pengoe - Dashboard",
-			Descrtipion: "Dashboard for pengoe",
+			Description: "Dashboard for pengoe",
 			Session: utils.Session{
 				LoggedIn: true,
 				User:     *user,
 			},
-			SelectedAccountId:    1,
-			ShowNewAccountButton: true,
 			AccountSelectItems:   accountSelectItems,
+			SelectedAccountId:    0,
+			ShowNewAccountButton: true,
 		}
 
-		tmpl, tmplErr := getDashboardTmpl()
-		if tmplErr != nil {
-			logger.Log(logger.ERROR, "dashboard/loggedin/tmpl", tmplErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
+		component := pages.Dashboard(data)
+		handler := templ.Handler(component)
+		handler.ServeHTTP(w, r)
 
 		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
-
-		resErr := tmpl.Execute(w, data)
-		if resErr != nil {
-			logger.Log(logger.ERROR, "dashboard/loggedin/res", resErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
 
 		logger.Log(logger.INFO, "dashboard/loggedin/res", "Template rendered successfully")
 		return
@@ -119,29 +81,21 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, pattern string
 	// not logged in user
 	logger.Log(logger.INFO, "dashboard/checkSession", sessionErr.Error())
 
-	tmpl, tmplErr := getDashboardTmpl()
-	if tmplErr != nil {
-		logger.Log(logger.ERROR, "dashboard/notloggedin/tmpl", tmplErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-
 	logger.Log(logger.INFO, "dashboad/notloggedin/tmpl", "Template parsed successfully")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	data := utils.Page{
+	data := pages.DashboardProps{
 		Title:       "pengoe - Dashboard",
-		Descrtipion: "Dashboard for pengoe",
+		Description: "Dashboard for pengoe",
 		Session: utils.Session{
 			LoggedIn: false,
 		},
 	}
 
-	resErr := tmpl.Execute(w, data)
-	if resErr != nil {
-		logger.Log(logger.ERROR, "dashboard/notloggedin/res", resErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
+	component := pages.Dashboard(data)
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
 
 	logger.Log(logger.INFO, "dashboard/notloggedin/res", "Template rendered successfully")
 	return

@@ -14,7 +14,7 @@ import (
 RefreshTokenHandler gets a new access token and refresh token
 if the refresh token is valid.
 */
-func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
 		logger.Log(logger.ERROR, "refresh/token", rokenErr.Error())

@@ -1,0 +1,100 @@
+package components
+
+templ Leftpanel() {
+	<aside
+ 		class="bg-backgroundalt text-text absolute z-10 min-h-screen w-fit -translate-x-full transform transition-transform duration-500"
+ 		hx-ext="receiver"
+ 		on-event:menu-open="
+      this.classList.remove('-translate-x-full');
+      this.classList.add('translate-x-0');
+      this.querySelectorAll('button').forEach((el) => {
+        toggleTabIndex(el);
+      });
+      this.querySelectorAll('a').forEach((el) => {
+        toggleTabIndex(el);
+      });
+    "
+ 		on-event:menu-close="
+      this.classList.remove('translate-x-0');
+      this.classList.add('-translate-x-full');
+      this.querySelectorAll('button').forEach((el) => {
+        toggleTabIndex(el);
+        el.blur();
+      });
+      this.querySelectorAll('a').forEach((el) => {
+        toggleTabIndex(el);
+        el.blur();
+      });
+    "
+	>
+		<div class="flex items-center justify-start gap-2 p-2 text-2xl">
+			<button
+ 				class="text-accent p-2"
+ 				aria-label="Close menu"
+ 				hx-on:click="emit('menu-close');"
+ 				class="p-2"
+ 				tabindex="-1"
+ 				hx-ext="receiver"
+ 				on-event:menu-open="
+          this.focus();
+        "
+			>
+				<!-- menu left icon -->
+				<svg
+ 					stroke="currentColor"
+ 					fill="currentColor"
+ 					stroke-width="0"
+ 					viewBox="0 0 24 24"
+ 					height="1em"
+ 					width="1em"
+ 					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+ 						d="M21 17.9995V19.9995H3V17.9995H21ZM6.59619 3.90332L8.01041 5.31753L4.82843 8.49951L8.01041 11.6815L6.59619 13.0957L2 8.49951L6.59619 3.90332ZM21 10.9995V12.9995H12V10.9995H21ZM21 3.99951V5.99951H12V3.99951H21Z"
+					></path>
+				</svg>
+			</button>
+			<a
+ 				href="/"
+ 				class="flex items-center justify-center p-2"
+ 				tabindex="-1"
+ 				aria-label="Home"
+			>
+				<svg
+ 					stroke="currentColor"
+ 					fill="currentColor"
+ 					stroke-width="0"
+ 					viewBox="0 0 24 24"
+ 					height="1em"
+ 					width="1em"
+ 					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+ 						d="M12.97 2.59a1.5 1.5 0 0 0-1.94 0l-7.5 6.363A1.5 1.5 0 0 0 3 10.097V19.5A1.5 1.5 0 0 0 4.5 21h4.75a.75.75 0 0 0 .75-.75V14h4v6.25c0 .414.336.75.75.75h4.75a1.5 1.5 0 0 0 1.5-1.5v-9.403a1.5 1.5 0 0 0-.53-1.144l-7.5-6.363Z"
+					></path>
+				</svg>
+			</a>
+			<a
+ 				href="/dashboard"
+ 				class="flex items-center justify-center p-2"
+ 				tabindex="-1"
+ 				aria-label="Dashboard"
+			>
+				<svg
+ 					stroke="currentColor"
+ 					fill="currentColor"
+ 					stroke-width="0"
+ 					viewBox="0 0 24 24"
+ 					height="1em"
+ 					width="1em"
+ 					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path fill="none" d="M0 0h24v24H0z"></path>
+					<path
+ 						d="M11 21H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h6v18zm2 0h6c1.1 0 2-.9 2-2v-7h-8v9zm8-11V5c0-1.1-.9-2-2-2h-6v7h8z"
+					></path>
+				</svg>
+			</a>
+		</div>
+	</aside>
+}

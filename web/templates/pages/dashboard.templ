@@ -1,0 +1,42 @@
+package pages;
+
+import (
+	"pengoe/web/templates/layouts"
+	"pengoe/internal/utils"
+	"pengoe/web/templates/components"
+)
+
+type DashboardProps struct {
+	Title       string
+	Description string
+	Session     utils.Session
+	SelectedAccountId    int
+	AccountSelectItems   []utils.AccountSelectItem
+	ShowNewAccountButton bool
+}
+
+templ Dashboard(props DashboardProps) {
+	@layouts.Base(layouts.BaseProps{
+		Title: props.Title,
+		Description: props.Description,
+	}) {
+		<div hx-ext="protected-page,description" id="page">
+			if props.Session.LoggedIn {
+				@components.Leftpanel()
+				<!-- content -->
+				<main class="absolute z-0 min-h-screen w-full bg-white text-black">
+					@components.Topbar(components.TopbarProps{
+						SelectedAccountId: props.SelectedAccountId,
+						AccountSelectItems: props.AccountSelectItems,
+						ShowNewAccountButton: props.ShowNewAccountButton,
+					})
+				</main>
+				<!-- end of content -->
+			} else {
+				<div class="flex items-center justify-center p-10">
+					@components.Spinner()
+				</div>
+			}
+		</div>
+	}
+}

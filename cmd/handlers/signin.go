@@ -10,10 +10,10 @@ import (
 	"pengoe/internal/logger"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
-	"pengoe/web/templates/components"
-	"pengoe/web/templates/layouts"
 	"pengoe/web/templates/pages"
 	"time"
+
+	"github.com/a-h/templ"
 )
 
 type SigninPage struct {
@@ -26,26 +26,9 @@ type SigninPage struct {
 }
 
 /*
-getSigninTmpl helper function to parse the signin template.
-*/
-func getSigninTmpl() (*template.Template, error) {
-	tmpl, tmplErr := template.ParseFiles(
-		layouts.Base,
-		pages.Signin,
-		components.Icon,
-		components.Error,
-	)
-	if tmplErr != nil {
-		return nil, tmplErr
-	}
-
-	return tmpl, nil
-}
-
-/*
 SigninPageHandler handles the GET request to /signin.
 */
-func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func SigninPageHandler(w http.ResponseWriter, r *http.Request) {
 	params := utils.GetQueryParams(r)
 
 	// connect to the database
@@ -89,12 +72,6 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 	// not logged in
 	logger.Log(logger.INFO, "signin/checkSession", accessTokenErr.Error())
 
-	tmpl, tmplErr := getSigninTmpl()
-	if tmplErr != nil {
-		logger.Log(logger.ERROR, "signin/signinTmpl", tmplErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-
 	logger.Log(logger.INFO, "Template parsed successfully", "signin/signinTmpl")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -104,20 +81,20 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		redirect = "%2Fdashboard"
 	}
 
-	data := SigninPage{
+	data := pages.SigninProps{
 		Title:       "pengoe - Sign in",
 		Descrtipion: "Sign in to pengoe",
 		Session: utils.Session{
 			LoggedIn: false,
 		},
-		Redirect: template.URL(redirect),
+		RedirectUrl: redirect,
+		UsernameOrEmail: "",
+		LoginError: "",
 	}
 
-	resErr := tmpl.Execute(w, data)
-	if resErr != nil {
-		logger.Log(logger.ERROR, "signin/get/res", resErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
+	component := pages.Signin(data);
+	handler := templ.Handler(component);
+	handler.ServeHTTP(w, r);
 
 	logger.Log(logger.INFO, "signin/get/res", "Template rendered successfully")
 	return
@@ -126,7 +103,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 /*
 SigninHandler handles the POST request to /signin.
 */
-func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func SigninHandler(w http.ResponseWriter, r *http.Request) {
 
 	formErr := r.ParseForm()
 	if formErr != nil {
@@ -161,12 +138,6 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
 
-		tmpl, tmplErr := getSigninTmpl()
-		if tmplErr != nil {
-			logger.Log(logger.ERROR, "signin/post/errorTmpl", tmplErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
-
 		logger.Log(logger.INFO, "signin/post/errorTmpl", "Template parsed successfully")
 
 		params := utils.GetQueryParams(r)
@@ -176,26 +147,20 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			redirect = "%2Fdashboard"
 		}
 
-		data := SigninPage{
+		data := pages.SigninProps{
 			Title:       "pengoe - Sign in",
 			Descrtipion: "Sign in to pengoe",
 			Session: utils.Session{
 				LoggedIn: false,
 			},
-		Redirect: template.URL(redirect),
-			Values: map[string]string{
-				"usernameOrEmail": usernameOrEmail,
-			},
-			Errors: map[string]string{
-				"loginError": "Invalid username or password",
-			},
+			RedirectUrl: redirect,
+			UsernameOrEmail: usernameOrEmail,
+			LoginError: "Incorrect username or password",
 		}
 
-		resErr := tmpl.Execute(w, data)
-		if resErr != nil {
-			logger.Log(logger.ERROR, "signin/post/errorRes", resErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
+		component := pages.Signin(data);
+		handler := templ.Handler(component);
+		handler.ServeHTTP(w, r);
 
 		logger.Log(logger.INFO, "signin/post/errorRes", "Template rendered successfully")
 		return

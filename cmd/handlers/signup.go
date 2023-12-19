@@ -11,9 +11,9 @@ import (
 	"pengoe/internal/logger"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
-	"pengoe/web/templates/components"
-	"pengoe/web/templates/layouts"
 	"pengoe/web/templates/pages"
+
+	"github.com/a-h/templ"
 )
 
 type SignupPage struct {
@@ -21,35 +21,14 @@ type SignupPage struct {
 	Descrtipion string
 	Session     utils.Session
 	Redirect    template.URL
-	Values			map[string]string
-	Errors			map[string]string
-}
-
-/*
-getSignupTmpl helper function to parse the signup template.
-*/
-func getSignupTmpl() (*template.Template, error) {
-	tmpl, tmplErr := template.ParseFiles(
-		layouts.Base,
-		pages.Signup,
-		components.Icon,
-		components.Error,
-		components.Incorrect,
-		components.Correct,
-	)
-	if tmplErr != nil {
-		logger.Log(logger.ERROR, "signup/signupTmpl", tmplErr.Error())
-		return nil, tmplErr
-	}
-
-	logger.Log(logger.INFO, "signup/signupTmpl", "Template parsed successfully")
-	return tmpl, nil
+	Values      map[string]string
+	Errors      map[string]string
 }
 
 /*
 SignupPageHandler handles the GET request to /signup.
 */
-func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func SignupPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := utils.GetQueryParams(r)
 
@@ -92,12 +71,6 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 
 	logger.Log(logger.INFO, "signup/checkSession", accessTokenErr.Error())
 
-	tmpl, tmplErr := getSignupTmpl()
-	if tmplErr != nil {
-		logger.Log(logger.ERROR, "signup/signupTmpl", tmplErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-
 	logger.Log(logger.INFO, "signup/signupTmpl", "Template parsed successfully")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -107,20 +80,26 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		redirect = "%2Fdashboard"
 	}
 
-	data := SignupPage{
+	data := pages.SignupProps{
 		Title:       "pengoe - Sign in",
-		Descrtipion: "Sign in to pengoe",
+		Description: "Sign in to pengoe",
 		Session: utils.Session{
 			LoggedIn: false,
 		},
-		Redirect: template.URL(redirect),
+		RedirectUrl:   redirect,
+		Username:      "",
+		Email:         "",
+		Firstname:     "",
+		Lastname:      "",
+		UsernameCheck: "",
+		UsernameError: "",
+		EmailCheck:    "",
+		EmailError:    "",
 	}
 
-	resErr := tmpl.Execute(w, data)
-	if resErr != nil {
-		logger.Log(logger.ERROR, "signup/get/res", resErr.Error())
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
+	component := pages.Signup(data)
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
 
 	logger.Log(logger.INFO, "signup/get/res", "Template rendered successfully")
 	return
@@ -129,7 +108,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 /*
 NewUserHandler handles the POST request to /signup.
 */
-func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
+func NewUserHandler(w http.ResponseWriter, r *http.Request) {
 	params := utils.GetQueryParams(r)
 
 	formErr := r.ParseForm()
@@ -231,12 +210,6 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusConflict)
 
-		tmpl, tmplErr := getSignupTmpl()
-		if tmplErr != nil {
-			logger.Log(logger.ERROR, "signup/post/signupTmpl", tmplErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
-
 		logger.Log(logger.INFO, "signup/post/signupTmpl", "Template parsed successfully")
 
 		redirect := params["redirect"]
@@ -244,32 +217,26 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, pattern string) {
 			redirect = "%2Fdashboard"
 		}
 
-		data := SignupPage{
+		data := pages.SignupProps{
 			Title:       "pengoe - Sign in",
-			Descrtipion: "Sign in to pengoe",
+			Description: "Sign in to pengoe",
 			Session: utils.Session{
 				LoggedIn: false,
 			},
-			Redirect: template.URL(redirect),
-			Values: map[string]string{
-				"usernameValue": username,
-				"emailValue": email,
-				"firstnameValue": firstname,
-				"lastnameValue": lastname,
-				"usernameCheck": usernameCheck,
-				"emailCheck": emailCheck,
-			},
-			Errors: map[string]string{
-				"usernameError": usernameError,
-				"emailError": emailError,
-			},
+			RedirectUrl:   redirect,
+			Firstname:     firstname,
+			Lastname:      lastname,
+			Username:      username,
+			UsernameCheck: usernameCheck,
+			UsernameError: usernameError,
+			Email:         email,
+			EmailCheck:    emailCheck,
+			EmailError:    emailError,
 		}
 
-		resErr := tmpl.Execute(w, data)
-		if resErr != nil {
-			logger.Log(logger.ERROR, "signup/post/res", resErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
+		component := pages.Signup(data)
+		handler := templ.Handler(component)
+		handler.ServeHTTP(w, r)
 
 		logger.Log(logger.INFO, "signup/post/res", "Template rendered successfully")
 		return

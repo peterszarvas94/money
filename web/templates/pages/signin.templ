@@ -1,0 +1,99 @@
+package pages
+
+import (
+	"pengoe/web/templates/components"
+	"pengoe/internal/utils"
+	"pengoe/web/templates/layouts"
+	"fmt"
+)
+
+type SigninProps struct {
+	Title           string
+	Descrtipion     string
+	Session         utils.Session
+	RedirectUrl     string
+	UsernameOrEmail string
+	LoginError      string
+}
+
+templ Signin(props SigninProps) {
+	@layouts.Base(layouts.BaseProps{
+		Title:       props.Title,
+		Description: props.Descrtipion,
+	}) {
+		<div
+ 			class="from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text"
+ 			hx-ext="gated-page,description"
+ 			id="page"
+		>
+			<!-- background -->
+			<figure
+ 				class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
+			>
+				@components.Icon()
+			</figure>
+			<!-- end of background -->
+			<!-- content -->
+			<section class="z-10 absolute w-full">
+				<header class="flex justify-center py-14">
+					<a href="/" class="flex items-center justify-center gap-2">
+						<figure class="text-primary text-5xl">
+							@components.Icon()
+						</figure>
+						<h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
+							pengoe
+						</h1>
+					</a>
+				</header>
+				<main class="flex flex-col items-center gap-10 bg-transparent">
+					<form
+ 						hx-post={ fmt.Sprintf("/signin?redirect=%s", props.RedirectUrl) }
+ 						hx-target="body"
+ 						hx-ext="show-client-error"
+ 						hx-replace-url="true"
+ 						class="flex w-full max-w-sm flex-col gap-4"
+					>
+						<input
+ 							aria-label="Username or email"
+ 							name="user"
+ 							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+ 							placeholder="Username or email"
+ 							value={ props.UsernameOrEmail }
+ 							require
+						/>
+						<input
+ 							aria-label="Password"
+ 							name="password"
+ 							type="password"
+ 							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+ 							placeholder="Password"
+ 							required
+						/>
+						<div class="flex justify-center">
+							<button
+ 								aria-label="Sign up"
+ 								type="submit"
+ 								class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+							>
+								Sign in
+							</button>
+						</div>
+					</form>
+					<nav class="flex w-full max-w-sm justify-center gap-2">
+						<div>Not a member yet?</div>
+						<a
+ 							href={ templ.SafeURL(fmt.Sprintf("/signup?redirect=%s", props.RedirectUrl)) }
+ 							class="border-primary hover:border-accent focus:border-accent border-b focus:outline-none"
+						>
+							Sign up here.
+						</a>
+					</nav>
+					<div class="text-red-500 text-center">
+						{ props.LoginError }
+					</div>
+				</main>
+			</section>
+			<!-- end of content -->
+		</div>
+	}
+}
