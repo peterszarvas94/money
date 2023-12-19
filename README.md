@@ -58,8 +58,9 @@ To run commands, you need to have:
   - [x] form
   - [x] backend functions
 - [ ] left panel can be pinned
-- [ ] better logger
-  - [ ] central error handling
+- [ ] better errors
+  - [x] central error handling
+  - [ ] revocer from errors
 - [x] topbar 
   - [x] shows accounts correctly
   - [ ] fix empty accountselectitem list 
