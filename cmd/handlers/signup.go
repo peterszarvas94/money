@@ -28,7 +28,7 @@ type SignupPage struct {
 /*
 SignupPageHandler handles the GET request to /signup.
 */
-func SignupPageHandler(w http.ResponseWriter, r *http.Request) error {
+func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 
 	params := utils.GetQueryParams(r)
 
@@ -62,7 +62,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) error {
 
 		logger.Log(logger.INFO, "signin/get/decode", "Redirect to "+redirect)
 
-		// todo: change this to http... with some extension?
+		// TODO: change this to http... with some extension?
 		w.Header().Set("HX-Redirect", redirect)
 		return nil
 	}
@@ -106,7 +106,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request) error {
 /*
 NewUserHandler handles the POST request to /signup.
 */
-func NewUserHandler(w http.ResponseWriter, r *http.Request) error {
+func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	params := utils.GetQueryParams(r)
 
 	formErr := r.ParseForm()

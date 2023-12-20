@@ -16,7 +16,7 @@ import (
 	"pengoe/web/templates/layouts"
 )
 
-type DashboardProps struct {
+type AccountProps struct {
 	Title                string
 	Description          string
 	Session              utils.Session
@@ -25,7 +25,7 @@ type DashboardProps struct {
 	ShowNewAccountButton bool
 }
 
-func Dashboard(props DashboardProps) templ.Component {
+func Account(props AccountProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -78,7 +78,7 @@ func Dashboard(props DashboardProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Var4 := `Dashboard`
+				templ_7745c5c3_Var4 := `Account`
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

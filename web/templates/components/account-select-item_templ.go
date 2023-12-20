@@ -11,15 +11,7 @@ import "io"
 import "bytes"
 
 import "pengoe/internal/utils"
-
-func onClickHandler(msg int) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name:       `__templ_onClickHandler_2ab3`,
-		Function:   `function __templ_onClickHandler_2ab3(msg){console.log(msg);}`,
-		Call:       templ.SafeScript(`__templ_onClickHandler_2ab3`, msg),
-		CallInline: templ.SafeScriptInline(`__templ_onClickHandler_2ab3`, msg),
-	}
-}
+import "fmt"
 
 func AccountSelectItemSelected(props utils.AccountSelectItem) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -34,24 +26,16 @@ func AccountSelectItemSelected(props utils.AccountSelectItem) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, onClickHandler(props.Id))
+		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/account/%d", props.Id))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var2)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button class=\"rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 templ.ComponentScript = onClickHandler(props.Id)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" tabindex=\"-1\" aria-current=\"true\" aria-label=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2\" tabindex=\"-1\" aria-current=\"true\" aria-label=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +52,7 @@ func AccountSelectItemSelected(props utils.AccountSelectItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"text-primary group-hover:text-accent group-focus:text-accent text-sm\"><svg stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" viewBox=\"0 0 448 512\" height=\"1em\" width=\"1em\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z\"></path></svg></div></button></li>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"text-primary group-hover:text-accent group-focus:text-accent text-sm\"><svg stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" viewBox=\"0 0 448 512\" height=\"1em\" width=\"1em\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z\"></path></svg></div></a></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -125,24 +109,16 @@ func AccountSelectItem(props utils.AccountSelectItem) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, onClickHandler(props.Id))
+		var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/account/%d", props.Id))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button class=\"rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 templ.ComponentScript = onClickHandler(props.Id)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" tabindex=\"-1\" aria-label=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2\" tabindex=\"-1\" aria-label=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,7 +135,7 @@ func AccountSelectItem(props utils.AccountSelectItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></button></li>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></a></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

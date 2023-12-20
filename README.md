@@ -33,7 +33,7 @@ To run commands, you need to have:
 
 - [x] signup page
   - [x] add username field
-  - [x] add svg to background
+- [x] add svg to background
   - [x] fix tokens
   - [x] update handler for new schema
   - [x] error message if unauthorized
@@ -64,3 +64,5 @@ To run commands, you need to have:
 - [x] topbar 
   - [x] shows accounts correctly
   - [ ] fix empty accountselectitem list 
+  - [ ] fix: hidden elements are clickable
+- [ ] write tests

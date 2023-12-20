@@ -10,7 +10,7 @@ import (
 /*
 Handler for home page "/".
 */
-func HomePageHandler(w http.ResponseWriter, r *http.Request) error {
+func HomePageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	logger.Log(logger.INFO, "index/path", r.URL.Path)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

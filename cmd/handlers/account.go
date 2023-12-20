@@ -1,31 +1,36 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
-	"html"
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
+	"strconv"
 
 	"github.com/a-h/templ"
 )
 
-type newAccountPage struct {
-	Title                string
-	Descrtipion          string
-	Session              utils.Session
-	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
-	ShowNewAccountButton bool
-}
-
 /*
-NewAccountPageHandler handles the GET request to /account/new
+AccountPageHandler handles the GET request to /account/:id
 */
-func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) error {
+func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+	id, found := p["id"]
+	if !found {
+		router.Notfound(w, r)
+		return errors.New("Path variable \"id\" not found")
+	}
+
+	// id to int
+	accountId, errParse := strconv.Atoi(id)
+	if errParse != nil {
+		router.Notfound(w, r)
+		return errParse
+	}
 
 	// connect to db
 	dbManager := db.NewDBManager()
@@ -44,14 +49,15 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) error {
 	if user != nil {
 		// logged in user
 		logMsg := fmt.Sprintf("Logged in as %d", user.Id)
-		logger.Log(logger.INFO, "newaccount/checkSession", logMsg)
+		logger.Log(logger.INFO, "dashboard/checkSession", logMsg)
+
+		// TODO: check if the user has access to the account
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(user.Id)
 		if accountsErr != nil {
-			logger.Log(logger.ERROR, "dashboard/accounts", accountsErr.Error())
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return accountsErr
 		}
@@ -65,127 +71,45 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request) error {
 			})
 		}
 
-		data := pages.NewAccountProps{
-			Title:       "pengoe - New Account",
-			Description: "New Account for pengoe",
-			Session: &utils.Session{
+		data := pages.AccountProps{
+			Title:       "pengoe - Dashboard",
+			Description: "Dashboard for pengoe",
+			Session: utils.Session{
 				LoggedIn: true,
+				User:     *user,
 			},
-			SelectedAccountId:    0,
 			AccountSelectItems:   accountSelectItems,
-			ShowNewAccountButton: false,
+			SelectedAccountId:    accountId,
+			ShowNewAccountButton: true,
 		}
 
-		component := pages.NewAccount(data)
+		component := pages.Account(data)
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "newaccount/loggedin/res", "Template rendered successfully")
+		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
+
+		logger.Log(logger.INFO, "dashboard/loggedin/res", "Template rendered successfully")
 		return nil
 	}
 
 	// not logged in user
-	logger.Log(logger.WARNING, "newaccount/checkSession", sessionErr.Error())
-
-	data := pages.NewAccountProps{
-		Title:       "pengoe - New Account",
-		Description: "New Account for pengoe",
-		Session: &utils.Session{
-			LoggedIn: true,
-		},
-	}
-
-	component := pages.NewAccount(data)
-	handler := templ.Handler(component)
-	handler.ServeHTTP(w, r)
+	logger.Log(logger.WARNING, "dashboard/checkSession", sessionErr.Error())
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	logger.Log(logger.INFO, "newaccount/notloggedin/res", "Template rendered successfully")
-	return nil
-}
-
-/*
-NewAccountHandler handles the POST request to /account
-*/
-func NewAccountHandler(w http.ResponseWriter, r *http.Request) error {
-	formErr := r.ParseForm()
-	if formErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return formErr
+	data := pages.DashboardProps{
+		Title:       "pengoe - Dashboard",
+		Description: "Dashboard for pengoe",
+		Session: utils.Session{
+			LoggedIn: false,
+		},
 	}
 
-	logger.Log(logger.INFO, "newaccount/post/form", "Form parsed successfully")
+	component := pages.Dashboard(data)
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
 
-	name := html.EscapeString(r.FormValue("name"))
-	description := html.EscapeString(r.FormValue("description"))
-	currency := html.EscapeString(r.FormValue("currency"))
-
-	// TODO: handle empty values
-
-	logger.Log(logger.INFO, "newaccount/post/form", "Form values escaped successfully")
-
-	// connect to db
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return dbErr
-	}
-
-	logger.Log(logger.INFO, "newaccount/post/db", "Connected to db successfully")
-
-	defer db.Close()
-
-	userService := services.NewUserService(db)
-	accountService := services.NewAccountService(db)
-	accessService := services.NewAccessService(db)
-
-	// check if the user is logged in, protected route
-	user, sessionErr := userService.CheckAccessToken(r)
-	if user != nil {
-		// logged in user
-		logMsg := fmt.Sprintf("Logged in as %d", user.Id)
-		logger.Log(logger.INFO, "newaccount/post/checkSession", logMsg)
-
-		// create new account
-		account := &utils.Account{
-			Name:        name,
-			Description: description,
-			Currency:    currency,
-		}
-
-		newAccount, newAccountErr := accountService.New(account)
-		if newAccountErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return newAccountErr
-		}
-
-		logger.Log(logger.INFO, "newaccount/post/newAccount", "Account created successfully")
-
-		// create new access
-		access := &utils.Access{
-			Role:      utils.Admin,
-			UserId:    user.Id,
-			AccountId: newAccount.Id,
-		}
-
-		access, newAccessErr := accessService.New(access)
-		if newAccessErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return newAccessErr
-		}
-
-		logger.Log(logger.INFO, "newaccount/post/newAccess", "Access created successfully")
-
-		w.Header().Set("HX-Redirect", "/dashboard")
-	}
-
-	// not logged in user
-	if sessionErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return sessionErr
-	}
-
+	logger.Log(logger.INFO, "dashboard/notloggedin/res", "Template rendered successfully")
 	return nil
 }

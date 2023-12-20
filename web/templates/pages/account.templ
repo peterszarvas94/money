@@ -1,4 +1,4 @@
-package pages;
+package pages
 
 import (
 	"pengoe/web/templates/layouts"
@@ -6,16 +6,16 @@ import (
 	"pengoe/web/templates/components"
 )
 
-type DashboardProps struct {
-	Title       string
-	Description string
-	Session     utils.Session
+type AccountProps struct {
+	Title                string
+	Description          string
+	Session              utils.Session
 	SelectedAccountId    int
 	AccountSelectItems   []utils.AccountSelectItem
 	ShowNewAccountButton bool
 }
 
-templ Dashboard(props DashboardProps) {
+templ Account(props AccountProps) {
 	@layouts.Base(layouts.BaseProps{
 		Title: props.Title,
 		Description: props.Description,
@@ -31,7 +31,7 @@ templ Dashboard(props DashboardProps) {
 						ShowNewAccountButton: props.ShowNewAccountButton,
 					})
 					<div class="flex flex-col items-center justify-center p-10">
-						<h1 class="text-2xl font-semibold">Dashboard</h1>
+						<h1 class="text-2xl font-semibold">Account</h1>
 					</div>
 				</main>
 				<!-- end of content -->

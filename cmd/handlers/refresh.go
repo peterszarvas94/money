@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
@@ -14,10 +15,11 @@ import (
 RefreshTokenHandler gets a new access token and refresh token
 if the refresh token is valid.
 */
-func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) error {
+func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		fmt.Println("refresh/token", rokenErr)
 		return rokenErr
 	}
 

@@ -15,7 +15,7 @@ import (
 /*
 DashboardPageHandler handles the GET request to /dashboard.
 */
-func DashboardPageHandler(w http.ResponseWriter, r *http.Request) error {
+func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 
 	// connect to db
 	dbManager := db.NewDBManager()

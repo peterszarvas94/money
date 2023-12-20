@@ -16,7 +16,7 @@ import (
 CheckUserHandler checks if the username or email isaftaken.
 Sends icons.
 */
-func CheckUserHandler(w http.ResponseWriter, r *http.Request) error {
+func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	// connect to db
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()

@@ -28,7 +28,7 @@ type SigninPage struct {
 /*
 SigninPageHandler handles the GET request to /signin.
 */
-func SigninPageHandler(w http.ResponseWriter, r *http.Request) error {
+func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	params := utils.GetQueryParams(r)
 
 	// connect to the database
@@ -101,7 +101,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request) error {
 /*
 SigninHandler handles the POST request to /signin.
 */
-func SigninHandler(w http.ResponseWriter, r *http.Request) error {
+func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 
 	formErr := r.ParseForm()
 	if formErr != nil {

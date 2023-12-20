@@ -1,16 +1,13 @@
 package components
 
 import "pengoe/internal/utils"
-
-script onClickHandler(msg int) {
-	console.log(msg);
-}
+import "fmt"
 
 templ AccountSelectItemSelected(props utils.AccountSelectItem) {
 	<li>
-		<button
+		<a
+ 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", props.Id)) }
  			class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
- 			onclick={ onClickHandler(props.Id) }
  			tabindex="-1"
  			aria-current="true"
  			aria-label={ props.Text }
@@ -33,7 +30,7 @@ templ AccountSelectItemSelected(props utils.AccountSelectItem) {
 					></path>
 				</svg>
 			</div>
-		</button>
+		</a>
 	</li>
 }
 
@@ -69,13 +66,13 @@ templ AccountSelectItemNew() {
 
 templ AccountSelectItem(props utils.AccountSelectItem) {
 	<li>
-		<button
+		<a
+ 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", props.Id)) }
  			class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
- 			onclick={ onClickHandler(props.Id) }
  			tabindex="-1"
  			aria-label={ props.Text }
 		>
 			<div>{ props.Text }</div>
-		</button>
+		</a>
 	</li>
 }
