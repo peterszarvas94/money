@@ -39,3 +39,19 @@ func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 
 	logger.Log(logger.INFO, "notallowed/res", "Template rendered successfully")
 }
+
+/*
+InternalError handles the 500 error.
+*/
+func InternalError(w http.ResponseWriter, r *http.Request) {
+	logger.Log(logger.INFO, "internalservererror/tmpl", "Template parsed successfully")
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusInternalServerError)
+		
+	component := pages.InternalError()
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
+
+	logger.Log(logger.INFO, "internalservererror/res", "Template rendered successfully")
+}

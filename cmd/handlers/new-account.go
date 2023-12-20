@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
@@ -22,7 +23,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -43,7 +44,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 		accounts, accountsErr := accountService.GetByUserId(user.Id)
 		if accountsErr != nil {
 			logger.Log(logger.ERROR, "dashboard/accounts", accountsErr.Error())
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return accountsErr
 		}
 
@@ -102,7 +103,7 @@ NewAccountHandler handles the POST request to /account
 func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	formErr := r.ParseForm()
 	if formErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return formErr
 	}
 
@@ -120,7 +121,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 
@@ -148,7 +149,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 		newAccount, newAccountErr := accountService.New(account)
 		if newAccountErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return newAccountErr
 		}
 
@@ -163,7 +164,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 		access, newAccessErr := accessService.New(access)
 		if newAccessErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return newAccessErr
 		}
 
@@ -174,7 +175,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 	// not logged in user
 	if sessionErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return sessionErr
 	}
 

@@ -10,9 +10,9 @@ type AccountProps struct {
 	Title                string
 	Description          string
 	Session              utils.Session
-	SelectedAccountId    int
 	AccountSelectItems   []utils.AccountSelectItem
 	ShowNewAccountButton bool
+	Account              utils.Account
 }
 
 templ Account(props AccountProps) {
@@ -20,13 +20,13 @@ templ Account(props AccountProps) {
 		Title: props.Title,
 		Description: props.Description,
 	}) {
-		<div hx-ext="protected-page,description" id="page">
+		<div hx-ext="protected-page,description,show-notfound" id="page">
 			if props.Session.LoggedIn {
 				@components.Leftpanel()
 				<!-- content -->
 				<main class="absolute z-0 min-h-screen w-full bg-white text-black">
 					@components.Topbar(components.TopbarProps{
-						SelectedAccountId: props.SelectedAccountId,
+						SelectedAccountId: props.Account.Id,
 						AccountSelectItems: props.AccountSelectItems,
 						ShowNewAccountButton: props.ShowNewAccountButton,
 					})

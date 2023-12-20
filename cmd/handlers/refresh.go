@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"strconv"
@@ -18,7 +19,7 @@ if the refresh token is valid.
 func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		fmt.Println("refresh/token", rokenErr)
 		return rokenErr
 	}
@@ -28,21 +29,21 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]st
 	// check if refresh token is valid
 	claims, jwtErr := utils.ValidateToken(token)
 	if jwtErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return jwtErr
 	}
 
 	// get user id from claims
 	userIdStr, subErr := claims.GetSubject()
 	if subErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return subErr
 	}
 
 	// convert user id to int
 	userId, userIdErr := strconv.Atoi(userIdStr)
 	if userIdErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return userIdErr
 	}
 
@@ -50,7 +51,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]st
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -59,21 +60,21 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]st
 	// check if user exists
 	_, dbErr = userService.GetById(userId)
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 
 	// get new access token
 	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return accessTokenErr
 	}
 
 	// get new refresh token as well
 	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return refreshTokenErr
 	}
 

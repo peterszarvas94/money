@@ -126,6 +126,29 @@ htmx.defineExtension("show-client-error", {
 });
 
 /**
+ * "show-notfound" extension to render not found page
+ * only used on page which can throw 404
+ */
+htmx.defineExtension("show-notfound", {
+  transformResponse: function (text, xhr, _elt) {
+    console.log(xhr.status);
+    if (xhr.status === 404) {
+      return text;
+    }
+  },
+  // onEvent: function (name, evt) {
+  //   console.log(1);
+  //   if (name == "htmx:beforeOnLoad") {
+  //     const status = evt?.detail?.xhr?.status;
+  //     const statusNotFound = status === 404;
+  //     if (statusNotFound) {
+  //       evt.detail.shouldSwap = true;
+  //     }
+  //   }
+  // },
+});
+
+/**
  * "delete" extension to delete elements
  * only used on delete button
  */

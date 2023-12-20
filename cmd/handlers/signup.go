@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
@@ -36,7 +37,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -111,7 +112,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return formErr
 	}
 
@@ -129,7 +130,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()

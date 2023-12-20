@@ -9,6 +9,7 @@ import (
 type AccountService interface {
 	New(user *utils.Account) (*utils.Account, error)
 	GetByUserId(userId int) ([]*utils.Account, error)
+	GetById(accountId int) (*utils.Account, error)
 }
 
 type accountService struct {
@@ -97,4 +98,40 @@ func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
 	}
 
 	return accounts, nil
+}
+
+/*
+GetById is a function that returns an account for a given id.
+*/
+func (s *accountService) GetById(accountId int) (*utils.Account, error) {
+	row := s.db.QueryRow(
+		`SELECT
+			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
+		FROM account
+		WHERE account.id = ?`,
+		accountId,
+	)
+
+	var id int
+	var name string
+	var description string
+	var currency string
+	var createdAt string
+	var updatedAt string
+
+	scanErr := row.Scan(&id, &name, &description, &currency, &createdAt, &updatedAt)
+	if scanErr != nil {
+		return nil, scanErr
+	}
+
+	account := &utils.Account{
+		Id:          id,
+		Name:        name,
+		Description: description,
+		Currency:    currency,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+	}
+
+	return account, nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
@@ -21,7 +22,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -41,7 +42,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(user.Id)
 		if accountsErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return accountsErr
 		}
 

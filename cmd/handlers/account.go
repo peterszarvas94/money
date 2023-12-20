@@ -36,13 +36,20 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
 
 	userService := services.NewUserService(db)
 	accountService := services.NewAccountService(db)
+
+	// get account early
+	account, accountErr := accountService.GetById(accountId)
+	if accountErr != nil {
+		router.Notfound(w, r)
+		return accountErr
+	}
 
 	// check if the user is logged in, protected route
 	user, sessionErr := userService.CheckAccessToken(r)
@@ -58,7 +65,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(user.Id)
 		if accountsErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return accountsErr
 		}
 
@@ -79,8 +86,8 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 				User:     *user,
 			},
 			AccountSelectItems:   accountSelectItems,
-			SelectedAccountId:    accountId,
 			ShowNewAccountButton: true,
+			Account:              *account,
 		}
 
 		component := pages.Account(data)

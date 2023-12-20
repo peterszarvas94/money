@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
@@ -35,7 +36,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -52,7 +53,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		encoded := params["redirect"]
 		redirect, decodeErr := url.QueryUnescape(encoded)
 		if decodeErr != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			router.InternalError(w, r)
 			return decodeErr
 		}
 
@@ -105,7 +106,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return formErr
 	}
 
@@ -118,7 +119,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -167,7 +168,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	// if the login was successful
 	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return accessTokenErr
 	}
 
@@ -175,7 +176,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	refreshToken, refreshTokenErr := utils.NewToken(userId, utils.RefreshToken)
 	if refreshTokenErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return refreshTokenErr
 	}
 
@@ -204,7 +205,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	encoded := params["redirect"]
 	redirect, decodeErr := url.QueryUnescape(encoded)
 	if decodeErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return decodeErr
 	}
 

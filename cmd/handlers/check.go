@@ -6,6 +6,7 @@ import (
 	"net/mail"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
+	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/web/templates/components"
 
@@ -21,7 +22,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return dbErr
 	}
 	defer db.Close()
@@ -31,7 +32,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 	// Parse the form
 	parseErr := r.ParseForm()
 	if parseErr != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		router.InternalError(w, r)
 		return parseErr
 	}
 

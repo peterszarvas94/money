@@ -20,9 +20,9 @@ type AccountProps struct {
 	Title                string
 	Description          string
 	Session              utils.Session
-	SelectedAccountId    int
 	AccountSelectItems   []utils.AccountSelectItem
 	ShowNewAccountButton bool
+	Account              utils.Account
 }
 
 func Account(props AccountProps) templ.Component {
@@ -44,7 +44,7 @@ func Account(props AccountProps) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-ext=\"protected-page,description\" id=\"page\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-ext=\"protected-page,description,show-notfound\" id=\"page\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -67,7 +67,7 @@ func Account(props AccountProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = components.Topbar(components.TopbarProps{
-					SelectedAccountId:    props.SelectedAccountId,
+					SelectedAccountId:    props.Account.Id,
 					AccountSelectItems:   props.AccountSelectItems,
 					ShowNewAccountButton: props.ShowNewAccountButton,
 				}).Render(ctx, templ_7745c5c3_Buffer)
