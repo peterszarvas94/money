@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
@@ -20,7 +19,6 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]st
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
 		router.InternalError(w, r)
-		fmt.Println("refresh/token", rokenErr)
 		return rokenErr
 	}
 

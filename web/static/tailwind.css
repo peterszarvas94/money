@@ -583,6 +583,10 @@ video {
   display: flex;
 }
 
+.hidden {
+  display: none;
+}
+
 .h-10 {
   height: 2.5rem;
 }
@@ -618,10 +622,6 @@ video {
 
 .max-w-2xl {
   max-width: 42rem;
-}
-
-.max-w-md {
-  max-width: 28rem;
 }
 
 .max-w-sm {
@@ -667,6 +667,10 @@ video {
 
 .resize-y {
   resize: vertical;
+}
+
+.list-disc {
+  list-style-type: disc;
 }
 
 .flex-col {
@@ -836,6 +840,14 @@ video {
 
 .pb-6 {
   padding-bottom: 1.5rem;
+}
+
+.pl-2 {
+  padding-left: 0.5rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
 }
 
 .text-center {

@@ -17,7 +17,11 @@ func main() {
 
 	// home page
 	r.GET("/", handlers.HomePageHandler)
-	
+
+	// test page
+	// r.GET("/test/:id/deez/:a", handlers.TestHandler)
+	// r.GET("/test/:id/deez/nuts", handlers.TestHandler)
+
 	// signup
 	r.GET("/signup", handlers.SignupPageHandler)
 	r.POST("/signup", handlers.NewUserHandler)

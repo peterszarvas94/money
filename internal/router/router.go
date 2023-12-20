@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"pengoe/internal/logger"
 	"pengoe/internal/utils"
-	"reflect"
-	"runtime"
 	"strings"
 )
 
@@ -111,10 +109,11 @@ func (r *Router) DELETE(s string, handler HandlerFunc) {
 }
 
 /*
-ServeHTTP is mandatory
+ServeHTTP is mandatory.
+It searches for a matching route and calls the handler function.
 */
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	pathStr := r.URL.Path
+	pathStr := removeTrailingslash(r.URL.Path)
 	method := r.Method
 
 	// handle static files
@@ -129,24 +128,32 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path := utils.GetPatternFromStr(pathStr)
-	possible := router.routes
+	possible := []route{}
+
+	// check for possible matches
+	for _, route := range router.routes {
+		if len(route.pattern) != len(path) {
+			continue
+		}
+		possible = append(possible, route)
+	}
 
 	for i, pathSegment := range path {
 		newPossible := []route{}
-		isMatch := false
+		// check for exact match
 		for _, route := range possible {
-			patternSegment, rangeErr := utils.GetFromSlice(i, route.pattern)
-			if rangeErr != nil {
-				continue
-			}
-
-			if patternSegment == pathSegment {
+			patternSegment := route.pattern[i]
+			if pathSegment == patternSegment {
 				newPossible = append(newPossible, route)
-				isMatch = true
-				continue
 			}
-			if !isMatch && strings.HasPrefix(patternSegment, ":") {
-				newPossible = append(newPossible, route)
+		}
+		// if no exact match, check for variable match
+		if len(newPossible) == 0 {
+			for _, route := range possible {
+				patternSegment := route.pattern[i]
+				if strings.HasPrefix(patternSegment, ":") {
+					newPossible = append(newPossible, route)
+				}
 			}
 		}
 		possible = newPossible
@@ -156,7 +163,6 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	for _, route := range possible {
 		found = true
-		fmt.Println(route)
 		if route.method == method {
 			variables := utils.GetPathVariables(path, route.pattern)
 			handlerErr := route.handler(w, r, variables)
@@ -180,60 +186,12 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Url pattern matching.
-Eg.: /api/v1/user/:id -> /api/v1/user/1/
+removeTrailingslash removes trailing slash from path.
 */
-// func matches(pattern, path string) (bool, map[string]string) {
-//
-// 	// remove trailing slash
-// 	pattern = removeTrailingslash(pattern)
-// 	path = removeTrailingslash(path)
-//
-// 	patterns := strings.Split(pattern, "/")
-// 	paths := strings.Split(path, "/")
-//
-// 	// check if the number of patterns and paths are the same
-// 	if len(patterns) != len(paths) {
-// 		return false, nil
-// 	}
-//
-// 	pathVariables := make(map[string]string)
-//
-// 	// check if the patterns and paths match
-// 	for i, path := range paths {
-// 		pattern := patterns[i]
-//
-// 		if path == pattern {
-// 			continue
-// 		}
-//
-// 		if strings.HasPrefix(pattern, ":") {
-// 			key := strings.TrimPrefix(pattern, ":")
-// 			value := path
-// 			pathVariables[key] = value
-//
-// 			continue
-// 		}
-//
-// 		return false, nil
-// 	}
-//
-// 	return true, pathVariables
-// }
-
-// remove trailing slash
 func removeTrailingslash(path string) string {
 	if path != "/" && strings.HasSuffix(path, "/") {
 		return path[:len(path)-1]
 	}
 
 	return path
-}
-
-//list all routes with path, method and handler function name
-func (router *Router) ListRoutes() {
-	for i, routes := range router.routes {
-		handlerFuncName := runtime.FuncForPC(reflect.ValueOf(routes.handler).Pointer()).Name()
-		fmt.Printf("%d. %s %s -> %s\n", i+1, routes.method, routes.pattern, handlerFuncName)
-	}
 }
