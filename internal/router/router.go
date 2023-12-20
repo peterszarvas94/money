@@ -152,7 +152,11 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		possible = newPossible
 	}
 
+	found := false
+
 	for _, route := range possible {
+		found = true
+		fmt.Println(route)
 		if route.method == method {
 			variables := utils.GetPathVariables(path, route.pattern)
 			handlerErr := route.handler(w, r, variables)
@@ -164,14 +168,14 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if method == "GET" {
+	if found && method == "GET" {
 		// send back webpage to browser
 		MethodNotAllowed(w, r)
 		return
 	}
 
 	// otherwise send back error
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	Notfound(w, r)
 	return
 }
 
