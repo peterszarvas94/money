@@ -113,7 +113,7 @@ ServeHTTP is mandatory.
 It searches for a matching route and calls the handler function.
 */
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	pathStr := removeTrailingslash(r.URL.Path)
+	pathStr := removeTrailingSlash(r.URL.Path)
 	method := r.Method
 
 	// handle static files
@@ -128,16 +128,56 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path := utils.GetPatternFromStr(pathStr)
+
+	matchingRoutes, matchErr := matchRoutes(router.routes, path)
+	if matchErr != nil {
+		NotFound(w, r)
+		return
+	}
+
+	route, methodErr := matchMethod(matchingRoutes, method)
+	if methodErr != nil {
+		if len(matchingRoutes) < 1 && method == "GET" {
+			MethodNotAllowed(w, r)
+			return
+		}
+		NotFound(w, r)
+		return
+	}
+
+	variables := utils.GetPathVariables(route.pattern, path)
+
+	handlerErr := route.handler(w, r, variables)
+	if handlerErr != nil {
+		logger.Log(logger.ERROR, "handler", handlerErr.Error())
+	}
+}
+
+/*
+getSameLengthRoutes returns routes with the same length as path.
+*/
+func getSameLengthRoutes(routes []route, path []string) []route {
 	possible := []route{}
 
-	// check for possible matches
-	for _, route := range router.routes {
+	for _, route := range routes {
 		if len(route.pattern) != len(path) {
 			continue
 		}
 		possible = append(possible, route)
 	}
 
+	return possible
+}
+
+/*
+matchRoutes returns the route that matches the path.
+Works only for same length routes.
+You must filter routes by getSameLengthRoutes first.
+*/
+func matchRoutes(routes []route, path []string) ([]route, error) {
+	possible := getSameLengthRoutes(routes, path)
+
+	// get possible routes (should be only one)
 	for i, pathSegment := range path {
 		newPossible := []route{}
 		// check for exact match
@@ -159,36 +199,30 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		possible = newPossible
 	}
 
-	found := false
-
-	for _, route := range possible {
-		found = true
-		if route.method == method {
-			variables := utils.GetPathVariables(path, route.pattern)
-			handlerErr := route.handler(w, r, variables)
-			if handlerErr != nil {
-				logger.Log(logger.ERROR, "handler", handlerErr.Error())
-				fmt.Println(handlerErr.Error())
-			}
-			return
-		}
+	if len(possible) == 0 {
+		return []route{}, errors.New("No matching route found")
 	}
 
-	if found && method == "GET" {
-		// send back webpage to browser
-		MethodNotAllowed(w, r)
-		return
-	}
-
-	// otherwise send back error
-	Notfound(w, r)
-	return
+	return possible, nil
 }
 
 /*
-removeTrailingslash removes trailing slash from path.
+matchMethod returns the route that matches the method.
 */
-func removeTrailingslash(path string) string {
+func matchMethod(routes []route, method string) (route, error) {
+	for _, route := range routes {
+		if route.method == method {
+			return route, nil
+		}
+	}
+
+	return route{}, errors.New("No matching route found")
+}
+
+/*
+removeTrailingSlash removes trailing slash from path.
+*/
+func removeTrailingSlash(path string) string {
 	if path != "/" && strings.HasSuffix(path, "/") {
 		return path[:len(path)-1]
 	}

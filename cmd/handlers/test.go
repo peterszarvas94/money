@@ -6,7 +6,7 @@ import (
 	"github.com/a-h/templ"
 )
 
-func TestHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func TestPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	path := r.URL.Path;

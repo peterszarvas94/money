@@ -20,7 +20,7 @@ func SignoutHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/signin?redirect=%2Fdashboard", http.StatusSeeOther)
+	w.Header().Set("HX-Redirect", "/signin?redirect=%2Fdashboard")
 
 	logger.Log(logger.INFO, "signout/method", "User logged out and redirected to home page")
 	return nil

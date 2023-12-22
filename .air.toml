@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   include_ext = ["go", "templ", "html", "sql", "js", "css"]
   bin = "./tmp/main"
-  cmd = "templ generate && go build -o ./tmp/main ./cmd/main.go"
+  cmd = "templ generate && go test ./... && go build -o ./tmp/main ./cmd/main.go"
   exclude_regex = ["_templ\\.go$"]
   exclude_unchanged = false
   follow_symlink = false

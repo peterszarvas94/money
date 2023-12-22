@@ -19,7 +19,8 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, p map[string]st
 	token, rokenErr := utils.GetRefreshToken(r)
 	if rokenErr != nil {
 		router.InternalError(w, r)
-		return rokenErr
+		// ignore missing token error, it runs every page load
+		return nil
 	}
 
 	logger.Log(logger.INFO, "refresh/token", "Refresh token received")

@@ -64,7 +64,7 @@ func Test(props TestProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for key, value := range props.Varibales {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"pl-2\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"pl-4 list-inside list-disc\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

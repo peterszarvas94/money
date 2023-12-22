@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"net/http"
 	"net/url"
 	"strings"
 )
@@ -17,7 +16,7 @@ func GetPatternFromStr(s string) []string {
 	return path
 }
 
-func GetPathVariables(path []string, pattern []string) map[string]string {
+func GetPathVariables(pattern []string, path []string) map[string]string {
 	variables := make(map[string]string)
 
 	for i, patternSegment := range pattern {
@@ -30,14 +29,19 @@ func GetPathVariables(path []string, pattern []string) map[string]string {
 	return variables
 }
 
-func GetQueryParams(r *http.Request) map[string]string {
-	queryParams := make(map[string]string)
+func GetQueryParam(values url.Values, param string) (string) {
+	for key, value := range values {
+		if key == param {
+			return value[0]
+		}
+	}
+	return ""
+}
 
-	query := r.URL.Query()
-	for key, value := range query {
-		encoded := url.QueryEscape(value[0])
-		queryParams[key] = encoded
+func IsValidRedirect(redirect string, encoded bool) bool {
+	if encoded {
+		return strings.HasPrefix(redirect, "%2f") || strings.HasPrefix(redirect, "%2F")
 	}
 
-	return queryParams
+	return strings.HasPrefix(redirect, "/")
 }

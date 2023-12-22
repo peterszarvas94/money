@@ -22,15 +22,15 @@ type SigninPage struct {
 	Descrtipion string
 	Session     utils.Session
 	Redirect    template.URL
-	Values			map[string]string
-	Errors			map[string]string
+	Values      map[string]string
+	Errors      map[string]string
 }
 
 /*
 SigninPageHandler handles the GET request to /signin.
 */
 func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	params := utils.GetQueryParams(r)
+	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
 
 	// connect to the database
 	dbManager := db.NewDBManager()
@@ -49,21 +49,18 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
 		logger.Log(logger.INFO, "signin/checkSession", logMsg)
 
-		//decode uri componetns
-		encoded := params["redirect"]
-		redirect, decodeErr := url.QueryUnescape(encoded)
-		if decodeErr != nil {
-			router.InternalError(w, r)
-			return decodeErr
-		}
-
 		if redirect == "" {
 			redirect = "/dashboard"
 		}
 
+		if !utils.IsValidRedirect(redirect, false) {
+			router.InternalError(w, r)
+			return nil
+		}
+
 		w.Header().Set("HX-Redirect", redirect)
 
-		logger.Log(logger.INFO, "signin/get/decode", "Redirecting to "+redirect)
+		logger.Log(logger.INFO, "signin/get/decode", fmt.Sprintf("Redirect to %s", redirect))
 
 		return nil
 	}
@@ -71,13 +68,17 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	// not logged in
 	logger.Log(logger.INFO, "signin/checkSession", accessTokenErr.Error())
 
-	logger.Log(logger.INFO, "Template parsed successfully", "signin/signinTmpl")
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	redirect := params["redirect"]
 	if redirect == "" {
 		redirect = "%2Fdashboard"
+	} else {
+		redirect = url.QueryEscape(redirect)
+	}
+
+	if !utils.IsValidRedirect(redirect, true) {
+		router.InternalError(w, r)
+		return nil
 	}
 
 	data := pages.SigninProps{
@@ -86,16 +87,15 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		Session: utils.Session{
 			LoggedIn: false,
 		},
-		RedirectUrl: redirect,
+		RedirectUrl:     redirect,
 		UsernameOrEmail: "",
-		LoginError: "",
+		LoginError:      "",
 	}
 
-	component := pages.Signin(data);
-	handler := templ.Handler(component);
-	handler.ServeHTTP(w, r);
+	component := pages.Signin(data)
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
 
-	logger.Log(logger.INFO, "signin/get/res", "Template rendered successfully")
 	return nil
 }
 
@@ -103,6 +103,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 SigninHandler handles the POST request to /signin.
 */
 func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
 
 	formErr := r.ParseForm()
 	if formErr != nil {
@@ -135,13 +136,15 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
 
-		logger.Log(logger.INFO, "signin/post/errorTmpl", "Template parsed successfully")
-
-		params := utils.GetQueryParams(r)
-
-		redirect := params["redirect"]
 		if redirect == "" {
 			redirect = "%2Fdashboard"
+		} else {
+			redirect = url.QueryEscape(redirect)
+		}
+
+		if !utils.IsValidRedirect(redirect, true) {
+			router.InternalError(w, r)
+			return nil
 		}
 
 		data := pages.SigninProps{
@@ -150,22 +153,21 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 			Session: utils.Session{
 				LoggedIn: false,
 			},
-			RedirectUrl: redirect,
+			RedirectUrl:     redirect,
 			UsernameOrEmail: usernameOrEmail,
-			LoginError: "Incorrect username or password",
+			LoginError:      "Incorrect username or password",
 		}
 
-		component := pages.Signin(data);
-		handler := templ.Handler(component);
-		handler.ServeHTTP(w, r);
+		component := pages.Signin(data)
+		handler := templ.Handler(component)
+		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "signin/post/errorRes", "Template rendered successfully")
 		return nil
 	}
 
+	// if the login was successful
 	userId := user.Id
 
-	// if the login was successful
 	accessToken, accessTokenErr := utils.NewToken(userId, utils.AccessToken)
 	if accessTokenErr != nil {
 		router.InternalError(w, r)
@@ -191,6 +193,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		Path:     "/refresh",
 		Expires:  expires,
 		HttpOnly: true,
+		// TODO: uncomment this when https is enabled
 		// Secure:   true,
 		// SameSite: http.SameSiteLaxMode,
 	})
@@ -200,17 +203,17 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	// set the access token header
 	w.Header().Set("Authorization", "Bearer "+accessToken.Token)
 
-	params := utils.GetQueryParams(r)
+	if redirect == "" {
+		redirect = "/dashboard"
+	}
 
-	encoded := params["redirect"]
-	redirect, decodeErr := url.QueryUnescape(encoded)
-	if decodeErr != nil {
+	if !utils.IsValidRedirect(redirect, false) {
 		router.InternalError(w, r)
-		return decodeErr
+		return nil
 	}
 
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 
-	logger.Log(logger.INFO, "signin/post/res", "Redirected to "+redirect)
+	logger.Log(logger.INFO, "signin/post/res", fmt.Sprintf("Redirected to %s", redirect))
 	return nil
 }

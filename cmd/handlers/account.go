@@ -21,14 +21,14 @@ AccountPageHandler handles the GET request to /account/:id
 func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	id, found := p["id"]
 	if !found {
-		router.Notfound(w, r)
+		router.NotFound(w, r)
 		return errors.New("Path variable \"id\" not found")
 	}
 
 	// id to int
 	accountId, errParse := strconv.Atoi(id)
 	if errParse != nil {
-		router.Notfound(w, r)
+		router.NotFound(w, r)
 		return errParse
 	}
 
@@ -47,7 +47,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	// get account early
 	account, accountErr := accountService.GetById(accountId)
 	if accountErr != nil {
-		router.Notfound(w, r)
+		router.NotFound(w, r)
 		return accountErr
 	}
 

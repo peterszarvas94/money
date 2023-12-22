@@ -9,9 +9,9 @@ import (
 )
 
 /*
-Notfound handles the 404 error.
+NotFound handles the 404 error.
 */
-func Notfound(w http.ResponseWriter, r *http.Request) {
+func NotFound(w http.ResponseWriter, r *http.Request) {
 	logger.Log(logger.INFO, "notfound/tmpl", "Template parsed successfully")
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

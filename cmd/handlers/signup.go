@@ -30,8 +30,7 @@ type SignupPage struct {
 SignupPageHandler handles the GET request to /signup.
 */
 func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-
-	params := utils.GetQueryParams(r)
+	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
 
 	// connet to the database
 	dbManager := db.NewDBManager()
@@ -49,34 +48,34 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
 		logger.Log(logger.INFO, "signin/checkSession", logMsg)
 
-		//decode uri componetns
-		encoded := params["redirect"]
-		redirect, decodeErr := url.QueryUnescape(encoded)
-		if decodeErr != nil {
-			logger.Log(logger.ERROR, "signin/get/decode", decodeErr.Error())
-			return decodeErr
-		}
-
 		if redirect == "" {
 			redirect = "/dashboard"
 		}
 
-		logger.Log(logger.INFO, "signin/get/decode", "Redirect to "+redirect)
+		if !utils.IsValidRedirect(redirect, false) {
+			router.InternalError(w, r)
+			return nil
+		}
 
-		// TODO: change this to http... with some extension?
+		logger.Log(logger.INFO, "signin/get/decode", fmt.Sprintf("Redirecting to %s", redirect))
+
 		w.Header().Set("HX-Redirect", redirect)
 		return nil
 	}
 
 	logger.Log(logger.INFO, "signup/checkSession", accessTokenErr.Error())
 
-	logger.Log(logger.INFO, "signup/signupTmpl", "Template parsed successfully")
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	redirect := params["redirect"]
 	if redirect == "" {
 		redirect = "%2Fdashboard"
+	} else {
+		redirect = url.QueryEscape(redirect)
+	}
+
+	if !utils.IsValidRedirect(redirect, true) {
+		router.InternalError(w, r)
+		return nil
 	}
 
 	data := pages.SignupProps{
@@ -100,7 +99,6 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
 
-	logger.Log(logger.INFO, "signup/get/res", "Template rendered successfully")
 	return nil
 }
 
@@ -108,7 +106,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 NewUserHandler handles the POST request to /signup.
 */
 func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	params := utils.GetQueryParams(r)
+	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
 
 	formErr := r.ParseForm()
 	if formErr != nil {
@@ -209,9 +207,15 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 
 		logger.Log(logger.INFO, "signup/post/signupTmpl", "Template parsed successfully")
 
-		redirect := params["redirect"]
 		if redirect == "" {
 			redirect = "%2Fdashboard"
+		} else {
+			redirect = url.QueryEscape(redirect)
+		}
+
+		if !utils.IsValidRedirect(redirect, true) {
+			router.InternalError(w, r)
+			return nil
 		}
 
 		data := pages.SignupProps{
@@ -235,13 +239,25 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "signup/post/res", "Template rendered successfully")
+		return nil
+	}
+
+	if redirect == "" {
+		redirect = "%2Fdashboard"
+	} else {
+		redirect = url.QueryEscape(redirect)
+	}
+
+	if !utils.IsValidRedirect(redirect, true) {
+		router.InternalError(w, r)
 		return nil
 	}
 
 	// successful signup, redirect to signin
-	logger.Log(logger.INFO, "signup/post/user", "User added successfully, redirect to "+params["redirect"])
+	logger.Log(logger.INFO, "signup/post/user", fmt.Sprintf("User added successfully, redirect to /signin?redirect=%s", redirect))
 
-	http.Redirect(w, r, "/signin?redirect="+params["redirect"], http.StatusSeeOther)
+	fmt.Printf("redirect: %s\n", redirect)
+
+	http.Redirect(w, r, fmt.Sprintf("/signin?redirect=%s", redirect), http.StatusSeeOther)
 	return nil
 }
