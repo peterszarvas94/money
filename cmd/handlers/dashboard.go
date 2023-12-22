@@ -73,7 +73,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 
 		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
 
-		logger.Log(logger.INFO, "dashboard/loggedin/res", "Template rendered successfully")
+
 		return nil
 	}
 
@@ -94,6 +94,6 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
 
-	logger.Log(logger.INFO, "dashboard/notloggedin/res", "Template rendered successfully")
+
 	return nil
 }

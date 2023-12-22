@@ -1,8 +1,15 @@
 #!make
 
+# Include environment variables from .env file
+ENV_FILE := .env
+include $(ENV_FILE)
+export $(shell sed 's/=.*//' $(ENV_FILE))
+
+LOG_LEVEL ?= info
+
 run:
 	killport 8080
-	air -- -log error
+	air -- -log $(LOG_LEVEL)
 
 # Generate tailwindcss classes for development
 tw:

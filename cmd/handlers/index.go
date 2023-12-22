@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"pengoe/internal/logger"
 	"pengoe/web/templates/pages"
+
 	"github.com/a-h/templ"
 )
 
@@ -23,8 +24,6 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, p map[string]string
 	component := pages.Index(data);
 	handler := templ.Handler(component);
 	handler.ServeHTTP(w, r);
-
-	logger.Log(logger.INFO, "index/res", "Template rendered successfully")
 
 	return nil
 }

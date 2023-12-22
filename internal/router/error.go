@@ -20,8 +20,6 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	component := pages.NotFound()
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
-
-	logger.Log(logger.INFO, "notfound/res", "Template rendered successfully")
 }
 
 /*
@@ -32,12 +30,10 @@ func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusMethodNotAllowed)
-		
+
 	component := pages.NotAllowed()
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
-
-	logger.Log(logger.INFO, "notallowed/res", "Template rendered successfully")
 }
 
 /*
@@ -48,10 +44,8 @@ func InternalError(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusInternalServerError)
-		
+
 	component := pages.InternalError()
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
-
-	logger.Log(logger.INFO, "internalservererror/res", "Template rendered successfully")
 }

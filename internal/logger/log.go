@@ -19,6 +19,8 @@ const (
 
 const maxLoglevel = int(FATAL)
 
+var Loglevel string
+
 // Returns the string representation of the loglevel
 func llToString(ll LoglevelEnum) string {
 	switch ll {
@@ -54,7 +56,14 @@ func llToEnum(ll string) LoglevelEnum {
 // Logs into log.txt in the following format:
 // LEVEL location YYYY-MM-DD HH:MM:SS - message
 func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
-	fileName := "internal/logger/log.txt"
+	// check if message loglevel is less than the loglevel
+	// e.g. if message loglevel is INFO and loglevel is WARNING, don't log
+	loglevelEnum := GetLogLevel()
+	if messageLoglevelEnum < loglevelEnum {
+		return
+	}
+
+	fileName := "logs"
 	now := time.Now().Format("2006-01-02 15:04:05")
 
 	file, fileErr := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -64,16 +73,8 @@ func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
 	}
 	defer file.Close()
 
-	messageLoglevelStr := llToString(messageLoglevelEnum)
-
-	formattedMessage := fmt.Sprintf("%s %s %s - %s", messageLoglevelStr, location, now, message)
+	formattedMessage := fmt.Sprintf("%s %s %s - %s", llToString(messageLoglevelEnum), location, now, message)
 	logger := log.New(file, "", 0)
-
-	loglevelEnum := GetLogLevel()
-
-	if messageLoglevelEnum < loglevelEnum {
-		return
-	}
 
 	if messageLoglevelEnum == FATAL {
 		logger.Fatal(formattedMessage)
@@ -81,8 +82,6 @@ func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
 		logger.Println(formattedMessage)
 	}
 }
-
-var Loglevel string
 
 // Returns the loggin level from the -l flag, defaulting to INFO
 func GetLogLevel() LoglevelEnum {

@@ -10,9 +10,11 @@ import (
 )
 
 func main() {
+	// get log level from command line flag -log
 	flag.StringVar(&logger.Loglevel, "log", "INFO", "-log INFO|WARNING|ERROR|FATAL")
 	flag.Parse()
 
+	// create router
 	r := router.NewRouter()
 
 	// home page

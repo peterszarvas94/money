@@ -65,4 +65,4 @@ To run commands, you need to have:
   - [x] shows accounts correctly
   - [ ] fix empty accountselectitem list 
   - [ ] fix: hidden elements are clickable
-- [ ] write tests
+- [x] write tests

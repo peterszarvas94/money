@@ -96,7 +96,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 
 		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
 
-		logger.Log(logger.INFO, "dashboard/loggedin/res", "Template rendered successfully")
+
 		return nil
 	}
 
@@ -117,6 +117,6 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
 
-	logger.Log(logger.INFO, "dashboard/notloggedin/res", "Template rendered successfully")
+
 	return nil
 }

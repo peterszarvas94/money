@@ -1,0 +1,30 @@
+WARNING dashboard/checkSession 2023-12-22 22:23:31 - No authorization header
+INFO refresh/token 2023-12-22 22:23:31 - Refresh token received
+INFO refresh/res 2023-12-22 22:23:32 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:23:32 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:23:32 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:35:51 - No authorization header
+INFO refresh/token 2023-12-22 22:35:51 - Refresh token received
+INFO refresh/res 2023-12-22 22:35:51 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:35:52 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:35:52 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:35:52 - No authorization header
+INFO refresh/token 2023-12-22 22:35:52 - Refresh token received
+INFO refresh/res 2023-12-22 22:35:52 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:35:52 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:35:52 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:35:52 - No authorization header
+INFO refresh/token 2023-12-22 22:35:52 - Refresh token received
+INFO refresh/res 2023-12-22 22:35:52 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:35:52 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:35:52 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:35:52 - No authorization header
+INFO refresh/token 2023-12-22 22:35:52 - Refresh token received
+INFO refresh/res 2023-12-22 22:35:52 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:35:53 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:35:53 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:36:16 - No authorization header
+INFO refresh/token 2023-12-22 22:36:16 - Refresh token received
+INFO refresh/res 2023-12-22 22:36:17 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:36:17 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:36:17 - Template parsed successfully

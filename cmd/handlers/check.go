@@ -52,7 +52,6 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 			handler := templ.Handler(component)
 			handler.ServeHTTP(w, r)
 
-			logger.Log(logger.INFO, "check/username/correctres", "Template rendered successfully")
 			return nil
 		}
 
@@ -64,7 +63,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "check/username/incorrectres", "Template rendered successfully")
+
 		return nil
 	}
 
@@ -100,7 +99,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "check/email/incorrect", "Template rendered successfully")
+
 		return nil
 	}
 
