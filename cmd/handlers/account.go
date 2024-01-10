@@ -56,7 +56,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	if user != nil {
 		// logged in user
 		logMsg := fmt.Sprintf("Logged in as %d", user.Id)
-		logger.Log(logger.INFO, "dashboard/checkSession", logMsg)
+		logger.Log(logger.INFO, "accountpage/checkSession", logMsg)
 
 		// TODO: check if the user has access to the account
 
@@ -94,18 +94,17 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		logger.Log(logger.INFO, "dashboard/loggedin/tmpl", "Template parsed successfully")
-
+		logger.Log(logger.INFO, "accountpage/loggedin/tmpl", "Template parsed successfully")
 
 		return nil
 	}
 
 	// not logged in user
-	logger.Log(logger.WARNING, "dashboard/checkSession", sessionErr.Error())
+	logger.Log(logger.WARNING, "accountpage/checkSession", sessionErr.Error())
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	data := pages.DashboardProps{
+	data := pages.AccountProps{
 		Title:       "pengoe - Dashboard",
 		Description: "Dashboard for pengoe",
 		Session: utils.Session{
@@ -113,10 +112,71 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 		},
 	}
 
-	component := pages.Dashboard(data)
+	component := pages.Account(data)
 	handler := templ.Handler(component)
 	handler.ServeHTTP(w, r)
 
+	return nil
+}
+
+/*
+DeleteAccountHandler handles the GET request to /account/:id
+*/
+func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+	id, found := p["id"]
+	if !found {
+		router.NotFound(w, r)
+		return errors.New("Path variable \"id\" not found")
+	}
+
+	// id to int
+	accountId, errParse := strconv.Atoi(id)
+	if errParse != nil {
+		router.NotFound(w, r)
+		return errParse
+	}
+
+	// connect to db
+	dbManager := db.NewDBManager()
+	db, dbErr := dbManager.GetDB()
+	if dbErr != nil {
+		router.InternalError(w, r)
+		return dbErr
+	}
+	defer db.Close()
+
+	userService := services.NewUserService(db)
+	accountService := services.NewAccountService(db)
+
+	// check if the user is logged in, protected route
+	user, sessionErr := userService.CheckAccessToken(r)
+	if user != nil {
+		// logged in user
+		logger.Log(logger.INFO, "accountpage/checkSession", fmt.Sprintf("Logged in as %d", user.Id))
+
+		// TODO: check if the user has access to the account
+
+		// delete account
+		accountErr := accountService.Delete(accountId)
+		if accountErr != nil {
+			router.NotFound(w, r)
+			return accountErr
+		}
+		fmt.Println("Account deleted")
+
+		logger.Log(logger.INFO, "accountpage/delete", fmt.Sprintf("Account %d deleted", accountId))
+
+		// redirect to dashboard
+		w.Header().Set("HX-Redirect", "/dashboard")
+			
+		return nil
+	}
+
+	// not logged in user
+	logger.Log(logger.WARNING, "accountpage/checkSession", sessionErr.Error())
+
+	// redirect to login
+	w.Header().Set("HX-Redirect", "/signin")
 
 	return nil
 }

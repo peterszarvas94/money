@@ -72,7 +72,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-
+		logger.Log(logger.INFO, "newaccount/loggedin/res", "Template rendered successfully")
 		return nil
 	}
 
@@ -93,7 +93,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-
+	logger.Log(logger.INFO, "newaccount/notloggedin/res", "Template rendered successfully")
 	return nil
 }
 

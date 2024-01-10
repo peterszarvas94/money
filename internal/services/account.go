@@ -10,6 +10,7 @@ type AccountService interface {
 	New(user *utils.Account) (*utils.Account, error)
 	GetByUserId(userId int) ([]*utils.Account, error)
 	GetById(accountId int) (*utils.Account, error)
+	Delete(accountId int) error
 }
 
 type accountService struct {
@@ -134,4 +135,19 @@ func (s *accountService) GetById(accountId int) (*utils.Account, error) {
 	}
 
 	return account, nil
+}
+
+/*
+Delete is a function that deletes an account from the database.
+*/
+func (s *accountService) Delete(accountId int) error {
+	_, deleteErr := s.db.Exec(
+		`DELETE FROM account WHERE id = ?`,
+		accountId,
+	)
+	if deleteErr != nil {
+		return deleteErr
+	}
+
+	return nil
 }

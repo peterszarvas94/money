@@ -31,22 +31,13 @@ To run commands, you need to have:
 
 ## Todo
 
+### Pages
+
 - [x] signup page
   - [x] add username field
-- [x] add svg to background
-  - [x] fix tokens
-  - [x] update handler for new schema
-  - [x] error message if unauthorized
 - [x] signin page
   - [x] form
   - [x] error message if unauthorized
-- [x] dashboard page
-- [ ] loading states
-  - [x] for protected pages
-  - [ ] for button presses
-- [ ] toast notifications
-- [x] add services to backend
-- [ ] viewtransition api
 - [ ] dashboard page
   - [x] handler
   - [x] account selector
@@ -57,12 +48,33 @@ To run commands, you need to have:
   - [x] handler
   - [x] form
   - [x] backend functions
-- [ ] left panel can be pinned
-- [ ] better errors
-  - [x] central error handling
-  - [ ] revocer from errors
+- [ ] account page
+  - [ ] delete button
+  - [ ] new event form
+
+### Components
+
 - [x] topbar 
   - [x] shows accounts correctly
-  - [ ] fix empty accountselectitem list 
-  - [ ] fix: hidden elements are clickable
-- [x] write tests
+  - [x] fix empty accountselectitem list 
+  - [x] fix: hidden elements are clickable
+- [ ] left panel
+  - [ ] can be pinned
+
+### Misc
+
+- [x] add svg to background
+  - [x] fix tokens
+  - [x] update handler for new schema
+  - [x] error message if unauthorized
+- [ ] loading states
+  - [x] for protected pages
+  - [ ] for button presses
+- [ ] toast notifications
+- [x] add services to backend
+- [ ] viewtransition api
+- [ ] better errors
+  - [x] central error handling
+  - [ ] recover from errors
+- [ ] rewrite client-side event bus
+- [x] tests

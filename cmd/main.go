@@ -49,6 +49,7 @@ func main() {
 	// new account page
 	r.GET("/account/new", handlers.NewAccountPageHandler)
 	r.POST("/account", handlers.NewAccountHandler)
+	r.DELETE("/account/:id", handlers.DeleteAccountHandler)
 
 	// account page
 	r.GET("/account/:id", handlers.AccountPageHandler)

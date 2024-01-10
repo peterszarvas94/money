@@ -28,3 +28,436 @@ INFO refresh/token 2023-12-22 22:36:16 - Refresh token received
 INFO refresh/res 2023-12-22 22:36:17 - New tokens sent
 INFO dashboard/checkSession 2023-12-22 22:36:17 - Logged in as 1
 INFO dashboard/loggedin/tmpl 2023-12-22 22:36:17 - Template parsed successfully
+WARNING dashboard/checkSession 2023-12-22 22:40:00 - No authorization header
+INFO refresh/token 2023-12-22 22:40:00 - Refresh token received
+INFO refresh/res 2023-12-22 22:40:01 - New tokens sent
+INFO dashboard/checkSession 2023-12-22 22:40:01 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2023-12-22 22:40:01 - Template parsed successfully
+INFO index/path 2024-01-10 17:26:39 - /
+WARNING dashboard/checkSession 2024-01-10 17:26:42 - No authorization header
+INFO internalservererror/tmpl 2024-01-10 17:26:42 - Template parsed successfully
+INFO signin/checkSession 2024-01-10 17:26:42 - No authorization header
+INFO internalservererror/tmpl 2024-01-10 17:26:42 - Template parsed successfully
+INFO signin/post/parse 2024-01-10 17:26:48 - Form parsed successfully
+INFO signin/post/access 2024-01-10 17:26:51 - Access token created successfully
+INFO signin/post/refresh 2024-01-10 17:26:51 - Refresh token created successfully
+INFO signin/post/res 2024-01-10 17:26:51 - Redirected to /dashboard
+WARNING dashboard/checkSession 2024-01-10 17:26:51 - No authorization header
+INFO refresh/token 2024-01-10 17:26:51 - Refresh token received
+INFO refresh/res 2024-01-10 17:26:51 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:26:51 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:26:51 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:37:06 - No authorization header
+INFO refresh/token 2024-01-10 17:37:06 - Refresh token received
+INFO refresh/res 2024-01-10 17:37:06 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:37:06 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:37:06 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:37:44 - No authorization header
+INFO refresh/token 2024-01-10 17:37:44 - Refresh token received
+INFO refresh/res 2024-01-10 17:37:45 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:37:45 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:37:45 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:37:50 - No authorization header
+INFO refresh/token 2024-01-10 17:37:50 - Refresh token received
+INFO refresh/res 2024-01-10 17:37:51 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:37:52 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:37:52 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:38:30 - No authorization header
+INFO refresh/token 2024-01-10 17:38:31 - Refresh token received
+INFO refresh/res 2024-01-10 17:38:31 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:38:32 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:38:32 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:38:55 - No authorization header
+INFO refresh/token 2024-01-10 17:38:55 - Refresh token received
+INFO refresh/res 2024-01-10 17:38:56 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:38:56 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:38:57 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:39:15 - No authorization header
+INFO refresh/token 2024-01-10 17:39:15 - Refresh token received
+INFO refresh/res 2024-01-10 17:39:15 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:39:15 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:39:15 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:40:03 - No authorization header
+INFO refresh/token 2024-01-10 17:40:03 - Refresh token received
+INFO refresh/res 2024-01-10 17:40:03 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:40:03 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:40:03 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:40:04 - No authorization header
+INFO refresh/token 2024-01-10 17:40:04 - Refresh token received
+INFO refresh/res 2024-01-10 17:40:04 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:40:04 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:40:05 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:40:33 - No authorization header
+INFO refresh/token 2024-01-10 17:40:33 - Refresh token received
+INFO refresh/res 2024-01-10 17:40:33 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:40:34 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:40:34 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:40:35 - No authorization header
+INFO refresh/token 2024-01-10 17:40:35 - Refresh token received
+INFO refresh/res 2024-01-10 17:40:35 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:40:35 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:40:36 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:40:50 - No authorization header
+INFO refresh/token 2024-01-10 17:40:50 - Refresh token received
+INFO refresh/res 2024-01-10 17:40:51 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:40:51 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:40:51 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:41:02 - No authorization header
+INFO refresh/token 2024-01-10 17:41:02 - Refresh token received
+INFO refresh/res 2024-01-10 17:41:02 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:41:02 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:41:02 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:41:24 - No authorization header
+WARNING dashboard/checkSession 2024-01-10 17:41:25 - No authorization header
+INFO refresh/token 2024-01-10 17:41:25 - Refresh token received
+INFO refresh/res 2024-01-10 17:41:25 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:41:25 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:41:25 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:41:26 - No authorization header
+INFO refresh/token 2024-01-10 17:41:26 - Refresh token received
+INFO refresh/res 2024-01-10 17:41:26 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:41:26 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:41:26 - Template parsed successfully
+WARNING newaccount/checkSession 2024-01-10 17:41:41 - No authorization header
+INFO refresh/token 2024-01-10 17:41:41 - Refresh token received
+INFO refresh/res 2024-01-10 17:41:41 - New tokens sent
+INFO newaccount/checkSession 2024-01-10 17:41:41 - Logged in as 1
+INFO newaccount/post/form 2024-01-10 17:41:45 - Form parsed successfully
+INFO newaccount/post/form 2024-01-10 17:41:45 - Form values escaped successfully
+INFO newaccount/post/db 2024-01-10 17:41:45 - Connected to db successfully
+INFO newaccount/post/checkSession 2024-01-10 17:41:45 - Logged in as 1
+INFO newaccount/post/newAccount 2024-01-10 17:41:45 - Account created successfully
+INFO newaccount/post/newAccess 2024-01-10 17:41:45 - Access created successfully
+WARNING dashboard/checkSession 2024-01-10 17:41:45 - No authorization header
+INFO refresh/token 2024-01-10 17:41:45 - Refresh token received
+INFO refresh/res 2024-01-10 17:41:45 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:41:45 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:41:45 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 17:50:50 - No authorization header
+INFO refresh/token 2024-01-10 17:50:50 - Refresh token received
+INFO refresh/res 2024-01-10 17:50:50 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 17:50:50 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 17:50:50 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 17:50:56 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:01:00 - No authorization header
+INFO refresh/token 2024-01-10 18:01:00 - Refresh token received
+INFO refresh/res 2024-01-10 18:01:00 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:01:00 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:01:01 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:06:55 - No authorization header
+INFO refresh/token 2024-01-10 18:06:55 - Refresh token received
+INFO refresh/res 2024-01-10 18:06:56 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:06:57 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:06:58 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:07:41 - No authorization header
+INFO refresh/token 2024-01-10 18:07:41 - Refresh token received
+INFO refresh/res 2024-01-10 18:07:42 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:07:42 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:07:42 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:07:46 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:09:08 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:09:12 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:09:20 - No authorization header
+INFO refresh/token 2024-01-10 18:09:20 - Refresh token received
+INFO refresh/res 2024-01-10 18:09:20 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:09:21 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:09:21 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:09:22 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:10:10 - No authorization header
+INFO refresh/token 2024-01-10 18:10:10 - Refresh token received
+INFO refresh/res 2024-01-10 18:10:10 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:10:10 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:10:10 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:10:23 - No authorization header
+INFO refresh/token 2024-01-10 18:10:23 - Refresh token received
+INFO refresh/res 2024-01-10 18:10:23 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:10:23 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:10:23 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:10:24 - Template parsed successfully
+INFO notfound/tmpl 2024-01-10 18:12:27 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:12:44 - No authorization header
+INFO refresh/token 2024-01-10 18:12:44 - Refresh token received
+INFO refresh/res 2024-01-10 18:12:44 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:12:45 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:12:46 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:12:52 - No authorization header
+INFO refresh/token 2024-01-10 18:12:52 - Refresh token received
+INFO refresh/res 2024-01-10 18:12:52 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:12:53 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:12:53 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:13:07 - No authorization header
+INFO refresh/token 2024-01-10 18:13:07 - Refresh token received
+INFO refresh/res 2024-01-10 18:13:07 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:13:07 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:13:07 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:13:29 - No authorization header
+INFO refresh/token 2024-01-10 18:13:29 - Refresh token received
+INFO refresh/res 2024-01-10 18:13:29 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:13:29 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:13:30 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:14:11 - No authorization header
+INFO refresh/token 2024-01-10 18:14:11 - Refresh token received
+INFO refresh/res 2024-01-10 18:14:12 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:14:12 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:14:12 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:14:21 - No authorization header
+INFO refresh/token 2024-01-10 18:14:21 - Refresh token received
+INFO refresh/res 2024-01-10 18:14:21 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:14:21 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:14:22 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:14:29 - No authorization header
+INFO refresh/token 2024-01-10 18:14:30 - Refresh token received
+INFO refresh/res 2024-01-10 18:14:30 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:14:30 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:14:30 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:14:57 - No authorization header
+INFO refresh/token 2024-01-10 18:14:58 - Refresh token received
+INFO refresh/res 2024-01-10 18:14:58 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:14:58 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:14:58 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:15:04 - No authorization header
+INFO signin/checkSession 2024-01-10 18:15:04 - No authorization header
+WARNING accountpage/checkSession 2024-01-10 18:15:13 - No authorization header
+INFO refresh/token 2024-01-10 18:15:13 - Refresh token received
+INFO refresh/res 2024-01-10 18:15:13 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:15:13 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:15:14 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:16:10 - No authorization header
+INFO signin/checkSession 2024-01-10 18:16:10 - No authorization header
+WARNING accountpage/checkSession 2024-01-10 18:17:36 - No authorization header
+INFO refresh/token 2024-01-10 18:17:36 - Refresh token received
+INFO refresh/res 2024-01-10 18:17:36 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:17:36 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:17:36 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:17:37 - No authorization header
+INFO signin/checkSession 2024-01-10 18:17:37 - No authorization header
+WARNING accountpage/checkSession 2024-01-10 18:18:14 - No authorization header
+INFO refresh/token 2024-01-10 18:18:14 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:15 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:18:15 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:18:15 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:18:16 - No authorization header
+INFO signin/checkSession 2024-01-10 18:18:16 - No authorization header
+WARNING accountpage/checkSession 2024-01-10 18:18:26 - No authorization header
+INFO refresh/token 2024-01-10 18:18:26 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:26 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:18:26 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:18:26 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:18:39 - No authorization header
+INFO refresh/token 2024-01-10 18:18:39 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:39 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:18:39 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:18:40 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:18:42 - No authorization header
+INFO signin/checkSession 2024-01-10 18:18:43 - No authorization header
+INFO refresh/token 2024-01-10 18:18:43 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:43 - New tokens sent
+INFO signin/checkSession 2024-01-10 18:18:43 - Logged in as 1, redirecting to dashboard
+INFO signin/get/decode 2024-01-10 18:18:43 - Redirect to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:18:43 - No authorization header
+INFO refresh/token 2024-01-10 18:18:43 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:44 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:18:44 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:18:45 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:18:47 - No authorization header
+INFO refresh/token 2024-01-10 18:18:47 - Refresh token received
+INFO refresh/res 2024-01-10 18:18:47 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:18:47 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:18:48 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:19:48 - No authorization header
+INFO signin/checkSession 2024-01-10 18:19:48 - No authorization header
+INFO refresh/token 2024-01-10 18:19:48 - Refresh token received
+INFO refresh/res 2024-01-10 18:19:48 - New tokens sent
+INFO signin/checkSession 2024-01-10 18:19:48 - Logged in as 1, redirecting to dashboard
+INFO signin/get/decode 2024-01-10 18:19:48 - Redirect to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:19:48 - No authorization header
+INFO refresh/token 2024-01-10 18:19:48 - Refresh token received
+INFO refresh/res 2024-01-10 18:19:48 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:19:48 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:19:49 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:20:23 - No authorization header
+INFO refresh/token 2024-01-10 18:20:23 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:23 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:20:23 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:20:23 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:20:24 - No authorization header
+INFO signin/checkSession 2024-01-10 18:20:24 - No authorization header
+INFO refresh/token 2024-01-10 18:20:24 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:24 - New tokens sent
+INFO signin/checkSession 2024-01-10 18:20:25 - Logged in as 1, redirecting to dashboard
+INFO signin/get/decode 2024-01-10 18:20:25 - Redirect to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:20:25 - No authorization header
+INFO refresh/token 2024-01-10 18:20:25 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:25 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:20:25 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:20:25 - Template parsed successfully
+INFO signout/method 2024-01-10 18:20:33 - User logged out and redirected to home page
+INFO signin/checkSession 2024-01-10 18:20:33 - No authorization header
+INFO internalservererror/tmpl 2024-01-10 18:20:33 - Template parsed successfully
+INFO signin/post/parse 2024-01-10 18:20:35 - Form parsed successfully
+INFO signin/post/access 2024-01-10 18:20:35 - Access token created successfully
+INFO signin/post/refresh 2024-01-10 18:20:35 - Refresh token created successfully
+INFO signin/post/res 2024-01-10 18:20:35 - Redirected to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:20:35 - No authorization header
+INFO refresh/token 2024-01-10 18:20:35 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:35 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:20:35 - Logged in as 10
+INFO dashboard/loggedin/tmpl 2024-01-10 18:20:35 - Template parsed successfully
+INFO signout/method 2024-01-10 18:20:37 - User logged out and redirected to home page
+INFO signin/checkSession 2024-01-10 18:20:37 - No authorization header
+INFO internalservererror/tmpl 2024-01-10 18:20:37 - Template parsed successfully
+INFO signin/post/parse 2024-01-10 18:20:41 - Form parsed successfully
+INFO signin/post/access 2024-01-10 18:20:41 - Access token created successfully
+INFO signin/post/refresh 2024-01-10 18:20:41 - Refresh token created successfully
+INFO signin/post/res 2024-01-10 18:20:41 - Redirected to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:20:41 - No authorization header
+INFO refresh/token 2024-01-10 18:20:41 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:41 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:20:41 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:20:42 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:20:44 - No authorization header
+INFO refresh/token 2024-01-10 18:20:44 - Refresh token received
+INFO refresh/res 2024-01-10 18:20:44 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:20:44 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:20:44 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:21:37 - No authorization header
+INFO signin/checkSession 2024-01-10 18:21:37 - No authorization header
+INFO refresh/token 2024-01-10 18:21:37 - Refresh token received
+INFO refresh/res 2024-01-10 18:21:37 - New tokens sent
+INFO signin/checkSession 2024-01-10 18:21:37 - Logged in as 1, redirecting to dashboard
+INFO signin/get/decode 2024-01-10 18:21:37 - Redirect to /dashboard
+WARNING dashboard/checkSession 2024-01-10 18:21:37 - No authorization header
+INFO refresh/token 2024-01-10 18:21:37 - Refresh token received
+INFO refresh/res 2024-01-10 18:21:37 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:21:38 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:21:38 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:22:26 - No authorization header
+INFO refresh/token 2024-01-10 18:22:26 - Refresh token received
+INFO refresh/res 2024-01-10 18:22:26 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:22:27 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:22:27 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:22:28 - No authorization header
+INFO notfound/tmpl 2024-01-10 18:22:28 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:23:39 - No authorization header
+INFO refresh/token 2024-01-10 18:23:39 - Refresh token received
+INFO refresh/res 2024-01-10 18:23:39 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:23:39 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:23:39 - Template parsed successfully
+INFO accountpage/checkSession 2024-01-10 18:23:49 - Logged in as 1
+INFO accountpage/delete 2024-01-10 18:23:49 - Account 7 deleted
+WARNING dashboard/checkSession 2024-01-10 18:23:49 - No authorization header
+INFO refresh/token 2024-01-10 18:23:49 - Refresh token received
+INFO refresh/res 2024-01-10 18:23:49 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:23:49 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:23:49 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:23:51 - No authorization header
+INFO refresh/token 2024-01-10 18:23:51 - Refresh token received
+INFO refresh/res 2024-01-10 18:23:51 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:23:51 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:23:51 - Template parsed successfully
+INFO accountpage/checkSession 2024-01-10 18:23:52 - Logged in as 1
+INFO accountpage/delete 2024-01-10 18:23:52 - Account 8 deleted
+WARNING dashboard/checkSession 2024-01-10 18:23:52 - No authorization header
+INFO refresh/token 2024-01-10 18:23:52 - Refresh token received
+INFO refresh/res 2024-01-10 18:23:52 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:23:52 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:23:52 - Template parsed successfully
+WARNING newaccount/checkSession 2024-01-10 18:24:18 - No authorization header
+INFO newaccount/notloggedin/res 2024-01-10 18:24:18 - Template rendered successfully
+INFO refresh/token 2024-01-10 18:24:18 - Refresh token received
+INFO refresh/res 2024-01-10 18:24:18 - New tokens sent
+INFO newaccount/checkSession 2024-01-10 18:24:18 - Logged in as 1
+INFO newaccount/loggedin/res 2024-01-10 18:24:19 - Template rendered successfully
+INFO newaccount/post/form 2024-01-10 18:24:22 - Form parsed successfully
+INFO newaccount/post/form 2024-01-10 18:24:22 - Form values escaped successfully
+INFO newaccount/post/db 2024-01-10 18:24:22 - Connected to db successfully
+INFO newaccount/post/checkSession 2024-01-10 18:24:22 - Logged in as 1
+INFO newaccount/post/newAccount 2024-01-10 18:24:22 - Account created successfully
+INFO newaccount/post/newAccess 2024-01-10 18:24:23 - Access created successfully
+WARNING accountpage/checkSession 2024-01-10 18:24:23 - No authorization header
+INFO refresh/token 2024-01-10 18:24:23 - Refresh token received
+INFO refresh/res 2024-01-10 18:24:23 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:24:24 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:24:24 - Template parsed successfully
+INFO accountpage/checkSession 2024-01-10 18:24:25 - Logged in as 1
+INFO accountpage/delete 2024-01-10 18:24:25 - Account 9 deleted
+WARNING dashboard/checkSession 2024-01-10 18:24:25 - No authorization header
+INFO refresh/token 2024-01-10 18:24:26 - Refresh token received
+INFO refresh/res 2024-01-10 18:24:26 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:24:26 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:24:26 - Template parsed successfully
+WARNING newaccount/checkSession 2024-01-10 18:25:14 - No authorization header
+INFO newaccount/notloggedin/res 2024-01-10 18:25:14 - Template rendered successfully
+INFO refresh/token 2024-01-10 18:25:14 - Refresh token received
+INFO refresh/res 2024-01-10 18:25:14 - New tokens sent
+INFO newaccount/checkSession 2024-01-10 18:25:14 - Logged in as 1
+INFO newaccount/loggedin/res 2024-01-10 18:25:14 - Template rendered successfully
+INFO newaccount/post/form 2024-01-10 18:25:17 - Form parsed successfully
+INFO newaccount/post/form 2024-01-10 18:25:17 - Form values escaped successfully
+INFO newaccount/post/db 2024-01-10 18:25:17 - Connected to db successfully
+INFO newaccount/post/checkSession 2024-01-10 18:25:17 - Logged in as 1
+INFO newaccount/post/newAccount 2024-01-10 18:25:17 - Account created successfully
+INFO newaccount/post/newAccess 2024-01-10 18:25:17 - Access created successfully
+WARNING accountpage/checkSession 2024-01-10 18:25:17 - No authorization header
+INFO refresh/token 2024-01-10 18:25:17 - Refresh token received
+INFO refresh/res 2024-01-10 18:25:17 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:25:17 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:25:18 - Template parsed successfully
+INFO accountpage/checkSession 2024-01-10 18:25:23 - Logged in as 1
+INFO accountpage/delete 2024-01-10 18:25:23 - Account 10 deleted
+WARNING dashboard/checkSession 2024-01-10 18:25:23 - No authorization header
+INFO refresh/token 2024-01-10 18:25:24 - Refresh token received
+INFO refresh/res 2024-01-10 18:25:24 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:25:24 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:25:24 - Template parsed successfully
+WARNING newaccount/checkSession 2024-01-10 18:25:43 - No authorization header
+INFO newaccount/notloggedin/res 2024-01-10 18:25:43 - Template rendered successfully
+INFO refresh/token 2024-01-10 18:25:43 - Refresh token received
+INFO refresh/res 2024-01-10 18:25:43 - New tokens sent
+INFO newaccount/checkSession 2024-01-10 18:25:43 - Logged in as 1
+INFO newaccount/loggedin/res 2024-01-10 18:25:43 - Template rendered successfully
+INFO newaccount/post/form 2024-01-10 18:25:50 - Form parsed successfully
+INFO newaccount/post/form 2024-01-10 18:25:50 - Form values escaped successfully
+INFO newaccount/post/db 2024-01-10 18:25:50 - Connected to db successfully
+INFO newaccount/post/checkSession 2024-01-10 18:25:50 - Logged in as 1
+INFO newaccount/post/newAccount 2024-01-10 18:25:50 - Account created successfully
+INFO newaccount/post/newAccess 2024-01-10 18:25:50 - Access created successfully
+WARNING accountpage/checkSession 2024-01-10 18:25:50 - No authorization header
+INFO refresh/token 2024-01-10 18:25:50 - Refresh token received
+INFO refresh/res 2024-01-10 18:25:50 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:25:50 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:25:50 - Template parsed successfully
+WARNING dashboard/checkSession 2024-01-10 18:28:59 - No authorization header
+INFO refresh/token 2024-01-10 18:29:00 - Refresh token received
+INFO refresh/res 2024-01-10 18:29:00 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:29:00 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:29:01 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 18:29:09 - No authorization header
+INFO refresh/token 2024-01-10 18:29:09 - Refresh token received
+INFO refresh/res 2024-01-10 18:29:10 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:29:10 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:29:10 - Template parsed successfully
+INFO accountpage/checkSession 2024-01-10 18:29:12 - Logged in as 1
+INFO accountpage/delete 2024-01-10 18:29:12 - Account 11 deleted
+WARNING dashboard/checkSession 2024-01-10 18:29:12 - No authorization header
+INFO refresh/token 2024-01-10 18:29:12 - Refresh token received
+INFO refresh/res 2024-01-10 18:29:12 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 18:29:13 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 18:29:13 - Template parsed successfully
+WARNING newaccount/checkSession 2024-01-10 18:29:21 - No authorization header
+INFO newaccount/notloggedin/res 2024-01-10 18:29:21 - Template rendered successfully
+INFO refresh/token 2024-01-10 18:29:22 - Refresh token received
+INFO refresh/res 2024-01-10 18:29:22 - New tokens sent
+INFO newaccount/checkSession 2024-01-10 18:29:22 - Logged in as 1
+INFO newaccount/loggedin/res 2024-01-10 18:29:22 - Template rendered successfully
+INFO newaccount/post/form 2024-01-10 18:29:30 - Form parsed successfully
+INFO newaccount/post/form 2024-01-10 18:29:30 - Form values escaped successfully
+INFO newaccount/post/db 2024-01-10 18:29:30 - Connected to db successfully
+INFO newaccount/post/checkSession 2024-01-10 18:29:30 - Logged in as 1
+INFO newaccount/post/newAccount 2024-01-10 18:29:30 - Account created successfully
+INFO newaccount/post/newAccess 2024-01-10 18:29:30 - Access created successfully
+WARNING accountpage/checkSession 2024-01-10 18:29:30 - No authorization header
+INFO refresh/token 2024-01-10 18:29:30 - Refresh token received
+INFO refresh/res 2024-01-10 18:29:30 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 18:29:31 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 18:29:31 - Template parsed successfully

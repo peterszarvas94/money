@@ -44,10 +44,11 @@ templ Topbar(props TopbarProps) {
 			</button>
 		</div>
 		<!-- account selector -->
-		<div class="p-2" hx-on:click="emit('accounts-toggle')">
-			<button
- 				class="flex cursor-pointer items-center gap-2 rounded-lg p-2"
+		<details class="p-2">
+			<summary
+ 				class="flex list-none cursor-pointer items-center gap-2 rounded-lg p-2"
  				hx-ext="receiver"
+ 				hx-on:click="emit('accounts-toggle')"
  				on-event:accounts-toggle="
           this.classList.toggle('bg-primary');
           this.classList.toggle('text-text');
@@ -84,7 +85,7 @@ templ Topbar(props TopbarProps) {
 						></path>
 					</svg>
 				</div>
-			</button>
+			</summary>
 			<!-- account selector dropdown -->
 			<div
  				class="border-primary absolute top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200 left-1/2 transform -translate-x-1/2"
@@ -108,15 +109,14 @@ templ Topbar(props TopbarProps) {
 							@AccountSelectItem(item)
 						}
 					}
-
 					@AccountSelectItemNew()
 				</ul>
 			</div>
-		</div>
+		</details>
 		<!-- profile -->
-		<div class="p-2">
-			<button
- 				class="text-2xl rounded-lg"
+		<details class="p-2">
+			<summary
+ 				class="text-2xl rounded-lg list-none cursor-pointer"
  				onclick="emit('profile-toggle')"
  				aria-label="Profile"
 			>
@@ -146,7 +146,7 @@ templ Topbar(props TopbarProps) {
 						></path>
 					</svg>
 				</div>
-			</button>
+			</summary>
 			<!-- profile dropdown -->
 			<div
  				class="border-primary absolute right-2 top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200"
@@ -172,6 +172,6 @@ templ Topbar(props TopbarProps) {
 					Signout
 				</button>
 			</div>
-		</div>
+		</details>
 	</div>
 }

@@ -11,9 +11,11 @@ import "io"
 import "bytes"
 
 import (
+	"fmt"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
+	"strconv"
 )
 
 type AccountProps struct {
@@ -83,12 +85,29 @@ func Account(props AccountProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></main><!--")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div><div class=\"flex justify-center\"><button hx-delete=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Var5 := ` end of content `
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/account/%s", strconv.Itoa(props.Account.Id))))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"none\" hx-ext=\"access\" hx-confirm=\"Are you sure you want to delete this account?\" class=\"bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var5 := `Delete`
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></main><!--")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var6 := ` end of content `
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
