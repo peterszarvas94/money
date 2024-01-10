@@ -461,3 +461,59 @@ INFO refresh/token 2024-01-10 18:29:30 - Refresh token received
 INFO refresh/res 2024-01-10 18:29:30 - New tokens sent
 INFO accountpage/checkSession 2024-01-10 18:29:31 - Logged in as 1
 INFO accountpage/loggedin/tmpl 2024-01-10 18:29:31 - Template parsed successfully
+INFO index/path 2024-01-10 18:57:38 - /
+INFO index/path 2024-01-10 18:59:40 - /
+INFO index/path 2024-01-10 19:00:10 - /
+INFO index/path 2024-01-10 19:00:15 - /
+INFO index/path 2024-01-10 19:00:16 - /
+INFO index/path 2024-01-10 19:00:17 - /
+INFO index/path 2024-01-10 19:00:18 - /
+INFO index/path 2024-01-10 19:00:19 - /
+INFO index/path 2024-01-10 19:00:26 - /
+INFO index/path 2024-01-10 19:01:06 - /
+INFO index/path 2024-01-10 19:01:52 - /
+INFO index/path 2024-01-10 19:02:43 - /
+INFO index/path 2024-01-10 19:03:50 - /
+INFO index/path 2024-01-10 19:04:07 - /
+INFO index/path 2024-01-10 19:05:23 - /
+INFO index/path 2024-01-10 19:05:34 - /
+INFO index/path 2024-01-10 19:05:42 - /
+INFO index/path 2024-01-10 19:05:48 - /
+INFO index/path 2024-01-10 19:06:01 - /
+INFO index/path 2024-01-10 19:06:02 - /
+INFO index/path 2024-01-10 19:06:30 - /
+INFO index/path 2024-01-10 19:06:41 - /
+INFO index/path 2024-01-10 19:06:42 - /
+INFO index/path 2024-01-10 19:06:51 - /
+WARNING dashboard/checkSession 2024-01-10 19:07:33 - No authorization header
+INFO refresh/token 2024-01-10 19:07:33 - Refresh token received
+INFO refresh/res 2024-01-10 19:07:34 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 19:07:34 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 19:07:35 - Template parsed successfully
+INFO index/path 2024-01-10 19:08:38 - /
+INFO index/path 2024-01-10 19:08:41 - /
+INFO index/path 2024-01-10 19:08:41 - /
+INFO index/path 2024-01-10 19:08:58 - /
+INFO index/path 2024-01-10 19:20:11 - /
+INFO index/path 2024-01-10 19:20:20 - /
+INFO index/path 2024-01-10 19:21:10 - /
+INFO index/path 2024-01-10 19:21:11 - /
+INFO index/path 2024-01-10 19:21:12 - /
+INFO index/path 2024-01-10 19:21:12 - /
+INFO index/path 2024-01-10 19:21:13 - /
+INFO index/path 2024-01-10 19:21:21 - /
+INFO index/path 2024-01-10 19:21:29 - /
+INFO index/path 2024-01-10 19:21:33 - /
+INFO index/path 2024-01-10 19:21:33 - /
+INFO index/path 2024-01-10 19:21:34 - /
+INFO index/path 2024-01-10 19:21:44 - /
+WARNING dashboard/checkSession 2024-01-10 19:22:24 - No authorization header
+INFO refresh/token 2024-01-10 19:22:24 - Refresh token received
+INFO refresh/res 2024-01-10 19:22:25 - New tokens sent
+INFO dashboard/checkSession 2024-01-10 19:22:25 - Logged in as 1
+INFO dashboard/loggedin/tmpl 2024-01-10 19:22:25 - Template parsed successfully
+WARNING accountpage/checkSession 2024-01-10 19:22:28 - No authorization header
+INFO refresh/token 2024-01-10 19:22:28 - Refresh token received
+INFO refresh/res 2024-01-10 19:22:28 - New tokens sent
+INFO accountpage/checkSession 2024-01-10 19:22:28 - Logged in as 1
+INFO accountpage/loggedin/tmpl 2024-01-10 19:22:28 - Template parsed successfully

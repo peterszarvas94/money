@@ -1,13 +1,14 @@
 # Pengoe
 
-Simple solution for splitting money and tracking expenses with friends.
+Simple solution for tracking shared accounts.
+Split income and log expenses.
 
 ## Stack
 
 - HTMX for interactivity
 - turso database
 - tailwindcss for styling
-- go webserver with html templates
+- go webserver with [templ](https://github.com/a-h/templ) templates
 
 ## Commands
 
@@ -25,7 +26,6 @@ To run commands, you need to have:
 - `docker` for building and running
 - `air` for development server
 - `tailwindcss` cli for css class generation
-- `bun` for schema migrations with prisma
 - `turso` cli for pushing migrations
 - `killport` from my [dotfiles](https://github.com/peterszarvas94/dots/blob/main/.local/bin/killport)
 
