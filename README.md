@@ -49,7 +49,7 @@ To run commands, you need to have:
   - [x] form
   - [x] backend functions
 - [ ] account page
-  - [ ] delete button
+  - [x] delete button
   - [ ] new event form
 
 ### Components
