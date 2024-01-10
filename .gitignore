@@ -1,6 +1,6 @@
 .env
 gin-bin
-log.txt
+logs
 main
 db/migrations
 tmp
