@@ -31,42 +31,32 @@ To run commands, you need to have:
 
 ## Todo
 
+### Auth
+
+- [ ] switch to sessions
+  - [ ] turso embedded replica
+  - [ ] session id to session cookie
+  - [ ] csrf token to hidden `<input />`
+
 ### Pages
 
-- [x] signup page
-  - [x] add username field
-- [x] signin page
-  - [x] form
-  - [x] error message if unauthorized
 - [ ] dashboard page
   - [x] handler
   - [x] account selector
   - [x] profile button with signout
   - [ ] show accounts info
   - [ ] maybe some charts
-- [x] new account page
-  - [x] handler
-  - [x] form
-  - [x] backend functions
 - [ ] account page
   - [x] delete button
   - [ ] new event form
 
 ### Components
 
-- [x] topbar 
-  - [x] shows accounts correctly
-  - [x] fix empty accountselectitem list 
-  - [x] fix: hidden elements are clickable
 - [ ] left panel
   - [ ] can be pinned
 
 ### Misc
 
-- [x] add svg to background
-  - [x] fix tokens
-  - [x] update handler for new schema
-  - [x] error message if unauthorized
 - [ ] loading states
   - [x] for protected pages
   - [ ] for button presses
@@ -77,4 +67,3 @@ To run commands, you need to have:
   - [x] central error handling
   - [ ] recover from errors
 - [ ] rewrite client-side event bus
-- [x] tests

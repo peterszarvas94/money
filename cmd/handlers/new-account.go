@@ -171,6 +171,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		logger.Log(logger.INFO, "newaccount/post/newAccess", "Access created successfully")
 
 		w.Header().Set("HX-Redirect", fmt.Sprintf("/account/%d", newAccount.Id))
+    return nil
 	}
 
 	// not logged in user

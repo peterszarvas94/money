@@ -28,8 +28,8 @@ MethodNotAllowed handles the 405 error.
 func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	logger.Log(logger.INFO, "notallowed/tmpl", "Template parsed successfully")
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	component := pages.NotAllowed()
 	handler := templ.Handler(component)
@@ -42,8 +42,8 @@ InternalError handles the 500 error.
 func InternalError(w http.ResponseWriter, r *http.Request) {
 	logger.Log(logger.INFO, "internalservererror/tmpl", "Template parsed successfully")
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	component := pages.InternalError()
 	handler := templ.Handler(component)

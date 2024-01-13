@@ -2,9 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
-	"os"
+	"pengoe/internal/utils"
 	"sync"
 
 	_ "github.com/libsql/libsql-client-go/libsql"
@@ -44,15 +43,8 @@ connect is a function that opens a connection to the database.
 It uses the DB_URL and DB_TOKEN environment variables (Turso db).
 */
 func (manager *DBManager) connect() error {
-	url, urlFound := os.LookupEnv("DB_URL")
-	if !urlFound {
-		return errors.New("DB_URL not found")
-	}
-
-	token, token_found := os.LookupEnv("DB_TOKEN")
-	if !token_found {
-		return errors.New("DB_TOKEN not found")
-	}
+	url := utils.Env.DBUrl
+	token := utils.Env.DBToken
 
 	connectionStr := fmt.Sprintf("%s?authToken=%s", url, token)
 

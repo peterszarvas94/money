@@ -3,7 +3,6 @@ package utils
 import (
 	"errors"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,10 +20,7 @@ func NewToken(id int, variant TokenVariant) (JWT, error) {
 	currentTime := time.Now().Unix()
 	expirationTime := currentTime + 3600
 
-	secret, found := os.LookupEnv("JWT_SECRET")
-	if !found {
-		return JWT{}, errors.New("Error: JWT_SECRET environment variable not found")
-	}
+	secret := Env.JWTSecret
 
 	idStr := strconv.Itoa(id)
 
@@ -47,10 +43,7 @@ func NewToken(id int, variant TokenVariant) (JWT, error) {
 }
 
 func ValidateToken(token string) (jwt.MapClaims, error) {
-	secret, found := os.LookupEnv("JWT_SECRET")
-	if !found {
-		return nil, errors.New("Error: JWT_SECRET environment variable not found")
-	}
+	secret := Env.JWTSecret
 
 	parsedToken, parseErr := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)

@@ -2,12 +2,14 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"pengoe/internal/utils"
 	"time"
 )
 
 type AccessService interface {
 	New(user *utils.Access) (*utils.Access, error)
+	Check(userId int, accountId int) error
 }
 
 type accessService struct {
@@ -50,4 +52,28 @@ func (s *accessService) New(access *utils.Access) (*utils.Access, error) {
 	}
 
 	return newAccess, nil
+}
+
+/*
+Check is a function that checks if a user has access to an account.
+*/
+func (s *accessService) Check(userId int, accountId int) error {
+	var count int
+
+	row := s.db.QueryRow(
+		`SELECT COUNT(*) FROM access WHERE user_id = ? AND account_id = ?`,
+		userId,
+		accountId,
+	)
+
+	err := row.Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return errors.New("No access")
+	}
+
+	return nil
 }

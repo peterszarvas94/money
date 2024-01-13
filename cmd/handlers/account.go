@@ -43,6 +43,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 
 	userService := services.NewUserService(db)
 	accountService := services.NewAccountService(db)
+  accessService := services.NewAccessService(db)
 
 	// get account early
 	account, accountErr := accountService.GetById(accountId)
@@ -58,7 +59,11 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 		logMsg := fmt.Sprintf("Logged in as %d", user.Id)
 		logger.Log(logger.INFO, "accountpage/checkSession", logMsg)
 
-		// TODO: check if the user has access to the account
+    accessErr := accessService.Check(user.Id, account.Id)
+    if accessErr != nil {
+      w.Header().Set("HX-Redirect", "/dashboard")
+      return accessErr
+    }
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
