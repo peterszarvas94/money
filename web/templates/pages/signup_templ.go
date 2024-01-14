@@ -12,13 +12,11 @@ import "bytes"
 
 import "pengoe/web/templates/components"
 import "fmt"
-import "pengoe/internal/utils"
 import "pengoe/web/templates/layouts"
 
 type SignupProps struct {
 	Title         string
 	Description   string
-	Session       utils.Session
 	RedirectUrl   string
 	Firstname     string
 	Lastname      string
@@ -49,7 +47,7 @@ func Signup(props SignupProps) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text\" hx-ext=\"gated-page,description\" id=\"page\"><!--")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text\" hx-ext=\"description\" id=\"page\"><!--")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

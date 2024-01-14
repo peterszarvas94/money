@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html"
 	"net/http"
 	"net/mail"
@@ -32,6 +33,11 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 	// Parse the form
 	parseErr := r.ParseForm()
 	if parseErr != nil {
+		logger.Log(
+			logger.ERROR,
+			"check/parse",
+			fmt.Sprintf("Error parsing form: %s", parseErr.Error()),
+		)
 		router.InternalError(w, r)
 		return parseErr
 	}

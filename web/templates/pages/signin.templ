@@ -2,7 +2,6 @@ package pages
 
 import (
 	"pengoe/web/templates/components"
-	"pengoe/internal/utils"
 	"pengoe/web/templates/layouts"
 	"fmt"
 )
@@ -10,10 +9,9 @@ import (
 type SigninProps struct {
 	Title           string
 	Descrtipion     string
-	Session         utils.Session
 	RedirectUrl     string
 	UsernameOrEmail string
-	LoginError      string
+	SigninErr       string
 }
 
 templ Signin(props SigninProps) {
@@ -23,7 +21,7 @@ templ Signin(props SigninProps) {
 	}) {
 		<div
  			class="from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text"
- 			hx-ext="gated-page,description"
+ 			hx-ext="description"
  			id="page"
 		>
 			<!-- background -->
@@ -89,7 +87,7 @@ templ Signin(props SigninProps) {
 						</a>
 					</nav>
 					<div class="text-red-500 text-center">
-						{ props.LoginError }
+						{ props.SigninErr }
 					</div>
 				</main>
 			</section>

@@ -40,9 +40,6 @@ func main() {
 	// check useraname and email
 	r.GET("/check", handlers.CheckUserHandler)
 
-	// refresh token
-	r.POST("/refresh", handlers.RefreshTokenHandler)
-
 	// dashboard
 	r.GET("/dashboard", handlers.DashboardPageHandler)
 

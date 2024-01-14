@@ -2,13 +2,11 @@ package pages;
 
 import "pengoe/web/templates/components"
 import "fmt"
-import "pengoe/internal/utils"
 import "pengoe/web/templates/layouts"
 
 type SignupProps struct {
 	Title         string
 	Description   string
-	Session       utils.Session
 	RedirectUrl   string
 	Firstname     string
 	Lastname      string
@@ -27,7 +25,7 @@ templ Signup(props SignupProps) {
 	}) {
 		<div
  			class="from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text"
- 			hx-ext="gated-page,description"
+ 			hx-ext="description"
  			id="page"
 		>
 			<!-- background -->

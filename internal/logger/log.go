@@ -64,7 +64,7 @@ func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
 	}
 
 	fileName := "logs"
-	now := time.Now().Format("2006-01-02 15:04:05")
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	file, fileErr := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
@@ -80,6 +80,10 @@ func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
 		logger.Fatal(formattedMessage)
 	} else {
 		logger.Println(formattedMessage)
+	}
+
+	if messageLoglevelEnum == ERROR {
+		fmt.Println(formattedMessage)
 	}
 }
 

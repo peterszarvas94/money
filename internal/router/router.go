@@ -145,7 +145,6 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handlerErr := route.handler(w, r, variables)
 	if handlerErr != nil {
 		logger.Log(logger.ERROR, "handler", handlerErr.Error())
-		fmt.Println(handlerErr.Error())
 	}
 }
 

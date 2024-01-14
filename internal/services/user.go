@@ -2,47 +2,54 @@ package services
 
 import (
 	"database/sql"
-	"errors"
-	"net/http"
 	"pengoe/internal/utils"
-	"strconv"
 	"time"
 )
 
-type UserService interface {
-	New(user *utils.User) (*utils.User, error)
-	Login(usernameOrEmail, password string) (*utils.User, error)
-	GetById(id int) (*utils.User, error)
+type UserServiceInterface interface {
+	Signup(user *utils.User) (*utils.User, error)
+	Signin(usernameOrEmail, password string) (*utils.User, error)
+	GetByID(id int) (*utils.User, error)
 	GetByUsername(username string) (*utils.User, error)
 	GetByEmail(email string) (*utils.User, error)
-	CheckRefreshToken(r *http.Request) (*utils.User, error)
-	CheckAccessToken(r *http.Request) (*utils.User, error)
 }
 
 type userService struct {
 	db *sql.DB
 }
 
-func NewUserService(db *sql.DB) UserService {
+func NewUserService(db *sql.DB) UserServiceInterface {
 	return &userService{db: db}
 }
 
 /*
-New is a function that adds a new user to the database.
+Signup is a function that adds a new user to the database.
 */
-func (s *userService) New(user *utils.User) (*utils.User, error) {
+func (s *userService) Signup(user *utils.User) (*utils.User, error) {
 	hashedPassword, hashErr := utils.HashPassword(user.Password)
 	if hashErr != nil {
 		return nil, hashErr
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 
 	mutation, mutationErr := s.db.Exec(
 		`INSERT INTO user (
-			username, email, firstname, lastname, password, created_at, updated_at
+			username,
+      email,
+      firstname,
+      lastname,
+      password,
+      created_at,
+      updated_at
 		) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		user.Username, user.Email, user.Fistname, user.Lastname, hashedPassword, now, now,
+		user.Username,
+		user.Email,
+		user.Fistname,
+		user.Lastname,
+		hashedPassword,
+		now,
+		now,
 	)
 	if mutationErr != nil {
 		return nil, mutationErr
@@ -59,23 +66,34 @@ func (s *userService) New(user *utils.User) (*utils.User, error) {
 		Email:     user.Email,
 		Fistname:  user.Fistname,
 		Lastname:  user.Lastname,
-		CreatedAt: now.String(),
-		UpdatedAt: now.String(),
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	return newUser, nil
 }
 
 /*
-Login is a function that gets a user from the database by username or email,
+Signin is a function that gets a user from the database by username or email,
 and checks if the passwords match.
 If correct, it returns the user's id.
 */
-func (s *userService) Login(usernameOrEmail, password string) (*utils.User, error) {
+func (s *userService) Signin(usernameOrEmail, password string) (*utils.User, error) {
 	query, queryErr := s.db.Query(
-		`SELECT id, username, email, firstname, lastname, password as hash, created_at, updated_at
-		FROM user WHERE username = ? OR email = ?`,
-		usernameOrEmail, usernameOrEmail,
+		`SELECT
+      id,
+      username,
+      email,
+      firstname,
+      lastname,
+      password as hash,
+      created_at,
+      updated_at
+		FROM user
+    WHERE username = ?
+    OR email = ?`,
+		usernameOrEmail,
+		usernameOrEmail,
 	)
 	if queryErr != nil {
 		return nil, queryErr
@@ -91,8 +109,17 @@ func (s *userService) Login(usernameOrEmail, password string) (*utils.User, erro
 	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &hash, &created_at, &updated_at)
-			if scanErr != nil {
+		scanErr := query.Scan(
+			&id,
+			&username,
+			&email,
+			&firstname,
+			&lastname,
+			&hash,
+			&created_at,
+			&updated_at,
+		)
+		if scanErr != nil {
 			return nil, scanErr
 		}
 	}
@@ -106,14 +133,24 @@ func (s *userService) Login(usernameOrEmail, password string) (*utils.User, erro
 		return nil, sql.ErrNoRows
 	}
 
+	created, createdErr := utils.ConvertToTime(created_at)
+	if createdErr != nil {
+		return nil, createdErr
+	}
+
+	updated, updatedErr := utils.ConvertToTime(updated_at)
+	if updatedErr != nil {
+		return nil, updatedErr
+	}
+
 	user := utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: created,
+		UpdatedAt: updated,
 	}
 
 	return &user, nil
@@ -122,10 +159,13 @@ func (s *userService) Login(usernameOrEmail, password string) (*utils.User, erro
 /*
 GetByUsername is a function that gets a user from the database by username.
 */
-func (s *userService) GetById(id int) (*utils.User, error) {
+func (s *userService) GetByID(id int) (*utils.User, error) {
 	var user utils.User
 
-	query, queryErr := s.db.Query("SELECT * FROM user WHERE id = ?", id)
+	query, queryErr := s.db.Query(
+		"SELECT * FROM user WHERE id = ?",
+		id,
+	)
 	if queryErr != nil {
 		return &user, queryErr
 	}
@@ -139,15 +179,33 @@ func (s *userService) GetById(id int) (*utils.User, error) {
 	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
+		scanErr := query.Scan(
+			&id,
+			&username,
+			&email,
+			&firstname,
+			&lastname,
+			&password,
+			&created_at,
+			&updated_at,
+		)
 		if scanErr != nil {
 			return &user, scanErr
 		}
 	}
 
-
 	if id == 0 {
 		return &user, sql.ErrNoRows
+	}
+
+	created, createdErr := utils.ConvertToTime(created_at)
+	if createdErr != nil {
+		return nil, createdErr
+	}
+
+	updated, updatedErr := utils.ConvertToTime(updated_at)
+	if updatedErr != nil {
+		return nil, updatedErr
 	}
 
 	user = utils.User{
@@ -156,8 +214,8 @@ func (s *userService) GetById(id int) (*utils.User, error) {
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: created,
+		UpdatedAt: updated,
 	}
 
 	return &user, nil
@@ -169,7 +227,10 @@ GetByUsername is a function that gets a user from the database by username.
 func (s *userService) GetByUsername(username string) (*utils.User, error) {
 	var user utils.User
 
-	query, queryErr := s.db.Query("SELECT * FROM user WHERE username = ?", username)
+	query, queryErr := s.db.Query(
+		"SELECT * FROM user WHERE username = ?",
+		username,
+	)
 	if queryErr != nil {
 		return &user, queryErr
 	}
@@ -183,7 +244,16 @@ func (s *userService) GetByUsername(username string) (*utils.User, error) {
 	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
+		scanErr := query.Scan(
+			&id,
+			&username,
+			&email,
+			&firstname,
+			&lastname,
+			&password,
+			&created_at,
+			&updated_at,
+		)
 		if scanErr != nil {
 			return &user, scanErr
 		}
@@ -193,14 +263,24 @@ func (s *userService) GetByUsername(username string) (*utils.User, error) {
 		return &user, sql.ErrNoRows
 	}
 
+	created, createdErr := utils.ConvertToTime(created_at)
+	if createdErr != nil {
+		return nil, createdErr
+	}
+
+	updated, updatedErr := utils.ConvertToTime(updated_at)
+	if updatedErr != nil {
+		return nil, updatedErr
+	}
+
 	user = utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: created,
+		UpdatedAt: updated,
 	}
 
 	return &user, nil
@@ -226,7 +306,16 @@ func (s *userService) GetByEmail(email string) (*utils.User, error) {
 	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(&id, &username, &email, &firstname, &lastname, &password, &created_at, &updated_at)
+		scanErr := query.Scan(
+			&id,
+			&username,
+			&email,
+			&firstname,
+			&lastname,
+			&password,
+			&created_at,
+			&updated_at,
+		)
 		if scanErr != nil {
 			return &user, scanErr
 		}
@@ -236,81 +325,25 @@ func (s *userService) GetByEmail(email string) (*utils.User, error) {
 		return &user, sql.ErrNoRows
 	}
 
+	created, createdErr := utils.ConvertToTime(created_at)
+	if createdErr != nil {
+		return nil, createdErr
+	}
+
+	updated, updatedErr := utils.ConvertToTime(updated_at)
+	if updatedErr != nil {
+		return nil, updatedErr
+	}
+
 	user = utils.User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
 		Fistname:  firstname,
 		Lastname:  lastname,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: created,
+		UpdatedAt: updated,
 	}
 
 	return &user, nil
-}
-
-/*
-CheckRefreshToken is a function that checks if the refreshtoken in cookie is valid.
-*/
-func (s *userService) CheckRefreshToken(r *http.Request) (*utils.User, error) {
-	refreshToken, cookieErr := r.Cookie("refresh")
-	if cookieErr != nil {
-		return nil, cookieErr
-	}
-
-	claims, jwtErr := utils.ValidateToken(refreshToken.Value)
-	if jwtErr != nil {
-		return nil, jwtErr
-	}
-
-	userIdStr, subErr := claims.GetSubject()
-	if subErr != nil {
-		return nil, subErr
-	}
-
-	userId, parseErr := strconv.Atoi(userIdStr)
-	if parseErr != nil {
-		return nil, parseErr
-	}
-
-	user, dbErr := s.GetById(userId)
-	if dbErr != nil {
-		return nil, dbErr
-	}
-
-	return user, nil
-}
-
-/*
-CheckAccessToken is a function that checks if the accesstoken in auth header is valid.
-*/
-func (s *userService) CheckAccessToken(r *http.Request) (*utils.User, error) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return nil, errors.New("No authorization header")
-	}
-
-	authToken := authHeader[len("Bearer "):]
-
-	claims, jwtErr := utils.ValidateToken(authToken)
-	if jwtErr != nil {
-		return nil, jwtErr
-	}
-
-	userIdStr, subErr := claims.GetSubject()
-	if subErr != nil {
-		return nil, subErr
-	}
-
-	userId, parseErr := strconv.Atoi(userIdStr)
-	if parseErr != nil {
-		return nil, parseErr
-	}
-
-	user, dbErr := s.GetById(userId)
-	if dbErr != nil {
-		return nil, dbErr
-	}
-
-	return user, nil
 }

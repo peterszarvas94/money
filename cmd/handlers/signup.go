@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -20,7 +21,6 @@ import (
 type SignupPage struct {
 	Title       string
 	Descrtipion string
-	Session     utils.Session
 	Redirect    template.URL
 	Values      map[string]string
 	Errors      map[string]string
@@ -40,30 +40,49 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		return dbErr
 	}
 	defer db.Close()
-	userService := services.NewUserService(db)
+	sessionService := services.NewSessionService(db)
 
 	// check if the user is already logged in, redirect to dashboard
-	user, accessTokenErr := userService.CheckAccessToken(r)
-	if user != nil {
-		logMsg := fmt.Sprintf("Logged in as %d, redirecting to dashboard", user.Id)
-		logger.Log(logger.INFO, "signin/checkSession", logMsg)
+	session, sessionErr := sessionService.CheckCookie(r)
+	if session != nil {
+
+		// user is already logged in, redirect
+		logger.Log(
+			logger.INFO,
+			"signup/session",
+			fmt.Sprintf("Session found with ID %d", session.Id),
+		)
 
 		if redirect == "" {
 			redirect = "/dashboard"
 		}
 
 		if !utils.IsValidRedirect(redirect, false) {
+			logger.Log(logger.ERROR,
+				"signup/nosession/redirect",
+				fmt.Sprintf("Invalid redirect, %s", redirect),
+			)
 			router.InternalError(w, r)
 			return nil
 		}
 
-		logger.Log(logger.INFO, "signin/get/decode", fmt.Sprintf("Redirecting to %s", redirect))
+		logger.Log(
+			logger.INFO,
+			"signup/session/redirect",
+			fmt.Sprintf("Redirecting to %s", redirect),
+		)
 
-		w.Header().Set("HX-Redirect", redirect)
+		http.Redirect(w, r, redirect, http.StatusSeeOther)
 		return nil
 	}
 
-	logger.Log(logger.INFO, "signup/checkSession", accessTokenErr.Error())
+	// no session found, render signup page
+
+	logger.Log(
+		logger.INFO,
+		"signup/nosession",
+		fmt.Sprintf("No session found. %s", sessionErr.Error()),
+	)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -74,16 +93,17 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	}
 
 	if !utils.IsValidRedirect(redirect, true) {
+		logger.Log(logger.ERROR,
+			"signup/nosession/redirect",
+			fmt.Sprintf("Invalid redirect, %s", redirect),
+		)
 		router.InternalError(w, r)
 		return nil
 	}
 
 	data := pages.SignupProps{
-		Title:       "pengoe - Sign in",
-		Description: "Sign in to pengoe",
-		Session: utils.Session{
-			LoggedIn: false,
-		},
+		Title:         "pengoe - Sign in",
+		Description:   "Sign in to pengoe",
 		RedirectUrl:   redirect,
 		Username:      "",
 		Email:         "",
@@ -94,6 +114,12 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		EmailCheck:    "",
 		EmailError:    "",
 	}
+
+	logger.Log(
+		logger.INFO,
+		"signup/nosession/render",
+		fmt.Sprintf("Rendering signup page with redirect %s", redirect),
+	)
 
 	component := pages.Signup(data)
 	handler := templ.Handler(component)
@@ -122,7 +148,14 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 	lastname := html.EscapeString(r.FormValue("lastname"))
 	password := html.EscapeString(r.FormValue("password"))
 
-	// TODO: handle empty values
+	if username == "" ||
+		email == "" ||
+		firstname == "" ||
+		lastname == "" ||
+		password == "" {
+		router.InternalError(w, r)
+		return errors.New("Some form values are empty")
+	}
 
 	// connect to db
 	dbManager := db.NewDBManager()
@@ -145,11 +178,11 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		Password: password,
 	}
 
-	_, userErr := userService.New(newUser)
+	_, signupErr := userService.Signup(newUser)
 
 	// unsuccessful signup, render signup page with error message
-	if userErr != nil {
-		logger.Log(logger.WARNING, "signup/post/userservice", userErr.Error())
+	if signupErr != nil {
+		logger.Log(logger.WARNING, "signup/post/userservice", signupErr.Error())
 
 		// check if email is valid
 		_, invalid := mail.ParseAddress(email)
@@ -219,11 +252,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		}
 
 		data := pages.SignupProps{
-			Title:       "pengoe - Sign in",
-			Description: "Sign in to pengoe",
-			Session: utils.Session{
-				LoggedIn: false,
-			},
+			Title:         "pengoe - Sign in",
+			Description:   "Sign in to pengoe",
 			RedirectUrl:   redirect,
 			Firstname:     firstname,
 			Lastname:      lastname,
@@ -242,6 +272,8 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		return nil
 	}
 
+	// successful signup, redirect to signin page
+
 	if redirect == "" {
 		redirect = "%2Fdashboard"
 	} else {
@@ -253,10 +285,14 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		return nil
 	}
 
-	// successful signup, redirect to signin
-	logger.Log(logger.INFO, "signup/post/user", fmt.Sprintf("User added successfully, redirect to /signin?redirect=%s", redirect))
-
-	fmt.Printf("redirect: %s\n", redirect)
+	logger.Log(
+		logger.INFO,
+		"signup/post/user",
+		fmt.Sprintf(
+			"User added successfully, redirect to /signin?redirect=%s",
+			redirect,
+		),
+	)
 
 	http.Redirect(w, r, fmt.Sprintf("/signin?redirect=%s", redirect), http.StatusSeeOther)
 	return nil

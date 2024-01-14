@@ -24,7 +24,7 @@ func NewAccessService(db *sql.DB) AccessService {
 New is a function that adds an access to the database.
 */
 func (s *accessService) New(access *utils.Access) (*utils.Access, error) {
-	now := time.Now()
+	now := time.Now().UTC()
 
 	mutation, mutationErr := s.db.Exec(
 		`INSERT INTO access (
@@ -47,8 +47,8 @@ func (s *accessService) New(access *utils.Access) (*utils.Access, error) {
 		Role:      access.Role,
 		AccountId: access.AccountId,
 		UserId:    access.UserId,
-		CreatedAt: now.String(),
-		UpdatedAt: now.String(),
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	return newAccess, nil

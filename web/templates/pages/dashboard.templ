@@ -7,9 +7,8 @@ import (
 )
 
 type DashboardProps struct {
-	Title       string
-	Description string
-	Session     utils.Session
+	Title                string
+	Description          string
 	SelectedAccountId    int
 	AccountSelectItems   []utils.AccountSelectItem
 	ShowNewAccountButton bool
@@ -20,26 +19,20 @@ templ Dashboard(props DashboardProps) {
 		Title: props.Title,
 		Description: props.Description,
 	}) {
-		<div hx-ext="protected-page,description" id="page">
-			if props.Session.LoggedIn {
-				@components.Leftpanel()
-				<!-- content -->
-				<main class="absolute z-0 min-h-screen w-full bg-white text-black">
-					@components.Topbar(components.TopbarProps{
+		<div hx-ext="description" id="page">
+			@components.Leftpanel()
+			<!-- content -->
+			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
+				@components.Topbar(components.TopbarProps{
 						SelectedAccountId: props.SelectedAccountId,
 						AccountSelectItems: props.AccountSelectItems,
 						ShowNewAccountButton: props.ShowNewAccountButton,
 					})
-					<div class="flex flex-col items-center justify-center p-10">
-						<h1 class="text-2xl font-semibold">Dashboard</h1>
-					</div>
-				</main>
-				<!-- end of content -->
-			} else {
-				<div class="flex items-center justify-center p-10">
-					@components.Spinner()
+				<div class="flex flex-col items-center justify-center p-10">
+					<h1 class="text-2xl font-semibold">Dashboard</h1>
 				</div>
-			}
+			</main>
+			<!-- end of content -->
 		</div>
 	}
 }

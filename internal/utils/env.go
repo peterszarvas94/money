@@ -17,9 +17,10 @@ func getVariable(key string) (string, error) {
 }
 
 type environmentVariables struct {
-	DBUrl     string
-	DBToken   string
-	JWTSecret string
+	DBUrl       string
+	DBToken     string
+	JWTSecret   string
+	Environment string
 }
 
 func initEnvironmentVariables(variables *environmentVariables, keys ...string) {
@@ -27,7 +28,6 @@ func initEnvironmentVariables(variables *environmentVariables, keys ...string) {
 		value, err := getVariable(key)
 		if err != nil {
 			logger.Log(logger.ERROR, "env/initEnvVars", err.Error())
-			fmt.Println(err.Error())
 			os.Exit(1)
 		}
 
@@ -38,6 +38,8 @@ func initEnvironmentVariables(variables *environmentVariables, keys ...string) {
 			variables.DBToken = value
 		case "JWT_SECRET":
 			variables.JWTSecret = value
+		case "ENVIRONMENT":
+			variables.Environment = value
 		}
 	}
 }
@@ -50,5 +52,6 @@ func init() {
 		"DB_URL",
 		"DB_TOKEN",
 		"JWT_SECRET",
+		"ENVIRONMENT",
 	)
 }

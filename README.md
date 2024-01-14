@@ -33,10 +33,11 @@ To run commands, you need to have:
 
 ### Auth
 
-- [ ] switch to sessions
+- [x] switch to sessions
   - [ ] turso embedded replica
-  - [ ] session id to session cookie
-  - [ ] csrf token to hidden `<input />`
+  - [x] session id to session cookie
+  - [x] csrf token to hidden `<input />`
+  - [ ] maybe csrf token not random but has user info?
 
 ### Pages
 

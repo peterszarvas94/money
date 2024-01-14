@@ -1,5 +1,7 @@
 package utils
 
+import "time"
+
 // db
 type User struct {
 	Id        int
@@ -8,8 +10,8 @@ type User struct {
 	Fistname  string
 	Lastname  string
 	Password  string
-	CreatedAt string
-	UpdatedAt string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Account struct {
@@ -17,8 +19,8 @@ type Account struct {
 	Name        string
 	Description string
 	Currency    string
-	CreatedAt   string
-	UpdatedAt   string
+	CreatedAt   time.Time
+	UpdatedAt	  time.Time
 }
 
 type Role string
@@ -33,12 +35,20 @@ type Access struct {
 	Role			Role
 	UserId    int
 	AccountId int
-	CreatedAt string
-	UpdatedAt string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Session struct {
+	Id         int
+	UserId     int
+	ValidUntil time.Time
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 // page
-type Session struct {
+type CurrentUser struct {
 	LoggedIn bool
 	User     User
 }
@@ -51,7 +61,7 @@ type AccountSelectItem struct {
 type Page struct {
 	Title       string
 	Descrtipion string
-	Session     Session
+	Session     CurrentUser
 	Data        map[string]string
 }
 

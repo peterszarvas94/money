@@ -12,7 +12,6 @@ import "bytes"
 
 import (
 	"fmt"
-	"pengoe/internal/utils"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
 )
@@ -20,10 +19,9 @@ import (
 type SigninProps struct {
 	Title           string
 	Descrtipion     string
-	Session         utils.Session
 	RedirectUrl     string
 	UsernameOrEmail string
-	LoginError      string
+	SigninErr       string
 }
 
 func Signin(props SigninProps) templ.Component {
@@ -45,7 +43,7 @@ func Signin(props SigninProps) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text\" hx-ext=\"gated-page,description\" id=\"page\"><!--")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text\" hx-ext=\"description\" id=\"page\"><!--")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -153,7 +151,7 @@ func Signin(props SigninProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 string = props.LoginError
+			var templ_7745c5c3_Var11 string = props.SigninErr
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
