@@ -20,19 +20,19 @@ type Account struct {
 	Description string
 	Currency    string
 	CreatedAt   time.Time
-	UpdatedAt	  time.Time
+	UpdatedAt   time.Time
 }
 
 type Role string
 
 const (
-	Admin Role = "admin"
+	Admin  Role = "admin"
 	Viewer Role = "viewer"
 )
 
 type Access struct {
 	Id        int
-	Role			Role
+	Role      Role
 	UserId    int
 	AccountId int
 	CreatedAt time.Time
@@ -45,6 +45,18 @@ type Session struct {
 	ValidUntil time.Time
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type Event struct {
+	Id           int
+	AccountId   int
+	Name         string
+	Description  string
+	Income       int
+	Reserved     int
+	DeliveredAt time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // page

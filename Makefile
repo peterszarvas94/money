@@ -27,3 +27,6 @@ docker-run:
 # Push migration
 push:
 	turso db shell $(db) < internal/db/schema.sql
+
+clear:
+	turso db shell $(db) < internal/db/clear.sql

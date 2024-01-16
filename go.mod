@@ -4,7 +4,6 @@ go 1.21.1
 
 require (
 	github.com/a-h/templ v0.2.476
-	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/libsql/libsql-client-go v0.0.0-20230917132930-48c310b27e7b
 	golang.org/x/crypto v0.14.0
 )
