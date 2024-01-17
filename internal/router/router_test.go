@@ -40,7 +40,7 @@ func TestRemoveTrailingSlash(t *testing.T) {
 }
 
 func TestGetSameLengthRoutes(t *testing.T) {
-	routes := []route{
+	routes := []*route{
 		{
 			pattern: []string{"one", "two"},
 			method:  "GET",
@@ -79,7 +79,7 @@ func TestGetSameLengthRoutes(t *testing.T) {
 }
 
 func TestMatchRoutes(t *testing.T) {
-	routes := []route{
+	routes := []*route{
 		{
 			pattern: []string{"one", "two"},
 			method:  "GET",
@@ -127,7 +127,7 @@ func TestMatchRoutes(t *testing.T) {
 }
 
 func TestMatchMethod(t *testing.T) {
-	routes := []route{
+	routes := []*route{
 		{
 			pattern: []string{"one", "two"},
 			method:  "GET",

@@ -9,6 +9,14 @@ import (
 	"pengoe/internal/router"
 )
 
+// func testMiddleWare(next router.HandlerFunc) router.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+// 		ctx := context.WithValue(r.Context(), "test", "testvalue")
+// 		r = r.WithContext(ctx)
+// 		return next(w, r, p)
+// 	}
+// }
+
 func main() {
 	// get log level from command line flag -log
 	flag.StringVar(&logger.Loglevel, "log", "INFO", "-log INFO|WARNING|ERROR|FATAL")
@@ -19,12 +27,6 @@ func main() {
 
 	// home page
 	r.GET("/", handlers.HomePageHandler)
-
-	// test page
-	// r.GET("/test/:id", handlers.TestPageHandler)
-	// r.GET("/test/help", handlers.TestPageHandler)
-	// r.GET("/test/:id/nuts", handlers.TestPageHandler)
-	// r.GET("/test/deez/nuts", handlers.TestPageHandler)
 
 	// signup
 	r.GET("/signup", handlers.SignupPageHandler)

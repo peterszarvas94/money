@@ -27,14 +27,14 @@ AccountPageHandler handles the GET request to /account/:id
 func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	id, found := p["id"]
 	if !found {
-		router.NotFound(w, r)
+		router.NotFound(w, r, p)
 		return errors.New("Path variable \"id\" not found")
 	}
 
 	// id to int
 	accountId, errParse := strconv.Atoi(id)
 	if errParse != nil {
-		router.NotFound(w, r)
+		router.NotFound(w, r, p)
 		return errParse
 	}
 
@@ -42,7 +42,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -54,7 +54,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	// get account early
 	account, accountErr := accountService.GetByID(accountId)
 	if accountErr != nil {
-		router.NotFound(w, r)
+		router.NotFound(w, r, p)
 		return accountErr
 	}
 
@@ -68,7 +68,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 			fmt.Sprintf("Session found with ID %d", session.Id),
 		)
 
-    // check if the user has access to the account
+		// check if the user has access to the account
 		accessErr := accessService.Check(session.UserId, account.Id)
 		if accessErr != nil {
 			logger.Log(
@@ -84,17 +84,17 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 			return accessErr
 		}
 
-    // get csrf token
-    serverSession, serverSessionError := serversession.Manager.Get(session.Id)
-    if serverSessionError != nil {
-      logger.Log(
-        logger.ERROR,
-        "accountpage/session/csrf",
-        serverSessionError.Error(),
-      )
-      router.InternalError(w, r)
-      return serverSessionError
-    }
+		// get csrf token
+		serverSession, serverSessionError := serversession.Manager.Get(session.Id)
+		if serverSessionError != nil {
+			logger.Log(
+				logger.ERROR,
+				"accountpage/session/csrf",
+				serverSessionError.Error(),
+			)
+			router.InternalError(w, r, p)
+			return serverSessionError
+		}
 
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(session.UserId)
@@ -104,7 +104,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 				"accountpage/session/accounts",
 				accountsErr.Error(),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return accountsErr
 		}
 
@@ -131,7 +131,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 			AccountSelectItems:   accountSelectItems,
 			ShowNewAccountButton: true,
 			Account:              *account,
-      CSRFToken:            serverSession.CSRFToken,
+			CSRFToken:            serverSession.CSRFToken,
 		}
 
 		component := pages.Account(data)
@@ -171,14 +171,14 @@ DeleteAccountHandler handles the DELETE request to /account/:id
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	id, found := p["id"]
 	if !found {
-		router.NotFound(w, r)
+		router.NotFound(w, r, p)
 		return errors.New("Path variable \"id\" not found")
 	}
 
 	// id to int
 	accountId, errParse := strconv.Atoi(id)
 	if errParse != nil {
-		router.NotFound(w, r)
+		router.NotFound(w, r, p)
 		return errParse
 	}
 
@@ -186,7 +186,7 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -221,34 +221,32 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 			return accessErr
 		}
 
-    // manually parse body, to get csrf token (because DELETE request, thx go)
-    body, bodyErr := io.ReadAll(r.Body)
-    if bodyErr != nil {
-      logger.Log(
-        logger.ERROR,
-        "accountpage/session/csrf",
-        bodyErr.Error(),
-      )
-      router.InternalError(w, r)
-      return bodyErr
-    }
+		// manually parse body, to get csrf token (because DELETE request, thx go)
+		body, bodyErr := io.ReadAll(r.Body)
+		if bodyErr != nil {
+			logger.Log(
+				logger.ERROR,
+				"accountpage/session/csrf",
+				bodyErr.Error(),
+			)
+			router.InternalError(w, r, p)
+			return bodyErr
+		}
 
-    // csrf=asd -> asd
-    rawCsrfToken := html.EscapeString(strings.Split(string(body), "=")[1])
+		// csrf=asd -> asd
+		rawCsrfToken := html.EscapeString(strings.Split(string(body), "=")[1])
 
-    // decode body as url values
-    csrfToken, decodeErr := url.QueryUnescape(rawCsrfToken)
-    if decodeErr != nil {
-      logger.Log(
-        logger.ERROR,
-        "accountpage/session/csrf",
-        decodeErr.Error(),
-      )
-      router.InternalError(w, r)
-      return decodeErr
-    }
-
-    fmt.Println(csrfToken)
+		// decode body as url values
+		csrfToken, decodeErr := url.QueryUnescape(rawCsrfToken)
+		if decodeErr != nil {
+			logger.Log(
+				logger.ERROR,
+				"accountpage/session/csrf",
+				decodeErr.Error(),
+			)
+			router.InternalError(w, r, p)
+			return decodeErr
+		}
 
 		// check if the csrf token is valid
 		serverSession, serverSessionErr := serversession.Manager.Get(session.Id)
@@ -258,20 +256,20 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 				"accountpage/session/csrf/server",
 				serverSessionErr.Error(),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return serverSessionErr
 		}
 
-    // check if the csrf token is the same
-    if serverSession.CSRFToken.Token != csrfToken {
-      logger.Log(
-        logger.WARNING,
-        "accountpage/session/csrf",
-        "CSRF token is invalid",
-      )
-      w.WriteHeader(http.StatusUnauthorized)
-      return errors.New("CSRF token is invalid")
-    }
+		// check if the csrf token is the same
+		if serverSession.CSRFToken.Token != csrfToken {
+			logger.Log(
+				logger.WARNING,
+				"accountpage/session/csrf",
+				"CSRF token is invalid",
+			)
+			w.WriteHeader(http.StatusUnauthorized)
+			return errors.New("CSRF token is invalid")
+		}
 
 		// check if the csrf token is expired
 		if serverSession.CSRFToken.Valid.Before(time.Now().UTC()) {
@@ -282,35 +280,35 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 				"CSRF token is expired",
 			)
 
-      // renew csrf token
-      newCsrfToken, tokenErr := serversession.Manager.RenewCSRFToken(session.Id)
-      if tokenErr != nil {
-        logger.Log(
-          logger.ERROR,
-          "accountpage/session/csrf/new",
-          tokenErr.Error(),
-        )
-        router.InternalError(w, r)
-        return tokenErr
-      }
+			// renew csrf token
+			newCsrfToken, tokenErr := serversession.Manager.RenewCSRFToken(session.Id)
+			if tokenErr != nil {
+				logger.Log(
+					logger.ERROR,
+					"accountpage/session/csrf/new",
+					tokenErr.Error(),
+				)
+				router.InternalError(w, r, p)
+				return tokenErr
+			}
 
-      logger.Log(
-        logger.INFO,
-        "accountpage/session/csrf/new",
-        "CSRF token renewed successfully",
-      )
+			logger.Log(
+				logger.INFO,
+				"accountpage/session/csrf/new",
+				"CSRF token renewed successfully",
+			)
 
-      // get account
-      account, accountErr := accountService.GetByID(accountId)
-      if accountErr != nil {
-        logger.Log(
-          logger.ERROR,
-          "accountpage/session/accounts",
-          accountErr.Error(),
-        )
-        router.InternalError(w, r)
-        return accountErr
-      }
+			// get account
+			account, accountErr := accountService.GetByID(accountId)
+			if accountErr != nil {
+				logger.Log(
+					logger.ERROR,
+					"accountpage/session/accounts",
+					accountErr.Error(),
+				)
+				router.InternalError(w, r, p)
+				return accountErr
+			}
 
 			// get accounts
 			accounts, accountsErr := accountService.GetByUserId(session.UserId)
@@ -320,7 +318,7 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 					"accountpage/session/accounts",
 					accountsErr.Error(),
 				)
-				router.InternalError(w, r)
+				router.InternalError(w, r, p)
 				return accountsErr
 			}
 
@@ -347,7 +345,7 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 				AccountSelectItems:   accountSelectItems,
 				ShowNewAccountButton: true,
 				Account:              *account,
-        CSRFToken:            *newCsrfToken,
+				CSRFToken:            *newCsrfToken,
 			}
 
 			component := pages.Account(data)
@@ -363,17 +361,17 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 			return nil
 		}
 
-    // token is not expired, all good
-    logger.Log(
-      logger.INFO,
-      "accountpage/session/csrf",
-      "CSRF token is valid",
-    )
+		// token is not expired, all good
+		logger.Log(
+			logger.INFO,
+			"accountpage/session/csrf",
+			"CSRF token is valid",
+		)
 
 		// delete account
 		accountErr := accountService.Delete(accountId)
 		if accountErr != nil {
-			router.NotFound(w, r)
+			router.NotFound(w, r, p)
 			return accountErr
 		}
 

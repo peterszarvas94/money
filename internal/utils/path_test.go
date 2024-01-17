@@ -35,7 +35,7 @@ func TestGetQueryParams(t *testing.T) {
 	values["test"] = []string{"123", "456"}
 	expected := "123"
 
-	result:= utils.GetQueryParam(values, "test")
+	result := utils.GetQueryParam(values, "test")
 	if result != expected {
 		t.Errorf("Expected %s, got %s", expected, result)
 	}

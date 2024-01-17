@@ -37,7 +37,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -63,7 +63,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 				"signin/session/redirect",
 				fmt.Sprintf("Invalid redirect %s", redirect),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return nil
 		}
 
@@ -99,7 +99,7 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 			"signin/nosession/redirect",
 			fmt.Sprintf("Invalid redirect %s", redirect),
 		)
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return nil
 	}
 
@@ -132,7 +132,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return formErr
 	}
 
@@ -145,7 +145,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -168,7 +168,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		}
 
 		if !utils.IsValidRedirect(redirect, true) {
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return nil
 		}
 
@@ -192,7 +192,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	session, sessionErr := sessionService.New(user)
 	if sessionErr != nil {
 		logger.Log(logger.ERROR, "signin/post/session", sessionErr.Error())
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return sessionErr
 	}
 
@@ -201,7 +201,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	_, ssErr := serversession.Manager.Create(session.Id)
 	if ssErr != nil {
 		logger.Log(logger.ERROR, "signin/post/serversession", ssErr.Error())
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return ssErr
 	}
 
@@ -241,7 +241,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	}
 
 	if !utils.IsValidRedirect(redirect, false) {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return nil
 	}
 

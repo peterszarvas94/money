@@ -21,7 +21,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -44,7 +44,7 @@ func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 		// get accounts
 		accounts, accountsErr := accountService.GetByUserId(session.UserId)
 		if accountsErr != nil {
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return accountsErr
 		}
 

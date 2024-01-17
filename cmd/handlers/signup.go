@@ -36,7 +36,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -62,7 +62,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 				"signup/nosession/redirect",
 				fmt.Sprintf("Invalid redirect, %s", redirect),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return nil
 		}
 
@@ -97,7 +97,7 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 			"signup/nosession/redirect",
 			fmt.Sprintf("Invalid redirect, %s", redirect),
 		)
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return nil
 	}
 
@@ -136,7 +136,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 
 	formErr := r.ParseForm()
 	if formErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return formErr
 	}
 
@@ -153,7 +153,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		firstname == "" ||
 		lastname == "" ||
 		password == "" {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return errors.New("Some form values are empty")
 	}
 
@@ -161,7 +161,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -247,7 +247,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		}
 
 		if !utils.IsValidRedirect(redirect, true) {
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return nil
 		}
 
@@ -281,7 +281,7 @@ func NewUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 	}
 
 	if !utils.IsValidRedirect(redirect, true) {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return nil
 	}
 

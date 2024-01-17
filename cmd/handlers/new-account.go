@@ -24,7 +24,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -50,7 +50,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 				"newaccount/session/server",
 				serverSessionErr.Error(),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return serverSessionErr
 		}
 
@@ -64,7 +64,7 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 				"newaccount/session/accounts",
 				accountsErr.Error(),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return accountsErr
 		}
 
@@ -129,7 +129,7 @@ NewAccountHandler handles the POST request to /account
 func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	formErr := r.ParseForm()
 	if formErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return formErr
 	}
 
@@ -144,7 +144,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		description == "" ||
 		currency == "" ||
 		csrfToken == "" {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		logger.Log(
 			logger.ERROR,
 			"newaccount/post/form",
@@ -163,7 +163,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -192,7 +192,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 				"newaccount/session/server",
 				serverSessionErr.Error(),
 			)
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return serverSessionErr
 		}
 
@@ -224,7 +224,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 					"newaccount/session/newcsrf",
 					tokenErr.Error(),
 				)
-				router.InternalError(w, r)
+				router.InternalError(w, r, p)
 				return tokenErr
 			}
 
@@ -242,7 +242,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 					"newaccount/session/accounts",
 					accountsErr.Error(),
 				)
-				router.InternalError(w, r)
+				router.InternalError(w, r, p)
 				return accountsErr
 			}
 
@@ -300,7 +300,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 		newAccount, newAccountErr := accountService.New(account)
 		if newAccountErr != nil {
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return newAccountErr
 		}
 
@@ -315,7 +315,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 		access, newAccessErr := accessService.New(access)
 		if newAccessErr != nil {
-			router.InternalError(w, r)
+			router.InternalError(w, r, p)
 			return newAccessErr
 		}
 
@@ -327,7 +327,7 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 	// not logged in user
 	if sessionErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return sessionErr
 	}
 

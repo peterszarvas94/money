@@ -70,12 +70,6 @@ func (sm *serverSessionManager) Create(sessionID int) (*serverSession, error) {
 
 	sm.sessions[sessionID] = session
 
-	// TODO: remove this print
-	fmt.Println("Current server sessions:")
-	for key := range sm.sessions {
-		fmt.Println(key)
-	}
-
 	return &session, nil
 }
 
@@ -109,12 +103,6 @@ func (sm *serverSessionManager) Delete(sessionID int) error {
 
 	delete(sm.sessions, sessionID)
 
-	// TODO: remove this print
-	fmt.Println("Current server sessions:")
-	for key := range sm.sessions {
-		fmt.Println(key)
-	}
-
 	return nil
 }
 
@@ -146,12 +134,6 @@ func (sm *serverSessionManager) RenewCSRFToken(sessionID int) (*CSRFToken, error
 	session.CSRFToken = *newCsrfToken
 
 	sm.sessions[sessionID] = *session
-
-	// TODO: remove this print
-	fmt.Println("Current server sessions:")
-	for key := range sm.sessions {
-		fmt.Println(key)
-	}
 
 	return newCsrfToken, nil
 }

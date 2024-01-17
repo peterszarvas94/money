@@ -23,7 +23,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return dbErr
 	}
 	defer db.Close()
@@ -38,7 +38,7 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 			"check/parse",
 			fmt.Sprintf("Error parsing form: %s", parseErr.Error()),
 		)
-		router.InternalError(w, r)
+		router.InternalError(w, r, p)
 		return parseErr
 	}
 
