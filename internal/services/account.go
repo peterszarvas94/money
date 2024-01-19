@@ -6,10 +6,19 @@ import (
 	"time"
 )
 
+type Account struct {
+	Id          int
+	Name        string
+	Description string
+	Currency    string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type AccountServiceInterface interface {
-	New(user *utils.Account) (*utils.Account, error)
-	GetByUserId(userId int) ([]*utils.Account, error)
-	GetByID(accountId int) (*utils.Account, error)
+	New(user *Account) (*Account, error)
+	GetByUserId(userId int) ([]*Account, error)
+	GetByID(accountId int) (*Account, error)
 	Delete(accountId int) error
 }
 
@@ -24,7 +33,7 @@ func NewAccountService(db *sql.DB) AccountServiceInterface {
 /*
 New is a function that adds an account to the database.
 */
-func (s *accountService) New(account *utils.Account) (*utils.Account, error) {
+func (s *accountService) New(account *Account) (*Account, error) {
 
 	now := time.Now().UTC()
 
@@ -43,7 +52,7 @@ func (s *accountService) New(account *utils.Account) (*utils.Account, error) {
 		return nil, idErr
 	}
 
-	newAccount := &utils.Account{
+	newAccount := &Account{
 		Id:          int(id),
 		Name:        account.Name,
 		Description: account.Description,
@@ -58,7 +67,7 @@ func (s *accountService) New(account *utils.Account) (*utils.Account, error) {
 /*
 GetByUserId is a function that returns all accounts for a given user.
 */
-func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
+func (s *accountService) GetByUserId(userId int) ([]*Account, error) {
 	rows, rowsErr := s.db.Query(
 		`SELECT 
 			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
@@ -71,7 +80,7 @@ func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
 		return nil, rowsErr
 	}
 
-	accounts := []*utils.Account{}
+	accounts := []*Account{}
 
 	for rows.Next() {
 		var id int
@@ -96,7 +105,7 @@ func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
 			return nil, updatedErr
 		}
 
-		account := &utils.Account{
+		account := &Account{
 			Id:          id,
 			Name:        name,
 			Description: description,
@@ -114,7 +123,7 @@ func (s *accountService) GetByUserId(userId int) ([]*utils.Account, error) {
 /*
 GetByID is a function that returns an account for a given id.
 */
-func (s *accountService) GetByID(accountId int) (*utils.Account, error) {
+func (s *accountService) GetByID(accountId int) (*Account, error) {
 	row := s.db.QueryRow(
 		`SELECT
 			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
@@ -145,7 +154,7 @@ func (s *accountService) GetByID(accountId int) (*utils.Account, error) {
 		return nil, updatedErr
 	}
 
-	account := &utils.Account{
+	account := &Account{
 		Id:          id,
 		Name:        name,
 		Description: description,

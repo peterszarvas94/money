@@ -3,12 +3,27 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"pengoe/internal/utils"
 	"time"
 )
 
+type Role string
+
+const (
+	Admin  Role = "admin"
+	Viewer Role = "viewer"
+)
+
+type Access struct {
+	Id        int
+	Role      Role
+	UserId    int
+	AccountId int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type AccessService interface {
-	New(user *utils.Access) (*utils.Access, error)
+	New(user *Access) (*Access, error)
 	Check(userId int, accountId int) error
 }
 
@@ -23,7 +38,7 @@ func NewAccessService(db *sql.DB) AccessService {
 /*
 New is a function that adds an access to the database.
 */
-func (s *accessService) New(access *utils.Access) (*utils.Access, error) {
+func (s *accessService) New(access *Access) (*Access, error) {
 	now := time.Now().UTC()
 
 	mutation, mutationErr := s.db.Exec(
@@ -42,7 +57,7 @@ func (s *accessService) New(access *utils.Access) (*utils.Access, error) {
 		return nil, idErr
 	}
 
-	newAccess := &utils.Access{
+	newAccess := &Access{
 		Id:        int(id),
 		Role:      access.Role,
 		AccountId: access.AccountId,

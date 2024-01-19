@@ -2,15 +2,15 @@ package pages;
 
 import (
 	"pengoe/web/templates/layouts"
-	"pengoe/internal/utils"
 	"pengoe/web/templates/components"
+	"pengoe/internal/services"
 )
 
 type DashboardProps struct {
 	Title                string
 	Description          string
 	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
 }
 
@@ -25,7 +25,7 @@ templ Dashboard(props DashboardProps) {
 			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
 				@components.Topbar(components.TopbarProps{
 						SelectedAccountId: props.SelectedAccountId,
-						AccountSelectItems: props.AccountSelectItems,
+						Accounts: props.Accounts,
 						ShowNewAccountButton: props.ShowNewAccountButton,
 					})
 				<div class="flex flex-col items-center justify-center p-10">

@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"pengoe/internal/serversession"
-	"pengoe/internal/utils"
+	"pengoe/internal/services"
+	"pengoe/internal/token"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
 )
@@ -21,9 +21,9 @@ type NewAccountProps struct {
 	Title                string
 	Description          string
 	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
-	CSRFToken            serversession.CSRFToken
+	Token                *token.Token
 	AccountName          string
 	AccountDescription   string
 	AccountCurrency      string
@@ -80,7 +80,7 @@ func NewAccount(props NewAccountProps) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Topbar(components.TopbarProps{
 				SelectedAccountId:    props.SelectedAccountId,
-				AccountSelectItems:   props.AccountSelectItems,
+				Accounts:             props.Accounts,
 				ShowNewAccountButton: props.ShowNewAccountButton,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +107,7 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.CSRFToken.Token))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.Token.Value))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

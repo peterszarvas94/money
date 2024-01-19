@@ -1,16 +1,13 @@
 package handlers
 
 import (
-	"fmt"
-	"html"
+	"database/sql"
+	"errors"
 	"html/template"
 	"net/http"
-	"net/url"
-	"pengoe/internal/db"
-	"pengoe/internal/logger"
 	"pengoe/internal/router"
-	"pengoe/internal/serversession"
 	"pengoe/internal/services"
+	"pengoe/internal/token"
 	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
 	"strconv"
@@ -21,7 +18,8 @@ import (
 type SigninPage struct {
 	Title       string
 	Descrtipion string
-	Session     utils.CurrentUser
+	LoggedIn    bool
+	User        services.User
 	Redirect    template.URL
 	Values      map[string]string
 	Errors      map[string]string
@@ -31,76 +29,10 @@ type SigninPage struct {
 SigninPageHandler handles the GET request to /signin.
 */
 func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
-
-	// connect to the database
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
+	redirect, redirectFound := r.Context().Value("redirect").(string)
+	if !redirectFound {
 		router.InternalError(w, r, p)
-		return dbErr
-	}
-	defer db.Close()
-	sessionService := services.NewSessionService(db)
-
-	session, sessionErr := sessionService.CheckCookie(r)
-
-	// if the user is logged in
-	if session != nil {
-		logger.Log(
-			logger.INFO,
-			"signin/session",
-			fmt.Sprintf("Session found with ID %d", session.Id),
-		)
-
-		if redirect == "" {
-			redirect = "/dashboard"
-		}
-
-		if !utils.IsValidRedirect(redirect, false) {
-			logger.Log(
-				logger.ERROR,
-				"signin/session/redirect",
-				fmt.Sprintf("Invalid redirect %s", redirect),
-			)
-			router.InternalError(w, r, p)
-			return nil
-		}
-
-		http.Redirect(w, r, redirect, http.StatusSeeOther)
-
-		logger.Log(
-			logger.INFO,
-			"signin/session/redirect",
-			fmt.Sprintf("Redirecting to %s", redirect),
-		)
-
-		return nil
-	}
-
-	// not logged in
-	logger.Log(
-		logger.INFO,
-		"signin/nosession",
-		fmt.Sprintf("No session found, %s", sessionErr.Error()),
-	)
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	if redirect == "" {
-		redirect = "%2Fdashboard"
-	} else {
-		redirect = url.QueryEscape(redirect)
-	}
-
-	if !utils.IsValidRedirect(redirect, true) {
-		logger.Log(
-			logger.ERROR,
-			"signin/nosession/redirect",
-			fmt.Sprintf("Invalid redirect %s", redirect),
-		)
-		router.InternalError(w, r, p)
-		return nil
+		return errors.New("Should use redirect middleware")
 	}
 
 	data := pages.SigninProps{
@@ -110,12 +42,6 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 		UsernameOrEmail: "",
 		SigninErr:       "",
 	}
-
-	logger.Log(
-		logger.INFO,
-		"signin/nosession/render",
-		fmt.Sprintf("Rendering signin page with redirect %s", redirect),
-	)
 
 	component := pages.Signin(data)
 	handler := templ.Handler(component)
@@ -128,7 +54,17 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 SigninHandler handles the POST request to /signin.
 */
 func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
+	redirect, redirectFound := r.Context().Value("redirect").(string)
+	if !redirectFound {
+		router.InternalError(w, r, p)
+		return errors.New("Should use redirect middleware")
+	}
+
+	db, dbFound := r.Context().Value("db").(*sql.DB)
+	if !dbFound {
+		router.InternalError(w, r, p)
+		return errors.New("Should use db middleware")
+	}
 
 	formErr := r.ParseForm()
 	if formErr != nil {
@@ -136,19 +72,21 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		return formErr
 	}
 
-	logger.Log(logger.INFO, "signin/post/parse", "Form parsed successfully")
+	 formValues := r.Form
 
-	usernameOrEmail := html.EscapeString(r.FormValue("user"))
-	password := html.EscapeString(r.FormValue("password"))
-
-	// connect to the database
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
-		router.InternalError(w, r, p)
-		return dbErr
+  values, err := utils.GetFormValues(
+    formValues,
+    "user",
+		"password",
+	)
+	if err != nil {
+		router.BadRequest(w, r, p)
+		return err
 	}
-	defer db.Close()
+
+	usernameOrEmail := values["user"]
+	password := values["password"]
+
 	userService := services.NewUserService(db)
 
 	// login the user
@@ -156,21 +94,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	// if the login was unsuccessful
 	if signinErr != nil {
-		logger.Log(logger.WARNING, "signin/post/login", signinErr.Error())
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
-
-		if redirect == "" {
-			redirect = "%2Fdashboard"
-		} else {
-			redirect = url.QueryEscape(redirect)
-		}
-
-		if !utils.IsValidRedirect(redirect, true) {
-			router.InternalError(w, r, p)
-			return nil
-		}
 
 		data := pages.SigninProps{
 			Title:           "pengoe - Sign in",
@@ -191,25 +115,15 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 	sessionService := services.NewSessionService(db)
 	session, sessionErr := sessionService.New(user)
 	if sessionErr != nil {
-		logger.Log(logger.ERROR, "signin/post/session", sessionErr.Error())
 		router.InternalError(w, r, p)
 		return sessionErr
 	}
 
-	logger.Log(logger.INFO, "signin/post/session", "Session created successfully")
-
-	_, ssErr := serversession.Manager.Create(session.Id)
-	if ssErr != nil {
-		logger.Log(logger.ERROR, "signin/post/serversession", ssErr.Error())
+	_, tokenErr := token.Manager.Create(session.Id)
+	if tokenErr != nil {
 		router.InternalError(w, r, p)
-		return ssErr
+		return tokenErr
 	}
-
-	logger.Log(
-		logger.INFO,
-		"signin/post/serversession",
-		"Server session created successfully",
-	)
 
 	secure := utils.Env.Environment == "production"
 	var sameSite http.SameSite
@@ -225,8 +139,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	// set the session id to cookie
 	cookie := &http.Cookie{
-		Name:  "session",
-		Value: sessionId,
+		Name:     "session",
+		Value:    sessionId,
 		Path:     "/",
 		Expires:  valid,
 		HttpOnly: true,
@@ -234,25 +148,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		SameSite: sameSite,
 	}
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-
-	if redirect == "" {
-		redirect = "/dashboard"
-	}
-
-	if !utils.IsValidRedirect(redirect, false) {
-		router.InternalError(w, r, p)
-		return nil
-	}
-
 	http.SetCookie(w, cookie)
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
-
-	logger.Log(
-		logger.INFO,
-		"signin/post/res",
-		fmt.Sprintf("Redirected to %s", redirect),
-	)
 
 	return nil
 }

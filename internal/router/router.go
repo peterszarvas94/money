@@ -15,9 +15,9 @@ type router struct {
 }
 
 type route struct {
-	pattern []string
-	method  string
-	handler HandlerFunc
+	pattern     []string
+	method      string
+	handler     HandlerFunc
 	middlewares []MiddlewareFunc
 }
 
@@ -29,9 +29,9 @@ Utility function for creating a new router.
 */
 func NewRouter() *router {
 	return &router{
-		routes: []*route{},
+		routes:       []*route{},
 		staticPrefix: "",
-		staticPath: "",
+		staticPath:   "",
 	}
 }
 
@@ -144,9 +144,9 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	handler := route.handler
 
-	// apply middlewares
-	for _, middleware := range route.middlewares {
-		handler = middleware(handler)
+	// apply middlewares backwards
+	for i := len(route.middlewares) - 1; i >= 0; i-- {
+		handler = route.middlewares[i](handler)
 	}
 
 	// call handler
@@ -155,12 +155,6 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		logger.Log(logger.ERROR, "handler", handlerErr.Error())
 	}
 }
-
-
-
-
-
-
 
 /*
 getSameLengthRoutes returns routes with the same length as path.
@@ -238,3 +232,4 @@ func removeTrailingSlash(path string) string {
 
 	return path
 }
+

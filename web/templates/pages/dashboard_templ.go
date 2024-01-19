@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"pengoe/internal/utils"
+	"pengoe/internal/services"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
 )
@@ -20,7 +20,7 @@ type DashboardProps struct {
 	Title                string
 	Description          string
 	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
 }
 
@@ -66,7 +66,7 @@ func Dashboard(props DashboardProps) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Topbar(components.TopbarProps{
 				SelectedAccountId:    props.SelectedAccountId,
-				AccountSelectItems:   props.AccountSelectItems,
+				Accounts:             props.Accounts,
 				ShowNewAccountButton: props.ShowNewAccountButton,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

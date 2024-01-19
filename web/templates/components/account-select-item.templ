@@ -1,18 +1,20 @@
 package components
 
-import "pengoe/internal/utils"
-import "fmt"
+import (
+	"pengoe/internal/services"
+	"fmt"
+)
 
-templ AccountSelectItemSelected(props utils.AccountSelectItem) {
+templ AccountSelectItemSelected(account *services.Account) {
 	<li>
 		<a
- 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", props.Id)) }
+ 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", account.Id)) }
  			class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
  			tabindex="-1"
  			aria-current="true"
- 			aria-label={ props.Text }
+ 			aria-label={ account.Name }
 		>
-			<div>{ props.Text }</div>
+			<div>{ account.Name }</div>
 			<div
  				class="text-primary group-hover:text-accent group-focus:text-accent text-sm"
 			>
@@ -64,15 +66,34 @@ templ AccountSelectItemNew() {
 	</li>
 }
 
-templ AccountSelectItem(props utils.AccountSelectItem) {
+templ AccountSelectItem(account *services.Account) {
 	<li>
 		<a
- 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", props.Id)) }
+ 			href={ templ.SafeURL(fmt.Sprintf("/account/%d", account.Id)) }
  			class="rounded-inner hover:bg-primary focus:bg-primary hover:text-text focus:text-text group flex w-full items-center justify-between gap-2 p-2"
  			tabindex="-1"
- 			aria-label={ props.Text }
+ 			aria-label={ account.Name }
 		>
-			<div>{ props.Text }</div>
+			<div>{ account.Name }</div>
 		</a>
 	</li>
+}
+
+templ NoAccountSelectItemsNew() {
+	<div class="p-4">
+		<a
+ 			href="/account/new"
+ 			class="p-2 border-primary w-fit rounded-lg border hover:bg-primary focus:bg-primary hover:text-text focus:text-text"
+		>
+			New account
+		</a>
+	</div>
+}
+
+templ NoAccountSelectItems() {
+	<div class="p-2">
+		<div class="p-2 w-fit">
+			- no accounts yet -
+		</div>
+	</div>
 }

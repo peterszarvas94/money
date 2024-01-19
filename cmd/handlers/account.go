@@ -1,18 +1,15 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
-	"html"
 	"io"
 	"net/http"
 	"net/url"
-	"pengoe/internal/db"
-	"pengoe/internal/logger"
 	"pengoe/internal/router"
-	"pengoe/internal/serversession"
 	"pengoe/internal/services"
-	"pengoe/internal/utils"
+	t "pengoe/internal/token"
 	"pengoe/web/templates/pages"
 	"strconv"
 	"strings"
@@ -25,8 +22,24 @@ import (
 AccountPageHandler handles the GET request to /account/:id
 */
 func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	id, found := p["id"]
-	if !found {
+	token, tokenFound := r.Context().Value("token").(*t.Token)
+	if !tokenFound {
+		router.RedirectToSignin(w, r, p)
+		return errors.New("Should use token middleware")
+	}
+	db, dbFound := r.Context().Value("db").(*sql.DB)
+	if !dbFound {
+		router.InternalError(w, r, p)
+		return errors.New("Should use db middleware")
+	}
+	session, sessionFound := r.Context().Value("session").(*services.Session)
+	if !sessionFound {
+		router.InternalError(w, r, p)
+		fmt.Println("Should use session middleware")
+	}
+
+	id, idFound := p["id"]
+	if !idFound {
 		router.NotFound(w, r, p)
 		return errors.New("Path variable \"id\" not found")
 	}
@@ -38,129 +51,44 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 		return errParse
 	}
 
-	// connect to db
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
-		router.InternalError(w, r, p)
-		return dbErr
-	}
-	defer db.Close()
-
 	accountService := services.NewAccountService(db)
 	accessService := services.NewAccessService(db)
-	sessionService := services.NewSessionService(db)
 
-	// get account early
+	// get account
 	account, accountErr := accountService.GetByID(accountId)
 	if accountErr != nil {
 		router.NotFound(w, r, p)
 		return accountErr
 	}
 
-	// check if the user is already logged in, redirect to dashboard
-	session, sessionErr := sessionService.CheckCookie(r)
-	if session != nil {
-		// logged in user
-		logger.Log(
-			logger.INFO,
-			"accountpage/session",
-			fmt.Sprintf("Session found with ID %d", session.Id),
-		)
-
-		// check if the user has access to the account
-		accessErr := accessService.Check(session.UserId, account.Id)
-		if accessErr != nil {
-			logger.Log(
-				logger.WARNING,
-				"accountpage/session/access",
-				fmt.Sprintf(
-					"User %d does not have access to account %d",
-					session.UserId,
-					account.Id,
-				),
-			)
-			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-			return accessErr
-		}
-
-		// get csrf token
-		serverSession, serverSessionError := serversession.Manager.Get(session.Id)
-		if serverSessionError != nil {
-			logger.Log(
-				logger.ERROR,
-				"accountpage/session/csrf",
-				serverSessionError.Error(),
-			)
-			router.InternalError(w, r, p)
-			return serverSessionError
-		}
-
-		// get accounts
-		accounts, accountsErr := accountService.GetByUserId(session.UserId)
-		if accountsErr != nil {
-			logger.Log(
-				logger.ERROR,
-				"accountpage/session/accounts",
-				accountsErr.Error(),
-			)
-			router.InternalError(w, r, p)
-			return accountsErr
-		}
-
-		logger.Log(
-			logger.INFO,
-			"accountpage/session/accounts",
-			fmt.Sprintf("Found %d accounts", len(accounts)),
-		)
-
-		// create account select items
-		accountSelectItems := []utils.AccountSelectItem{}
-		for _, account := range accounts {
-			accountSelectItems = append(accountSelectItems, utils.AccountSelectItem{
-				Id:   account.Id,
-				Text: account.Name,
-			})
-		}
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		data := pages.AccountProps{
-			Title:                fmt.Sprintf("pengoe - %s", account.Name),
-			Description:          fmt.Sprintf("Account page for %s", account.Name),
-			AccountSelectItems:   accountSelectItems,
-			ShowNewAccountButton: true,
-			Account:              *account,
-			CSRFToken:            serverSession.CSRFToken,
-		}
-
-		component := pages.Account(data)
-		handler := templ.Handler(component)
-		handler.ServeHTTP(w, r)
-
-		logger.Log(
-			logger.INFO,
-			"accountpage/loggedin/tmpl",
-			"Template parsed successfully",
-		)
-
-		return nil
+	// check if the user has access to the account
+	accessErr := accessService.Check(session.UserId, accountId)
+	if accessErr != nil {
+		http.Redirect(w, r, "/dashboard", http.StatusUnauthorized)
+		return accessErr
 	}
 
-	// not logged in user
-	logger.Log(
-		logger.INFO,
-		"accountpage/nosession",
-		fmt.Sprintf("No session found. %s", sessionErr.Error()),
-	)
+	// get accounts
+	accounts, accountsErr := accountService.GetByUserId(session.UserId)
+	if accountsErr != nil {
+		router.InternalError(w, r, p)
+		return accountsErr
+	}
 
-	logger.Log(
-		logger.INFO,
-		"accountpage/nosession/redirect",
-		fmt.Sprintf("Redirecting to /signin?redirect=%%2Faccount%%2F%s", id),
-	)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	http.Redirect(w, r, "/signin?redirect=%2Faccount%2F"+id, http.StatusSeeOther)
+	data := pages.AccountProps{
+		Title:                fmt.Sprintf("pengoe - %s", account.Name),
+		Description:          fmt.Sprintf("Account page for %s", account.Name),
+		Accounts:             accounts,
+		ShowNewAccountButton: true,
+		Account:              account,
+		Token:                token,
+	}
+
+	component := pages.Account(data)
+	handler := templ.Handler(component)
+	handler.ServeHTTP(w, r)
 
 	return nil
 }
@@ -169,6 +97,22 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 DeleteAccountHandler handles the DELETE request to /account/:id
 */
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+	token, tokenFound := r.Context().Value("token").(*t.Token)
+	if !tokenFound {
+		router.RedirectToSignin(w, r, p)
+		return errors.New("Should use token middleware")
+	}
+	db, dbFound := r.Context().Value("db").(*sql.DB)
+	if !dbFound {
+		router.InternalError(w, r, p)
+		return errors.New("Should use db middleware")
+	}
+	session, sessionFound := r.Context().Value("session").(*services.Session)
+	if !sessionFound {
+		router.InternalError(w, r, p)
+		fmt.Println("Should use session middleware")
+	}
+
 	id, found := p["id"]
 	if !found {
 		router.NotFound(w, r, p)
@@ -182,212 +126,105 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 		return errParse
 	}
 
-	// connect to db
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
-		router.InternalError(w, r, p)
-		return dbErr
-	}
-	defer db.Close()
-
 	accountService := services.NewAccountService(db)
-	sessionService := services.NewSessionService(db)
 	accessService := services.NewAccessService(db)
 
-	// check if the user is logged in
-	session, sessionErr := sessionService.CheckCookie(r)
-	if session != nil {
-		// logged in user
-		logger.Log(
-			logger.INFO,
-			"accountpage/checkSession",
-			fmt.Sprintf("Logged in as %d", session.UserId),
+	// check if the user has access to the account
+	accessErr := accessService.Check(session.UserId, accountId)
+	if accessErr != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New(
+			fmt.Sprintf(
+				"User %d does not have access to account %d",
+				session.UserId,
+				accountId,
+			),
 		)
+	}
 
-		// check if the user has access to the account
-		accessErr := accessService.Check(session.UserId, accountId)
-		if accessErr != nil {
-			logger.Log(
-				logger.WARNING,
-				"accountpage/session/access",
-				fmt.Sprintf(
-					"User %d does not have access to account %d",
-					session.UserId,
-					accountId,
-				),
-			)
-			w.WriteHeader(http.StatusUnauthorized)
-			return accessErr
-		}
+	// manually parse body, (because DELETE request, go btw)
+	body, bodyErr := io.ReadAll(r.Body)
+	if bodyErr != nil {
+		router.InternalError(w, r, p)
+		return bodyErr
+	}
 
-		// manually parse body, to get csrf token (because DELETE request, thx go)
-		body, bodyErr := io.ReadAll(r.Body)
-		if bodyErr != nil {
-			logger.Log(
-				logger.ERROR,
-				"accountpage/session/csrf",
-				bodyErr.Error(),
-			)
+	// csrf=asd -> [csrf asd]
+	splittedBody := strings.Split(string(body), "=")
+	if len(splittedBody) != 2 || splittedBody[0] != "csrf" {
+		router.Unauthorized(w, r, p)
+		return errors.New("CSRF token is missing")
+	}
+
+	// [csrf asd] -> asd
+	escapedTokenFromReq := splittedBody[1]
+
+	// decode token
+	tokenFromReq, decodeErr := url.QueryUnescape(escapedTokenFromReq)
+	if decodeErr != nil {
+		router.InternalError(w, r, p)
+		return decodeErr
+	}
+
+	// check if the two tokens are the same
+	if token.Value != tokenFromReq {
+		router.Unauthorized(w, r, p)
+		return errors.New("CSRF token is invalid")
+	}
+
+	// check if the csrf token is expired
+	if token.Valid.Before(time.Now().UTC()) {
+		// csrf token is expired
+
+		// renew csrf token
+		newCsrfToken, tokenErr := t.Manager.RenewToken(session.Id)
+		if tokenErr != nil {
 			router.InternalError(w, r, p)
-			return bodyErr
+			return tokenErr
 		}
 
-		// csrf=asd -> asd
-		rawCsrfToken := html.EscapeString(strings.Split(string(body), "=")[1])
-
-		// decode body as url values
-		csrfToken, decodeErr := url.QueryUnescape(rawCsrfToken)
-		if decodeErr != nil {
-			logger.Log(
-				logger.ERROR,
-				"accountpage/session/csrf",
-				decodeErr.Error(),
-			)
-			router.InternalError(w, r, p)
-			return decodeErr
-		}
-
-		// check if the csrf token is valid
-		serverSession, serverSessionErr := serversession.Manager.Get(session.Id)
-		if serverSessionErr != nil {
-			logger.Log(
-				logger.ERROR,
-				"accountpage/session/csrf/server",
-				serverSessionErr.Error(),
-			)
-			router.InternalError(w, r, p)
-			return serverSessionErr
-		}
-
-		// check if the csrf token is the same
-		if serverSession.CSRFToken.Token != csrfToken {
-			logger.Log(
-				logger.WARNING,
-				"accountpage/session/csrf",
-				"CSRF token is invalid",
-			)
-			w.WriteHeader(http.StatusUnauthorized)
-			return errors.New("CSRF token is invalid")
-		}
-
-		// check if the csrf token is expired
-		if serverSession.CSRFToken.Valid.Before(time.Now().UTC()) {
-			// csrf token is expired
-			logger.Log(
-				logger.INFO,
-				"accountpage/session/csrf/expired",
-				"CSRF token is expired",
-			)
-
-			// renew csrf token
-			newCsrfToken, tokenErr := serversession.Manager.RenewCSRFToken(session.Id)
-			if tokenErr != nil {
-				logger.Log(
-					logger.ERROR,
-					"accountpage/session/csrf/new",
-					tokenErr.Error(),
-				)
-				router.InternalError(w, r, p)
-				return tokenErr
-			}
-
-			logger.Log(
-				logger.INFO,
-				"accountpage/session/csrf/new",
-				"CSRF token renewed successfully",
-			)
-
-			// get account
-			account, accountErr := accountService.GetByID(accountId)
-			if accountErr != nil {
-				logger.Log(
-					logger.ERROR,
-					"accountpage/session/accounts",
-					accountErr.Error(),
-				)
-				router.InternalError(w, r, p)
-				return accountErr
-			}
-
-			// get accounts
-			accounts, accountsErr := accountService.GetByUserId(session.UserId)
-			if accountsErr != nil {
-				logger.Log(
-					logger.ERROR,
-					"accountpage/session/accounts",
-					accountsErr.Error(),
-				)
-				router.InternalError(w, r, p)
-				return accountsErr
-			}
-
-			logger.Log(
-				logger.INFO,
-				"accountpage/session/accounts",
-				fmt.Sprintf("Found %d accounts", len(accounts)),
-			)
-
-			// create account select items
-			accountSelectItems := []utils.AccountSelectItem{}
-			for _, account := range accounts {
-				accountSelectItems = append(accountSelectItems, utils.AccountSelectItem{
-					Id:   account.Id,
-					Text: account.Name,
-				})
-			}
-
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-			data := pages.AccountProps{
-				Title:                fmt.Sprintf("pengoe - %s", account.Name),
-				Description:          fmt.Sprintf("Account page for %s", account.Name),
-				AccountSelectItems:   accountSelectItems,
-				ShowNewAccountButton: true,
-				Account:              *account,
-				CSRFToken:            *newCsrfToken,
-			}
-
-			component := pages.Account(data)
-			handler := templ.Handler(component)
-			handler.ServeHTTP(w, r)
-
-			logger.Log(
-				logger.INFO,
-				"accountpage/loggedin/tmpl",
-				"Template parsed successfully",
-			)
-
-			return nil
-		}
-
-		// token is not expired, all good
-		logger.Log(
-			logger.INFO,
-			"accountpage/session/csrf",
-			"CSRF token is valid",
-		)
-
-		// delete account
-		accountErr := accountService.Delete(accountId)
+		// get account
+		account, accountErr := accountService.GetByID(accountId)
 		if accountErr != nil {
-			router.NotFound(w, r, p)
+			router.InternalError(w, r, p)
 			return accountErr
 		}
 
-		logger.Log(logger.INFO, "accountpage/delete", fmt.Sprintf("Account %d deleted", accountId))
+		// get accounts
+		accounts, accountsErr := accountService.GetByUserId(session.UserId)
+		if accountsErr != nil {
+			router.InternalError(w, r, p)
+			return accountsErr
+		}
 
-		// redirect to dashboard
-		w.Header().Set("HX-Redirect", "/dashboard")
+		data := pages.AccountProps{
+			Title:                fmt.Sprintf("pengoe - %s", account.Name),
+			Description:          fmt.Sprintf("Account page for %s", account.Name),
+			Accounts:             accounts,
+			ShowNewAccountButton: true,
+			Account:              account,
+			Token:                newCsrfToken,
+		}
+
+		component := pages.Account(data)
+		handler := templ.Handler(component)
+		handler.ServeHTTP(w, r)
 
 		return nil
 	}
 
-	// not logged in user
-	logger.Log(logger.WARNING, "accountpage/checkSession", sessionErr.Error())
+	// token is not expired, all good
 
-	// redirect to login
-	w.Header().Set("HX-Redirect", "/signin")
+	// delete account
+	accountErr := accountService.Delete(accountId)
+	if accountErr != nil {
+		router.NotFound(w, r, p)
+		return accountErr
+	}
+
+	// redirect to dashboard
+	w.Header().Set("HX-Redirect", "/dashboard")
 
 	return nil
+
 }

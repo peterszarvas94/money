@@ -6,12 +6,24 @@ import (
 	"time"
 )
 
+
+type User struct {
+	Id        int
+	Username  string
+	Email     string
+	Fistname  string
+	Lastname  string
+	Password  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type UserServiceInterface interface {
-	Signup(user *utils.User) (*utils.User, error)
-	Signin(usernameOrEmail, password string) (*utils.User, error)
-	GetByID(id int) (*utils.User, error)
-	GetByUsername(username string) (*utils.User, error)
-	GetByEmail(email string) (*utils.User, error)
+	Signup(user *User) (*User, error)
+	Signin(usernameOrEmail, password string) (*User, error)
+	GetByID(id int) (*User, error)
+	GetByUsername(username string) (*User, error)
+	GetByEmail(email string) (*User, error)
 }
 
 type userService struct {
@@ -25,7 +37,7 @@ func NewUserService(db *sql.DB) UserServiceInterface {
 /*
 Signup is a function that adds a new user to the database.
 */
-func (s *userService) Signup(user *utils.User) (*utils.User, error) {
+func (s *userService) Signup(user *User) (*User, error) {
 	hashedPassword, hashErr := utils.HashPassword(user.Password)
 	if hashErr != nil {
 		return nil, hashErr
@@ -60,7 +72,7 @@ func (s *userService) Signup(user *utils.User) (*utils.User, error) {
 		return nil, idErr
 	}
 
-	newUser := &utils.User{
+	newUser := &User{
 		Id:        int(id),
 		Username:  user.Username,
 		Email:     user.Email,
@@ -78,7 +90,7 @@ Signin is a function that gets a user from the database by username or email,
 and checks if the passwords match.
 If correct, it returns the user's id.
 */
-func (s *userService) Signin(usernameOrEmail, password string) (*utils.User, error) {
+func (s *userService) Signin(usernameOrEmail, password string) (*User, error) {
 	query, queryErr := s.db.Query(
 		`SELECT
       id,
@@ -143,7 +155,7 @@ func (s *userService) Signin(usernameOrEmail, password string) (*utils.User, err
 		return nil, updatedErr
 	}
 
-	user := utils.User{
+	user := User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -159,8 +171,8 @@ func (s *userService) Signin(usernameOrEmail, password string) (*utils.User, err
 /*
 GetByUsername is a function that gets a user from the database by username.
 */
-func (s *userService) GetByID(id int) (*utils.User, error) {
-	var user utils.User
+func (s *userService) GetByID(id int) (*User, error) {
+	var user User
 
 	query, queryErr := s.db.Query(
 		"SELECT * FROM user WHERE id = ?",
@@ -208,7 +220,7 @@ func (s *userService) GetByID(id int) (*utils.User, error) {
 		return nil, updatedErr
 	}
 
-	user = utils.User{
+	user = User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -224,8 +236,8 @@ func (s *userService) GetByID(id int) (*utils.User, error) {
 /*
 GetByUsername is a function that gets a user from the database by username.
 */
-func (s *userService) GetByUsername(username string) (*utils.User, error) {
-	var user utils.User
+func (s *userService) GetByUsername(username string) (*User, error) {
+	var user User
 
 	query, queryErr := s.db.Query(
 		"SELECT * FROM user WHERE username = ?",
@@ -273,7 +285,7 @@ func (s *userService) GetByUsername(username string) (*utils.User, error) {
 		return nil, updatedErr
 	}
 
-	user = utils.User{
+	user = User{
 		Id:        id,
 		Username:  username,
 		Email:     email,
@@ -289,8 +301,8 @@ func (s *userService) GetByUsername(username string) (*utils.User, error) {
 /*
 GetByEmail is a function that gets a user from the database by email.
 */
-func (s *userService) GetByEmail(email string) (*utils.User, error) {
-	var user utils.User
+func (s *userService) GetByEmail(email string) (*User, error) {
+	var user User
 
 	query, queryErr := s.db.Query("SELECT * FROM user WHERE email = ?", email)
 	if queryErr != nil {
@@ -335,7 +347,7 @@ func (s *userService) GetByEmail(email string) (*utils.User, error) {
 		return nil, updatedErr
 	}
 
-	user = utils.User{
+	user = User{
 		Id:        id,
 		Username:  username,
 		Email:     email,

@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"pengoe/internal/serversession"
-	"pengoe/internal/utils"
+	"pengoe/internal/services"
+	"pengoe/internal/token"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
 	"strconv"
@@ -21,10 +21,10 @@ import (
 type AccountProps struct {
 	Title                string
 	Description          string
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
-	Account              utils.Account
-	CSRFToken            serversession.CSRFToken
+	Account              *services.Account
+	Token                *token.Token
 }
 
 func Account(props AccountProps) templ.Component {
@@ -69,7 +69,7 @@ func Account(props AccountProps) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Topbar(components.TopbarProps{
 				SelectedAccountId:    props.Account.Id,
-				AccountSelectItems:   props.AccountSelectItems,
+				Accounts:             props.Accounts,
 				ShowNewAccountButton: props.ShowNewAccountButton,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -79,7 +79,7 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string = "Account: " + props.Account.Name
+			var templ_7745c5c3_Var4 string = props.Account.Name
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -105,7 +105,7 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.CSRFToken.Token))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.Token.Value))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

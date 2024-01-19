@@ -10,11 +10,11 @@ import "context"
 import "io"
 import "bytes"
 
-import "pengoe/internal/utils"
+import "pengoe/internal/services"
 
 type TopbarProps struct {
 	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
 }
 
@@ -40,7 +40,7 @@ func Topbar(props TopbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"p-2\"><button class=\"p-2 text-2xl\" aria-label=\"Open menu\" hx-on:click=\"emit(&#39;menu-open&#39;)\" tabindex=\"0\" hx-ext=\"receiver\" on-event:menu-open=\"\n            toggleTabIndex(this);\n            this.blur();\n          \" on-event:menu-close=\"\n            toggleTabIndex(this);\n            this.focus();\n          \"><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"p-2\"><button class=\"p-2 text-2xl\" aria-label=\"Open menu\" hx-on:click=\"emit(&#39;menu-open&#39;)\" tabindex=\"0\" hx-ext=\"receiver\" on-event:menu-open=\"\n          toggleTabIndex(this);\n          this.blur();\n        \" on-event:menu-close=\"\n          toggleTabIndex(this);\n          this.focus();\n        \"><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,83 +58,107 @@ func Topbar(props TopbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><details class=\"p-2\"><summary class=\"flex list-none cursor-pointer items-center gap-2 rounded-lg p-2\" hx-ext=\"receiver\" hx-on:click=\"emit(&#39;accounts-toggle&#39;)\" on-event:accounts-toggle=\"\n          this.classList.toggle(&#39;bg-primary&#39;);\n          this.classList.toggle(&#39;text-text&#39;);\n        \">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("-->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.SelectedAccountId == 0 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+		if len(props.Accounts) > 0 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<details class=\"p-2\"><summary class=\"flex list-none cursor-pointer items-center gap-2 rounded-lg p-2\" hx-ext=\"receiver\" hx-on:click=\"emit(&#39;accounts-toggle&#39;)\" on-event:accounts-toggle=\"\n          this.classList.toggle(&#39;bg-primary&#39;);\n          this.classList.toggle(&#39;text-text&#39;);\n        \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var5 := `Accounts`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			for _, item := range props.AccountSelectItems {
-				if item.Id == props.SelectedAccountId {
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var6 string = item.Text
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
+			if props.SelectedAccountId == 0 {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
 				}
-			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var7 := ` chevron down icon `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"text-xs\" hx-ext=\"receiver\" on-event:accounts-toggle=\"\n            this.classList.toggle(&#39;text-accent&#39;);\n          \"><svg stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" viewBox=\"0 0 448 512\" height=\"1em\" width=\"1em\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z\"></path></svg></div></summary><!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var8 := ` account selector dropdown `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"border-primary absolute top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200 left-1/2 transform -translate-x-1/2\" hx-ext=\"receiver\" on-event:accounts-toggle=\"\n          this.classList.toggle(&#39;opacity-0&#39;);\n          this.classList.toggle(&#39;opacity-100&#39;);\n          this.querySelectorAll(&#39;button&#39;).forEach((el) =&gt; {\n            toggleTabIndex(el);\n          });\n          this.querySelectorAll(&#39;a&#39;).forEach((el) =&gt; {\n            toggleTabIndex(el);\n          });\n        \"><ul>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, item := range props.AccountSelectItems {
-			if props.SelectedAccountId == item.Id {
-				templ_7745c5c3_Err = AccountSelectItemSelected(item).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Var5 := `Accounts`
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = AccountSelectItem(item).Render(ctx, templ_7745c5c3_Buffer)
+				for _, item := range props.Accounts {
+					if item.Id == props.SelectedAccountId {
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var6 string = item.Name
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!--")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var7 := ` chevron down icon `
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"text-xs\" hx-ext=\"receiver\" on-event:accounts-toggle=\"\n            this.classList.toggle(&#39;text-accent&#39;);\n          \"><svg stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" viewBox=\"0 0 448 512\" height=\"1em\" width=\"1em\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z\"></path></svg></div></summary><!--")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var8 := ` account selector dropdown `
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"border-primary absolute top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200 left-1/2 transform -translate-x-1/2\" hx-ext=\"receiver\" on-event:accounts-toggle=\"\n          this.classList.toggle(&#39;opacity-0&#39;);\n          this.classList.toggle(&#39;opacity-100&#39;);\n          this.querySelectorAll(&#39;button&#39;).forEach((el) =&gt; {\n            toggleTabIndex(el);\n          });\n          this.querySelectorAll(&#39;a&#39;).forEach((el) =&gt; {\n            toggleTabIndex(el);\n          });\n        \"><ul>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, item := range props.Accounts {
+				if props.SelectedAccountId == item.Id {
+					templ_7745c5c3_Err = AccountSelectItemSelected(item).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = AccountSelectItem(item).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+			if props.ShowNewAccountButton {
+				templ_7745c5c3_Err = AccountSelectItemNew().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></details>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			if props.ShowNewAccountButton {
+				templ_7745c5c3_Err = NoAccountSelectItemsNew().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = NoAccountSelectItems().Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = AccountSelectItemNew().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></details><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

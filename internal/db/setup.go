@@ -10,9 +10,9 @@ import (
 )
 
 /*
-DBManager is a struct that manages the database connection.
+dbManager is a struct that manages the database connection.
 */
-type DBManager struct {
+type dbManager struct {
 	db   *sql.DB
 	once sync.Once
 }
@@ -20,14 +20,19 @@ type DBManager struct {
 /*
 NewDBManager is a function that returns a new DBManager.
 */
-func NewDBManager() *DBManager {
-	return &DBManager{}
+func NewDBManager() *dbManager {
+	return &dbManager{}
 }
+
+/*
+Global Manager.
+*/
+var Manager *dbManager = NewDBManager()
 
 /*
 GetDB is a function that returns a database connection.
 */
-func (manager *DBManager) GetDB() (*sql.DB, error) {
+func (manager *dbManager) GetDB() (*sql.DB, error) {
 	var err error
 	manager.once.Do(func() {
 		err = manager.connect()
@@ -42,7 +47,7 @@ func (manager *DBManager) GetDB() (*sql.DB, error) {
 connect is a function that opens a connection to the database.
 It uses the DB_URL and DB_TOKEN environment variables (Turso db).
 */
-func (manager *DBManager) connect() error {
+func (manager *dbManager) connect() error {
 	url := utils.Env.DBUrl
 	token := utils.Env.DBToken
 

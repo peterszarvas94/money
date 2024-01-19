@@ -1,10 +1,10 @@
 package components
 
-import "pengoe/internal/utils"
+import "pengoe/internal/services"
 
 type TopbarProps struct {
 	SelectedAccountId    int
-	AccountSelectItems   []utils.AccountSelectItem
+	Accounts             []*services.Account
 	ShowNewAccountButton bool
 }
 
@@ -19,13 +19,13 @@ templ Topbar(props TopbarProps) {
  				tabindex="0"
  				hx-ext="receiver"
  				on-event:menu-open="
-            toggleTabIndex(this);
-            this.blur();
-          "
+          toggleTabIndex(this);
+          this.blur();
+        "
  				on-event:menu-close="
-            toggleTabIndex(this);
-            this.focus();
-          "
+          toggleTabIndex(this);
+          this.focus();
+        "
 			>
 				<!-- menu right icon -->
 				<svg
@@ -44,53 +44,54 @@ templ Topbar(props TopbarProps) {
 			</button>
 		</div>
 		<!-- account selector -->
-		<details class="p-2">
-			<summary
- 				class="flex list-none cursor-pointer items-center gap-2 rounded-lg p-2"
- 				hx-ext="receiver"
- 				hx-on:click="emit('accounts-toggle')"
- 				on-event:accounts-toggle="
+		if len(props.Accounts) > 0 {
+			<details class="p-2">
+				<summary
+ 					class="flex list-none cursor-pointer items-center gap-2 rounded-lg p-2"
+ 					hx-ext="receiver"
+ 					hx-on:click="emit('accounts-toggle')"
+ 					on-event:accounts-toggle="
           this.classList.toggle('bg-primary');
           this.classList.toggle('text-text');
         "
-			>
-				if (props.SelectedAccountId == 0) {
-					<div>Accounts</div>
-				} else {
-					for _, item := range props.AccountSelectItems {
-						if item.Id == props.SelectedAccountId {
-							<div>{ item.Text }</div>
+				>
+					if (props.SelectedAccountId == 0) {
+						<div>Accounts</div>
+					} else {
+						for _, item := range props.Accounts {
+							if item.Id == props.SelectedAccountId {
+								<div>{ item.Name }</div>
+							}
 						}
 					}
-				}
-				<!-- chevron down icon -->
-				<div
- 					class="text-xs"
- 					hx-ext="receiver"
- 					on-event:accounts-toggle="
+					<!-- chevron down icon -->
+					<div
+ 						class="text-xs"
+ 						hx-ext="receiver"
+ 						on-event:accounts-toggle="
             this.classList.toggle('text-accent');
           "
-				>
-					<svg
- 						stroke="currentColor"
- 						fill="currentColor"
- 						stroke-width="0"
- 						viewBox="0 0 448 512"
- 						height="1em"
- 						width="1em"
- 						xmlns="http://www.w3.org/2000/svg"
 					>
-						<path
- 							d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
-						></path>
-					</svg>
-				</div>
-			</summary>
-			<!-- account selector dropdown -->
-			<div
- 				class="border-primary absolute top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200 left-1/2 transform -translate-x-1/2"
- 				hx-ext="receiver"
- 				on-event:accounts-toggle="
+						<svg
+ 							stroke="currentColor"
+ 							fill="currentColor"
+ 							stroke-width="0"
+ 							viewBox="0 0 448 512"
+ 							height="1em"
+ 							width="1em"
+ 							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+ 								d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
+							></path>
+						</svg>
+					</div>
+				</summary>
+				<!-- account selector dropdown -->
+				<div
+ 					class="border-primary absolute top-14 w-fit rounded-lg border bg-white opacity-0 shadow-lg shadow-gray-100 transition-opacity duration-200 left-1/2 transform -translate-x-1/2"
+ 					hx-ext="receiver"
+ 					on-event:accounts-toggle="
           this.classList.toggle('opacity-0');
           this.classList.toggle('opacity-100');
           this.querySelectorAll('button').forEach((el) => {
@@ -100,19 +101,28 @@ templ Topbar(props TopbarProps) {
             toggleTabIndex(el);
           });
         "
-			>
-				<ul>
-					for _, item := range props.AccountSelectItems {
-						if props.SelectedAccountId == item.Id {
-							@AccountSelectItemSelected(item)
-						} else {
-							@AccountSelectItem(item)
+				>
+					<ul>
+						for _, item := range props.Accounts {
+							if props.SelectedAccountId == item.Id {
+								@AccountSelectItemSelected(item)
+							} else {
+								@AccountSelectItem(item)
+							}
 						}
-					}
-					@AccountSelectItemNew()
-				</ul>
-			</div>
-		</details>
+						if props.ShowNewAccountButton {
+							@AccountSelectItemNew()
+						}
+					</ul>
+				</div>
+			</details>
+		} else {
+			if props.ShowNewAccountButton {
+				@NoAccountSelectItemsNew()
+			} else {
+				@NoAccountSelectItems()
+			}
+		}
 		<!-- profile -->
 		<details class="p-2">
 			<summary

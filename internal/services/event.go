@@ -2,12 +2,24 @@ package services
 
 import (
 	"database/sql"
-	"pengoe/internal/utils"
 	"time"
 )
 
+
+type Event struct {
+	Id           int
+	AccountId   int
+	Name         string
+	Description  string
+	Income       int
+	Reserved     int
+	DeliveredAt time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 type EventService interface {
-	New(user *utils.Event) (*utils.Event, error)
+	New(user *Event) (*Event, error)
 }
 
 type eventService struct {
@@ -21,7 +33,7 @@ func NewEventService(db *sql.DB) EventService {
 /*
 New is a function that adds an event to the database.
 */
-func (s *eventService) New(event *utils.Event) (*utils.Event, error) {
+func (s *eventService) New(event *Event) (*Event, error) {
 	now := time.Now().UTC()
 
 	mutation, mutationErr := s.db.Exec(
@@ -54,7 +66,7 @@ func (s *eventService) New(event *utils.Event) (*utils.Event, error) {
 		return nil, idErr
 	}
 
-	newEvent := &utils.Event{
+	newEvent := &Event{
 		Id:          int(id),
 		AccountId:   event.AccountId,
 		Name:        event.Name,
