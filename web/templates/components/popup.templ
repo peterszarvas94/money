@@ -1,0 +1,24 @@
+package components
+
+import "pengoe/web/templates/icons"
+
+type PopupProps struct {
+	CloseUrl string
+	Child    templ.Component
+}
+
+templ Popup(props PopupProps) {
+	<div
+		class="border border-gray-300 bg-white rounded-lg shadow-lg p-4 flex flex-col items-center"
+	>
+		<button
+ 			hx-get={ props.CloseUrl }
+			hx-target="closest div"
+			hx-swap="outerHTML"
+			class="self-end"
+		>
+			@icons.Close()
+		</button>
+		@props.Child
+	</div>
+}

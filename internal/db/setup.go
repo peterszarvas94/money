@@ -48,8 +48,8 @@ connect is a function that opens a connection to the database.
 It uses the DB_URL and DB_TOKEN environment variables (Turso db).
 */
 func (manager *dbManager) connect() error {
-	url := utils.Env.DBUrl
-	token := utils.Env.DBToken
+	url := utils.Env.DB_URL
+	token := utils.Env.DB_TOKEN
 
 	connectionStr := fmt.Sprintf("%s?authToken=%s", url, token)
 

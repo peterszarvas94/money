@@ -22,9 +22,9 @@ func SignoutHandler(w http.ResponseWriter, r *http.Request, p map[string]string)
 		return errors.New("Should use db middleware")
 	}
 
-	secure := utils.Env.Environment == "production"
+	secure := utils.Env.ENVIRONMENT == "production"
 	var sameSite http.SameSite
-	if utils.Env.Environment == "production" {
+	if utils.Env.ENVIRONMENT == "production" {
 		sameSite = http.SameSiteLaxMode
 	} else {
 		sameSite = http.SameSiteDefaultMode

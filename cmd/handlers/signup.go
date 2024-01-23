@@ -4,13 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"html"
 	"html/template"
 	"net/http"
 	"net/mail"
-	"pengoe/internal/logger"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
-	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
 
 	"github.com/a-h/templ"
@@ -59,43 +58,54 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 SignupHandler handles the POST request to /signup.
 */
 func SignupHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	redirect, redirectFound := r.Context().Value("redirect").(string)
-	if !redirectFound {
+	redirect, found := r.Context().Value("redirect").(string)
+	if !found {
 		router.InternalError(w, r, p)
 		return errors.New("Should use redirect middleware")
 	}
-	db, dbFound := r.Context().Value("db").(*sql.DB)
-	if !dbFound {
+	db, found := r.Context().Value("db").(*sql.DB)
+	if !found {
 		router.InternalError(w, r, p)
 		return errors.New("Should use db middleware")
 	}
 
-	formErr := r.ParseForm()
-	if formErr != nil {
+	err := r.ParseForm()
+	if err != nil {
 		router.InternalError(w, r, p)
-		return formErr
+		return err
 	}
 
-  formValues := r.Form
+  form := r.Form
 
-  values, err := utils.GetFormValues(
-    formValues,
-    "username",
-    "email",
-    "firstname",
-    "lastname",
-    "password",
-  )
-  if err != nil {
+  username := html.EscapeString(form.Get("username"))
+  if username == "" {
     router.BadRequest(w, r, p)
-    return err
+    return errors.New("Username is required")
   }
 
-  username := values["username"]
-  email := values["email"]
-  firstname := values["firstname"]
-  lastname := values["lastname"]
-  password := values["password"]
+  email := html.EscapeString(form.Get("email"))
+  if email == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Email is required")
+  }
+
+  firstname := html.EscapeString(form.Get("firstname"))
+  if firstname == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Firstname is required")
+  }
+
+  lastname := html.EscapeString(form.Get("lastname"))
+  if lastname == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Lastname is required")
+  }
+
+  password := html.EscapeString(form.Get("password"))
+  if password == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Password is required")
+  }
 
 	// create user service
 	userService := services.NewUserService(db)
@@ -109,10 +119,10 @@ func SignupHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		Password: password,
 	}
 
-	_, signupErr := userService.Signup(newUser)
+	_, err = userService.Signup(newUser)
 
 	// unsuccessful signup, render signup page with error message
-	if signupErr != nil {
+	if err != nil {
 		_, parseErr := mail.ParseAddress(email)
 		_, usernameQueryErr := userService.GetByUsername(username)
 		_, emailQueryErr := userService.GetByEmail(email)
@@ -159,13 +169,6 @@ func SignupHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 			Email:         email,
 			EmailCheck:    emailCheck,
 			EmailError:    emailError,
-		}
-
-		if usernameError != "" {
-			logger.Log(logger.WARNING, "signup/post", usernameError)
-		}
-		if emailError != "" {
-			logger.Log(logger.WARNING, "signup/post", emailError)
 		}
 
 		component := pages.Signup(data)

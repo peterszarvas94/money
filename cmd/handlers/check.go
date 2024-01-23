@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"fmt"
+	"database/sql"
+	"errors"
 	"html"
 	"net/http"
 	"net/mail"
-	"pengoe/internal/db"
-	"pengoe/internal/logger"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/web/templates/components"
@@ -19,30 +18,20 @@ CheckUserHandler checks if the username or email isaftaken.
 Sends icons.
 */
 func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	// connect to db
-	dbManager := db.NewDBManager()
-	db, dbErr := dbManager.GetDB()
-	if dbErr != nil {
+	db, dbFound := r.Context().Value("db").(*sql.DB)
+	if !dbFound {
 		router.InternalError(w, r, p)
-		return dbErr
+		return errors.New("Should use db middleware")
 	}
-	defer db.Close()
 
 	userService := services.NewUserService(db)
 
 	// Parse the form
 	parseErr := r.ParseForm()
 	if parseErr != nil {
-		logger.Log(
-			logger.ERROR,
-			"check/parse",
-			fmt.Sprintf("Error parsing form: %s", parseErr.Error()),
-		)
 		router.InternalError(w, r, p)
 		return parseErr
 	}
-
-	logger.Log(logger.INFO, "check/parse", "Form parsed successfully")
 
 	// Check if username is taken
 	username := html.EscapeString(r.FormValue("username"))
@@ -50,26 +39,15 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 	if username != "" {
 		_, userErr := userService.GetByUsername(username)
 		if userErr != nil {
-			logger.Log(logger.INFO, "check/usename", userErr.Error())
-
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
 			component := components.Correct()
 			handler := templ.Handler(component)
 			handler.ServeHTTP(w, r)
-
 			return nil
 		}
-
-		logger.Log(logger.WARNING, "check/username", "User exists")
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
+		
 		component := components.Incorrect()
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
-
-
 		return nil
 	}
 
@@ -80,32 +58,15 @@ func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]strin
 		_, emailParseErr := mail.ParseAddress(email)
 		_, userErr := userService.GetByEmail(email)
 		if userErr != nil && emailParseErr == nil {
-			logger.Log(logger.INFO, "check/email", userErr.Error())
-
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
 			component := components.Correct()
 			handler := templ.Handler(component)
 			handler.ServeHTTP(w, r)
-
 			return nil
 		}
-
-		if emailParseErr != nil {
-			logger.Log(logger.WARNING, "check/email", emailParseErr.Error())
-		}
-
-		if userErr == nil {
-			logger.Log(logger.WARNING, "check/email", "User already exists")
-		}
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		component := components.Incorrect()
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
-
-
 		return nil
 	}
 

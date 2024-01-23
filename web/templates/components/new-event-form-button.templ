@@ -1,0 +1,31 @@
+package components
+
+import (
+	"strconv"
+)
+
+type NewEventFormButtonProps struct {
+	AccountId int
+}
+
+templ NewEventFormButton(props NewEventFormButtonProps) {
+	<div
+ 		class="flex justify-center p-4"
+	>
+		<button
+ 			hx-get="/ui/new-event-form"
+ 			hx-target="closest div"
+ 			hx-swap="outerHTML"
+ 			hx-include="#account_id"
+ 			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+		>
+			New Event
+		</button>
+		<input
+ 			id="account_id"
+			name="account_id"
+ 			type="hidden"
+ 			value={ strconv.Itoa(props.AccountId) }
+		/>
+	</div>
+}

@@ -1,9 +1,9 @@
 package pages
 
 import (
-	"pengoe/web/templates/components"
-	"pengoe/web/templates/layouts"
 	"fmt"
+	"pengoe/web/templates/layouts"
+	"pengoe/web/templates/icons"
 )
 
 type SigninProps struct {
@@ -28,7 +28,7 @@ templ Signin(props SigninProps) {
 			<figure
  				class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
 			>
-				@components.Icon()
+				@icons.Logo()
 			</figure>
 			<!-- end of background -->
 			<!-- content -->
@@ -36,7 +36,7 @@ templ Signin(props SigninProps) {
 				<header class="flex justify-center py-14">
 					<a href="/" class="flex items-center justify-center gap-2">
 						<figure class="text-primary text-5xl">
-							@components.Icon()
+							@icons.Logo()
 						</figure>
 						<h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
 							pengoe

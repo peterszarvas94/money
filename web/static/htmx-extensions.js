@@ -16,18 +16,6 @@ htmx.defineExtension("show-client-error", {
 });
 
 /**
- * "show-notfound" extension to render not found page
- * only used on page which can throw 404
- */
-htmx.defineExtension("show-notfound", {
-  transformResponse: function(text, xhr, _elt) {
-    if (xhr.status === 404) {
-      return text;
-    }
-  },
-});
-
-/**
  * "delete" extension to delete elements
  * only used on delete button
  */

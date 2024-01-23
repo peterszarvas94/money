@@ -49,12 +49,17 @@ To run commands, you need to have:
   - [ ] maybe some charts
 - [ ] account page
   - [x] delete button
-  - [ ] new event form
+  - [x] new event form
+  - [ ] show events in list
+  - [ ] events can have new payment form
+  - [ ] edit event form
+  - [ ] edit payment form
 
 ### Components
 
 - [ ] left panel
   - [ ] can be pinned
+- [x] event form
 
 ### Misc
 

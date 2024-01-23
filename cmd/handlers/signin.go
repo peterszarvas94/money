@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"html"
 	"html/template"
 	"net/http"
 	"pengoe/internal/router"
@@ -29,8 +30,8 @@ type SigninPage struct {
 SigninPageHandler handles the GET request to /signin.
 */
 func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	redirect, redirectFound := r.Context().Value("redirect").(string)
-	if !redirectFound {
+	redirect, found := r.Context().Value("redirect").(string)
+	if !found {
 		router.InternalError(w, r, p)
 		return errors.New("Should use redirect middleware")
 	}
@@ -54,46 +55,45 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 SigninHandler handles the POST request to /signin.
 */
 func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	redirect, redirectFound := r.Context().Value("redirect").(string)
-	if !redirectFound {
+	redirect, found := r.Context().Value("redirect").(string)
+	if !found {
 		router.InternalError(w, r, p)
 		return errors.New("Should use redirect middleware")
 	}
 
-	db, dbFound := r.Context().Value("db").(*sql.DB)
-	if !dbFound {
+	db, found := r.Context().Value("db").(*sql.DB)
+	if !found {
 		router.InternalError(w, r, p)
 		return errors.New("Should use db middleware")
 	}
 
-	formErr := r.ParseForm()
-	if formErr != nil {
-		router.InternalError(w, r, p)
-		return formErr
-	}
-
-	 formValues := r.Form
-
-  values, err := utils.GetFormValues(
-    formValues,
-    "user",
-		"password",
-	)
+	err := r.ParseForm()
 	if err != nil {
-		router.BadRequest(w, r, p)
+		router.InternalError(w, r, p)
 		return err
 	}
 
-	usernameOrEmail := values["user"]
-	password := values["password"]
+  form := r.Form
+
+  usernameOrEmail := html.EscapeString(form.Get("user"))
+  if usernameOrEmail == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Username or email is required")
+  }
+
+  password := html.EscapeString(form.Get("password"))
+  if password == "" {
+    router.BadRequest(w, r, p)
+    return errors.New("Password is required")
+  }
 
 	userService := services.NewUserService(db)
 
 	// login the user
-	user, signinErr := userService.Signin(usernameOrEmail, password)
+	user, err := userService.Signin(usernameOrEmail, password)
 
 	// if the login was unsuccessful
-	if signinErr != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 
 		data := pages.SigninProps{
@@ -113,21 +113,21 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	// if the login was successful
 	sessionService := services.NewSessionService(db)
-	session, sessionErr := sessionService.New(user)
-	if sessionErr != nil {
+	session, err := sessionService.New(user)
+	if err != nil {
 		router.InternalError(w, r, p)
-		return sessionErr
+		return err
 	}
 
-	_, tokenErr := token.Manager.Create(session.Id)
-	if tokenErr != nil {
+	_, err = token.Manager.Create(session.Id)
+	if err != nil {
 		router.InternalError(w, r, p)
-		return tokenErr
+		return err
 	}
 
-	secure := utils.Env.Environment == "production"
+	secure := utils.Env.ENVIRONMENT == "production"
 	var sameSite http.SameSite
-	if utils.Env.Environment == "production" {
+	if utils.Env.ENVIRONMENT == "production" {
 		sameSite = http.SameSiteLaxMode
 	} else {
 		sameSite = http.SameSiteDefaultMode

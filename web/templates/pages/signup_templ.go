@@ -13,6 +13,7 @@ import "bytes"
 import "pengoe/web/templates/components"
 import "fmt"
 import "pengoe/web/templates/layouts"
+import "pengoe/web/templates/icons"
 
 type SignupProps struct {
 	Title         string
@@ -60,7 +61,7 @@ func Signup(props SignupProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Icon().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icons.Logo().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -86,7 +87,7 @@ func Signup(props SignupProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Icon().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icons.Logo().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -131,7 +132,7 @@ func Signup(props SignupProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"grow rounded bg-transparent px-2 py-1 focus:outline-none\" required hx-get=\"/check\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#username-check\" hx-push-url=\"false\"><div id=\"username-check\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"grow rounded bg-transparent px-2 py-1 focus:outline-none\" required hx-get=\"/ui/check\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#username-check\" hx-push-url=\"false\"><div id=\"username-check\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -154,7 +155,7 @@ func Signup(props SignupProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"grow rounded bg-transparent px-2 py-1 focus:outline-none\" required hx-get=\"/check\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#email-check\" hx-push-url=\"false\"><div id=\"email-check\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"grow rounded bg-transparent px-2 py-1 focus:outline-none\" required hx-get=\"/ui/check\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#email-check\" hx-push-url=\"false\"><div id=\"email-check\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

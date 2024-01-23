@@ -3,6 +3,7 @@ package pages;
 import "pengoe/web/templates/components"
 import "fmt"
 import "pengoe/web/templates/layouts"
+import "pengoe/web/templates/icons"
 
 type SignupProps struct {
 	Title         string
@@ -32,7 +33,7 @@ templ Signup(props SignupProps) {
 			<figure
  				class="text-secondary text-giant absolute z-0 flex h-full w-full items-end justify-center pb-10"
 			>
-				@components.Icon()
+				@icons.Logo()
 			</figure>
 			<!-- end of background -->
 			<!-- content -->
@@ -40,7 +41,7 @@ templ Signup(props SignupProps) {
 				<header class="flex justify-center py-14">
 					<a href="/" class="flex items-center justify-center gap-2">
 						<figure class="text-primary text-5xl">
-							@components.Icon()
+							@icons.Logo()
 						</figure>
 						<h1 class="font-redhat text-accent text-5xl font-bold tracking-tight">
 							pengoe
@@ -85,7 +86,7 @@ templ Signup(props SignupProps) {
  								value={ props.Username }
  								class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
  								required
- 								hx-get="/check"
+ 								hx-get="/ui/check"
  								hx-trigger="keyup changed delay:500ms"
  								hx-target="#username-check"
  								hx-push-url="false"
@@ -107,7 +108,7 @@ templ Signup(props SignupProps) {
  								value={ props.Email }
  								class="grow rounded bg-transparent px-2 py-1 focus:outline-none"
  								required
- 								hx-get="/check"
+ 								hx-get="/ui/check"
  								hx-trigger="keyup changed delay:500ms"
  								hx-target="#email-check"
  								hx-push-url="false"

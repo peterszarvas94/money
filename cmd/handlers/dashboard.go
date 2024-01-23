@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"net/http"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
@@ -15,22 +15,22 @@ import (
 DashboardPageHandler handles the GET request to /dashboard.
 */
 func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-	db, dbFound := r.Context().Value("db").(*sql.DB)
-	if !dbFound {
+	db, found := r.Context().Value("db").(*sql.DB)
+	if !found {
 		router.InternalError(w, r, p)
-		fmt.Println("Should use db middleware")
+		return errors.New("Should use db middleware")
 	}
-	session, sessionFound := r.Context().Value("session").(*services.Session)
-	if !sessionFound {
+	session, found := r.Context().Value("session").(*services.Session)
+	if !found {
 		router.InternalError(w, r, p)
-		fmt.Println("Should use session middleware")
+		return errors.New("Should use session middleware")
 	}
 
 	accountService := services.NewAccountService(db)
-	accounts, accountsErr := accountService.GetByUserId(session.UserId)
-	if accountsErr != nil {
+	accounts, err := accountService.GetByUserId(session.UserId)
+	if err != nil {
 		router.InternalError(w, r, p)
-		return accountsErr
+		return err
 	}
 
 	data := pages.DashboardProps{

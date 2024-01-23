@@ -1,53 +1,53 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"pengoe/internal/logger"
+	"reflect"
+	"strings"
 )
 
-func getVariable(key string) (string, error) {
-	env, found := os.LookupEnv(key)
-	if !found || env == "" {
-		return "", errors.New(fmt.Sprintf("Environment variable %s not found", key))
-	}
-
-	return env, nil
+type env struct {
+	DB_URL      string
+	DB_TOKEN    string
+	JWT_SECRET  string
+	ENVIRONMENT string
 }
 
-type environmentVariables struct {
-	DBUrl       string
-	DBToken     string
-	JWTSecret   string
-	Environment string
-}
-
-func initEnvironmentVariables(variables *environmentVariables, keys ...string) {
+func initEnv(variables *env, keys ...string) {
 	for _, key := range keys {
-		value, err := getVariable(key)
-		if err != nil {
-			logger.Log(logger.ERROR, "env/initEnvVars", err.Error())
+		value, found := os.LookupEnv(key)
+		if !found {
+			logger.Log(
+				logger.ERROR,
+				"env/initEnvVars",
+				fmt.Sprintf("Environment variable %s not found", key),
+			)
 			os.Exit(1)
 		}
 
-		switch key {
-		case "DB_URL":
-			variables.DBUrl = value
-		case "DB_TOKEN":
-			variables.DBToken = value
-		case "JWT_SECRET":
-			variables.JWTSecret = value
-		case "ENVIRONMENT":
-			variables.Environment = value
+		fieldName := strings.ToUpper(key)
+		field := reflect.ValueOf(variables).Elem().FieldByName(fieldName)
+
+		if !field.IsValid() {
+			logger.Log(logger.ERROR, "env/initEnvVars", fmt.Sprintf("Unknown environment variable: %s", key))
+			os.Exit(1)
+		}
+
+		if field.Kind() == reflect.String {
+			field.SetString(value)
+		} else {
+			logger.Log(logger.ERROR, "env/initEnvVars", fmt.Sprintf("Unsupported type for field %s", fieldName))
+			os.Exit(1)
 		}
 	}
 }
 
-var Env environmentVariables
+var Env env
 
 func init() {
-	initEnvironmentVariables(
+	initEnv(
 		&Env,
 		"DB_URL",
 		"DB_TOKEN",

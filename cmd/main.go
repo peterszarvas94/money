@@ -32,19 +32,22 @@ func main() {
 	// signout
 	r.POST("/signout", h.SignoutHandler, m.WithToken, m.WithDB, m.WithSession)
 
-	// check useraname and email
-	r.GET("/check", h.CheckUserHandler, m.WithDB)
-
 	// dashboard
 	r.GET("/dashboard", h.DashboardPageHandler, m.WithToken, m.WithDB, m.WithSession)
 
-	// new account page
+	// account
 	r.GET("/account/new", h.NewAccountPageHandler, m.WithToken, m.WithDB, m.WithSession)
 	r.POST("/account", h.NewAccountHandler, m.WithToken, m.WithDB, m.WithSession)
 	r.DELETE("/account/:id", h.DeleteAccountHandler, m.WithToken, m.WithDB, m.WithSession)
-
-	// account page
 	r.GET("/account/:id", h.AccountPageHandler, m.WithToken, m.WithDB, m.WithSession)
+
+	// event
+	r.POST("/event", h.NewEventHandler, m.WithToken, m.WithDB, m.WithSession)
+
+	// ui
+	r.GET("/ui/check", h.CheckUserHandler, m.WithDB)
+	r.GET("/ui/new-event-form", h.NewEventFormHandler, m.WithToken)
+	r.GET("/ui/new-event-form-button", h.NewEventFormButtonHandler)
 
 	// static files
 	r.SetStaticPath("/static", "./web/static")

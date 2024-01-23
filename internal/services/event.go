@@ -5,21 +5,21 @@ import (
 	"time"
 )
 
-
 type Event struct {
-	Id           int
+	Id          int
 	AccountId   int
-	Name         string
-	Description  string
-	Income       int
-	Reserved     int
+	Name        string
+	Description string
+	Income      int
+	Reserved    int
 	DeliveredAt time.Time
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type EventService interface {
 	New(user *Event) (*Event, error)
+	GetByAccountId(accountId int) ([]*Event, error)
 }
 
 type eventService struct {
@@ -45,8 +45,8 @@ func (s *eventService) New(event *Event) (*Event, error) {
 			reserved,
 			delivered_at,
 			created_at,
-			updated_at,
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
 		event.AccountId,
 		event.Name,
 		event.Description,
@@ -81,6 +81,53 @@ func (s *eventService) New(event *Event) (*Event, error) {
 	return newEvent, nil
 }
 
-// TODO:
-// 1. simplify some handler logic, reuse code pls (new account form, delete btn)
-// 2. new event from on account page (copmonent, can be added more than one)
+/*
+GetByAccountId is a function that returns all events for an account.
+*/
+func (s *eventService) GetByAccountId(accountId int) ([]*Event, error) {
+	rows, err := s.db.Query(
+		`SELECT
+			id,
+			account_id,
+			name,
+			description,
+			income,
+			reserved,
+			delivered_at,
+			created_at,
+			updated_at
+		FROM event
+		WHERE account_id = ?;`,
+		accountId,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	events := []*Event{}
+
+	for rows.Next() {
+		event := &Event{}
+
+		err := rows.Scan(
+			&event.Id,
+			&event.AccountId,
+			&event.Name,
+			&event.Description,
+			&event.Income,
+			&event.Reserved,
+			&event.DeliveredAt,
+			&event.CreatedAt,
+			&event.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		events = append(events, event)
+	}
+
+	return events, nil
+}

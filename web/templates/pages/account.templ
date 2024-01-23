@@ -15,6 +15,7 @@ type AccountProps struct {
 	ShowNewAccountButton bool
 	Account              *services.Account
 	Token                *token.Token
+  Events               []*services.Event
 }
 
 templ Account(props AccountProps) {
@@ -22,7 +23,7 @@ templ Account(props AccountProps) {
 		Title: props.Title,
 		Description: props.Description,
 	}) {
-		<div hx-ext="description,show-notfound" id="page">
+		<div hx-ext="description" id="page">
 			@components.Leftpanel()
 			<!-- content -->
 			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
@@ -33,8 +34,9 @@ templ Account(props AccountProps) {
 					})
 				<div class="flex flex-col items-center justify-center p-10">
 					<h1 class="text-2xl font-semibold">{ props.Account.Name }</h1>
+					<p>{ props.Account.Description }</p>
 				</div>
-				<div class="flex justify-center">
+				<div class="flex justify-center p-4">
 					<button
  						hx-delete={ "/account/" + strconv.Itoa(props.Account.Id) }
  						hx-include="[name='csrf']"
@@ -50,6 +52,16 @@ templ Account(props AccountProps) {
  						value={ props.Token.Value }
 					/>
 				</div>
+        <div>events:</div>
+        <ul>
+          for _, event := range props.Events {
+            <li>{ event.Name }</li>
+          }
+        </ul>
+
+        @components.NewEventFormButton(components.NewEventFormButtonProps{
+          AccountId: props.Account.Id,
+        })
 			</main>
 			<!-- end of content -->
 		</div>
