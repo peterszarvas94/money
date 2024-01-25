@@ -62,6 +62,10 @@ func (m *TokenManager) Create(sessionID int) (*Token, error) {
 	token := Token{
 		SessionID: sessionID,
 		Value:     csrfToken,
+<<<<<<< HEAD
+=======
+		// TODO: change to 9 minutes
+>>>>>>> 7aab448 (add: events to account)
 		Valid:     time.Now().Add(10 * time.Second).UTC(),
 	}
 
@@ -126,7 +130,11 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 	newCsrfToken := &Token{
 		SessionID: sessionID,
 		Value:     newToken,
+<<<<<<< HEAD
 		// TODO
+=======
+		// TODO: change to 10 minutes
+>>>>>>> 7aab448 (add: events to account)
 		Valid:     time.Now().Add(10 * time.Second).UTC(),
 	}
 
