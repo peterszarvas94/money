@@ -8,9 +8,9 @@ import (
 )
 
 /*
-WithDB injects the database connection into the request context.
+DB injects the database connection into the request context.
 */
-func WithDB(next router.HandlerFunc) router.HandlerFunc {
+func DB(next router.HandlerFunc) router.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		db, err := db.Manager.GetDB()
 		if err != nil {

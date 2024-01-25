@@ -1,0 +1,11 @@
+package components
+
+import "pengoe/internal/token"
+
+type CsrfProps struct {
+	Token *token.Token
+}
+
+templ Csrf(props CsrfProps) {
+	<input id="csrf" type="hidden" name="csrf" value={ props.Token.Value }/>
+}

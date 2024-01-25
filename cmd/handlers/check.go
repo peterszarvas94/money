@@ -14,10 +14,10 @@ import (
 )
 
 /*
-CheckUserHandler checks if the username or email isaftaken.
+CheckUser checks if the username or email isaftaken.
 Sends icons.
 */
-func CheckUserHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func CheckUser(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	db, dbFound := r.Context().Value("db").(*sql.DB)
 	if !dbFound {
 		router.InternalError(w, r, p)

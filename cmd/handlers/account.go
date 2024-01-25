@@ -11,21 +11,21 @@ import (
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	t "pengoe/internal/token"
+	"pengoe/web/templates/components"
 	"pengoe/web/templates/pages"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/a-h/templ"
 )
 
 /*
-AccountPageHandler handles the GET request to /account/:id
+AccountPage handles the GET request to /account/:id
 */
-func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func AccountPage(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, found := r.Context().Value("token").(*t.Token)
 	if !found {
-		router.RedirectToSignin(w, r, p)
+		router.InternalError(w, r, p)
 		return errors.New("Should use token middleware")
 	}
 	db, found := r.Context().Value("db").(*sql.DB)
@@ -57,7 +57,7 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 	eventService := services.NewEventService(db)
 
 	// get account
-	account, err := accountService.GetByID(accountId)
+	account, err := accountService.GetById(accountId)
 	if err != nil {
 		router.NotFound(w, r, p)
 		return err
@@ -102,12 +102,12 @@ func AccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]str
 }
 
 /*
-DeleteAccountHandler handles the DELETE request to /account/:id
+DeleteAccount handles the DELETE request to /account/:id
 */
-func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func DeleteAccount(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, found := r.Context().Value("token").(*t.Token)
 	if !found {
-		router.RedirectToSignin(w, r, p)
+		router.InternalError(w, r, p)
 		return errors.New("Should use token middleware")
 	}
 	db, found := r.Context().Value("db").(*sql.DB)
@@ -141,41 +141,26 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 	err = accessService.Check(session.UserId, accountId)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New(
-			fmt.Sprintf(
-				"User %d does not have access to account %d",
-				session.UserId,
-				accountId,
-			),
-		)
+		return err
 	}
 
-	// manually parse body, (because DELETE request, go btw)
+	// manually parse body, (because DELETE request)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
 	}
 
-	// csrf=asd -> [csrf asd]
-	splittedBody := strings.Split(string(body), "=")
-	if len(splittedBody) != 2 || splittedBody[0] != "csrf" {
-		router.Unauthorized(w, r, p)
-		return errors.New("CSRF token is missing")
-	}
-
-	// [csrf asd] -> asd
-	escapedTokenFromReq := splittedBody[1]
-
-	// decode token
-	tokenFromReq, err := url.QueryUnescape(escapedTokenFromReq)
+	formValues, err := url.ParseQuery(string(body))
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
 	}
 
+	formToken := html.EscapeString(formValues.Get("csrf"))
+
 	// check if the two tokens are the same
-	if token.Value != tokenFromReq {
+	if token.Value != formToken {
 		router.Unauthorized(w, r, p)
 		return errors.New("CSRF token is invalid")
 	}
@@ -185,36 +170,19 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 		// csrf token is expired
 
 		// renew csrf token
-		newCsrfToken, err := t.Manager.RenewToken(session.Id)
+		newToken, err := t.Manager.RenewToken(session.Id)
 		if err != nil {
 			router.InternalError(w, r, p)
 			return err
 		}
 
-		// get account
-		account, err := accountService.GetByID(accountId)
-		if err != nil {
-			router.InternalError(w, r, p)
-			return err
+		data := components.CsrfProps{
+			Token: newToken,
 		}
 
-		// get accounts
-		accounts, err := accountService.GetByUserId(session.UserId)
-		if err != nil {
-			router.InternalError(w, r, p)
-			return err
-		}
+		w.Header().Set("HX-Trigger", "delete-account")
 
-		data := pages.AccountProps{
-			Title:                fmt.Sprintf("pengoe - %s", account.Name),
-			Description:          fmt.Sprintf("Account page for %s", account.Name),
-			Accounts:             accounts,
-			ShowNewAccountButton: true,
-			Account:              account,
-			Token:                newCsrfToken,
-		}
-
-		component := pages.Account(data)
+		component := components.Csrf(data)
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
@@ -237,9 +205,9 @@ func DeleteAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]s
 }
 
 /*
-NewAccountPageHandler handles the GET request to /account/new
+NewAccountPage handles the GET request to /account/new
 */
-func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func NewAccountPage(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, found := r.Context().Value("token").(*t.Token)
 	if !found {
 		router.RedirectToSignin(w, r, p)
@@ -282,9 +250,9 @@ func NewAccountPageHandler(w http.ResponseWriter, r *http.Request, p map[string]
 }
 
 /*
-NewAccountHandler handles the POST request to /account
+NewAccount handles the POST request to /account
 */
-func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func NewAccount(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	token, found := r.Context().Value("token").(*t.Token)
 	if !found {
 		router.RedirectToSignin(w, r, p)
@@ -339,32 +307,20 @@ func NewAccountHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 
 	// token is expired
 	if token.Valid.Before(time.Now().UTC()) {
-		newCsrfToken, err := t.Manager.RenewToken(session.Id)
+		// renew csrf token
+		newToken, err := t.Manager.RenewToken(session.Id)
 		if err != nil {
-			return router.InternalError(w, r, p)
+			router.InternalError(w, r, p)
+			return err
 		}
 
-		accounts, err := accountService.GetByUserId(session.UserId)
-		if err != nil {
-			return router.InternalError(w, r, p)
+		data := components.CsrfProps{
+			Token: newToken,
 		}
 
-		data := pages.NewAccountProps{
-			Title:                "pengoe - New Account",
-			Description:          "New Account for pengoe",
-			SelectedAccountId:    0,
-			Accounts:             accounts,
-			ShowNewAccountButton: false,
-			Token:                newCsrfToken,
-			Account: &services.Account{
-				Name:        name,
-				Description: description,
-				Currency:    currency,
-			},
-			Refetch: true,
-		}
+		w.Header().Set("HX-Trigger", "new-account")
 
-		component := pages.NewAccount(data)
+		component := components.Csrf(data)
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 

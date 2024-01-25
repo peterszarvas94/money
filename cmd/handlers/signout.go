@@ -12,10 +12,10 @@ import (
 )
 
 /*
-SignoutHandler signs the user out by deleting the refresh token.
+Signout signs the user out by deleting the refresh token.
 Access token is cleared by the client.
 */
-func SignoutHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func Signout(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	db, dbFound := r.Context().Value("db").(*sql.DB)
 	if !dbFound {
 		router.InternalError(w, r, p)

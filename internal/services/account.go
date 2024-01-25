@@ -18,7 +18,7 @@ type Account struct {
 type AccountServiceInterface interface {
 	New(user *Account) (*Account, error)
 	GetByUserId(userId int) ([]*Account, error)
-	GetByID(accountId int) (*Account, error)
+	GetById(accountId int) (*Account, error)
 	Delete(accountId int) error
 }
 
@@ -121,9 +121,9 @@ func (s *accountService) GetByUserId(userId int) ([]*Account, error) {
 }
 
 /*
-GetByID is a function that returns an account for a given id.
+GetById is a function that returns an account for a given id.
 */
-func (s *accountService) GetByID(accountId int) (*Account, error) {
+func (s *accountService) GetById(accountId int) (*Account, error) {
 	row := s.db.QueryRow(
 		`SELECT
 			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at

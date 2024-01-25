@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html"
-	"html/template"
 	"net/http"
 	"net/mail"
 	"pengoe/internal/router"
@@ -15,18 +14,10 @@ import (
 	"github.com/a-h/templ"
 )
 
-type SignupPage struct {
-	Title       string
-	Descrtipion string
-	Redirect    template.URL
-	Values      map[string]string
-	Errors      map[string]string
-}
-
 /*
-SignupPageHandler handles the GET request to /signup.
+SignupPage handles the GET request to /signup.
 */
-func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func SignupPage(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	redirect, found := r.Context().Value("redirect").(string)
 	if !found {
 		router.InternalError(w, r, p)
@@ -55,9 +46,9 @@ func SignupPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 }
 
 /*
-SignupHandler handles the POST request to /signup.
+Signup handles the POST request to /signup.
 */
-func SignupHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func Signup(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	redirect, found := r.Context().Value("redirect").(string)
 	if !found {
 		router.InternalError(w, r, p)

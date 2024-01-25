@@ -46,16 +46,6 @@ type NewAccountProps struct {
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
 	Token                *token.Token
-	Account              *services.Account
-	Refetch              bool
-}
-
-// this is for when the CSRF token is expired and the server sends a new one
-func getTrigger(refetch bool) string {
-	if refetch {
-		return "load"
-	}
-	return ""
 }
 
 func NewAccount(props NewAccountProps) templ.Component {
@@ -78,6 +68,12 @@ func NewAccount(props NewAccountProps) templ.Component {
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-ext=\"description\" id=\"page\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Csrf(components.CsrfProps{
+				Token: props.Token,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -106,23 +102,7 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div><form hx-post=\"/account\" hx-target=\"#page\" hx-trigger=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(getTrigger(props.Refetch)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"mx-auto flex max-w-2xl flex-col p-4\"><input type=\"hidden\" name=\"csrf\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.Token.Value))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"name\" class=\"font-semibold\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div><form hx-post=\"/account\" hx-include=\"#csrf\" hx-target=\"#csrf\" hx-swap=\"outerHTML\" hx-trigger=\"submit,new-account\" class=\"mx-auto flex max-w-2xl flex-col p-4\"><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"name\" class=\"font-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -139,15 +119,7 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><input type=\"text\" id=\"name\" name=\"name\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(getAccountName(props.Account)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" placeholder=\"Our folk band\" required minlength=\"3\" class=\"rounded-md border border-gray-300 p-2\"></div><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"description\" class=\"font-semibold\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><input type=\"text\" id=\"name\" name=\"name\" placeholder=\"Our folk band\" required minlength=\"3\" class=\"rounded-md border border-gray-300 p-2\"></div><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"description\" class=\"font-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -156,21 +128,12 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><textarea id=\"description\" name=\"description\" placeholder=\"2023 balance sheet\" class=\"resize-y rounded-md border border-gray-300 p-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><textarea id=\"description\" name=\"description\" placeholder=\"2023 balance sheet\" class=\"resize-y rounded-md border border-gray-300 p-2\"></textarea></div><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"currency\" class=\"font-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string = getAccountDescription(props.Account)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"flex flex-col pb-6\"><div class=\"flex items-center gap-2 pb-2\"><label for=\"currency\" class=\"font-semibold\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var7 := `Currency`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+			templ_7745c5c3_Var6 := `Currency`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -182,15 +145,7 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><input type=\"text\" id=\"currency\" name=\"currency\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(getAccountCurrency(props.Account)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" placeholder=\"EUR\" minlength=\"1\" required class=\"rounded-md border border-gray-300 p-2\"></div><div class=\"pb-6 flex gap-2 items-center\"><div class=\"text-primary text-3xs\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><input type=\"text\" id=\"currency\" name=\"currency\" placeholder=\"EUR\" minlength=\"1\" required class=\"rounded-md border border-gray-300 p-2\"></div><div class=\"pb-6 flex gap-2 items-center\"><div class=\"text-primary text-3xs\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -202,8 +157,8 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var8 := `Required fields`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+			templ_7745c5c3_Var7 := `Required fields`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -211,8 +166,8 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var9 := `Create`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
+			templ_7745c5c3_Var8 := `Create new account`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -220,8 +175,8 @@ func NewAccount(props NewAccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var10 := ` end of content `
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
+			templ_7745c5c3_Var9 := ` end of content `
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,4 +1,15 @@
 /**
+ * Use this instead of hx-confirm
+ * hx-on:click="showConfirm(event, 'Are you sure?')"
+ * hx-trigger="confirmed"
+ * */
+function showConfirm(e, msg) {
+  if (window.confirm(msg)) {
+    htmx.trigger(e.target, "confirmed")
+  }
+}
+
+/**
  * "show-client-error" extension to render client error
  * only used on form submission like signin, signup
  */

@@ -21,7 +21,7 @@ type User struct {
 type UserServiceInterface interface {
 	Signup(user *User) (*User, error)
 	Signin(usernameOrEmail, password string) (*User, error)
-	GetByID(id int) (*User, error)
+	GetById(id int) (*User, error)
 	GetByUsername(username string) (*User, error)
 	GetByEmail(email string) (*User, error)
 }
@@ -169,9 +169,9 @@ func (s *userService) Signin(usernameOrEmail, password string) (*User, error) {
 }
 
 /*
-GetByUsername is a function that gets a user from the database by username.
+GetById is a function that gets a user from the database by username.
 */
-func (s *userService) GetByID(id int) (*User, error) {
+func (s *userService) GetById(id int) (*User, error) {
 	var user User
 
 	query, queryErr := s.db.Query(

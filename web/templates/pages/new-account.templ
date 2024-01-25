@@ -9,24 +9,24 @@ import (
 )
 
 func getAccountName(account *services.Account) string {
-  if account == nil {
-    return ""
-  }
-  return account.Name
+	if account == nil {
+		return ""
+	}
+	return account.Name
 }
 
 func getAccountDescription(account *services.Account) string {
-  if account == nil {
-    return ""
-  }
-  return account.Description
+	if account == nil {
+		return ""
+	}
+	return account.Description
 }
 
 func getAccountCurrency(account *services.Account) string {
-  if account == nil {
-    return ""
-  }
-  return account.Currency
+	if account == nil {
+		return ""
+	}
+	return account.Currency
 }
 
 type NewAccountProps struct {
@@ -36,16 +36,6 @@ type NewAccountProps struct {
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
 	Token                *token.Token
-	Account              *services.Account
-	Refetch              bool
-}
-
-// this is for when the CSRF token is expired and the server sends a new one
-func getTrigger(refetch bool) string {
-	if refetch {
-		return "load"
-	}
-	return ""
 }
 
 templ NewAccount(props NewAccountProps) {
@@ -54,6 +44,9 @@ templ NewAccount(props NewAccountProps) {
 		Description: props.Description,
 	}) {
 		<div hx-ext="description" id="page">
+			@components.Csrf(components.CsrfProps{
+        Token: props.Token,
+      })
 			@components.Leftpanel()
 			/* content */
 			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
@@ -67,11 +60,12 @@ templ NewAccount(props NewAccountProps) {
 				</div>
 				<form
  					hx-post="/account"
- 					hx-target="#page"
- 					hx-trigger={ getTrigger(props.Refetch) }
+          hx-include="#csrf"
+          hx-target="#csrf"
+          hx-swap="outerHTML"
+          hx-trigger="submit,new-account"
  					class="mx-auto flex max-w-2xl flex-col p-4"
 				>
-					<input type="hidden" name="csrf" value={ props.Token.Value }/>
 					/* Name */
 					<div class="flex flex-col pb-6">
 						<div class="flex items-center gap-2 pb-2">
@@ -84,7 +78,6 @@ templ NewAccount(props NewAccountProps) {
  							type="text"
  							id="name"
  							name="name"
- 							value={ getAccountName(props.Account) }
  							placeholder="Our folk band"
  							required
  							minlength="3"
@@ -104,7 +97,6 @@ templ NewAccount(props NewAccountProps) {
  							placeholder="2023 balance sheet"
  							class="resize-y rounded-md border border-gray-300 p-2"
 						>
-							{ getAccountDescription(props.Account) }
 						</textarea>
 					</div>
 					/* Currency */
@@ -119,7 +111,6 @@ templ NewAccount(props NewAccountProps) {
  							type="text"
  							id="currency"
  							name="currency"
- 							value={ getAccountCurrency(props.Account) }
  							placeholder="EUR"
  							minlength="1"
  							required
@@ -138,7 +129,7 @@ templ NewAccount(props NewAccountProps) {
  							type="submit"
  							class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
 						>
-							Create
+							Create new account
 						</button>
 					</div>
 				</form>

@@ -62,7 +62,7 @@ func (m *TokenManager) Create(sessionID int) (*Token, error) {
 	token := Token{
 		SessionID: sessionID,
 		Value:     csrfToken,
-		Valid:     time.Now().Add(time.Minute).UTC(),
+		Valid:     time.Now().Add(10 * time.Second).UTC(),
 	}
 
 	m.tokens[sessionID] = token
@@ -126,7 +126,8 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 	newCsrfToken := &Token{
 		SessionID: sessionID,
 		Value:     newToken,
-		Valid:     time.Now().Add(1 * time.Hour).UTC(),
+		// TODO
+		Valid:     time.Now().Add(10 * time.Second).UTC(),
 	}
 
 	token = newCsrfToken
@@ -213,6 +214,4 @@ func init() {
 			os.Exit(1)
 		}
 	}
-
-	logger.Log(logger.INFO, "csrftoken/init", "CSRF Token manager initialized")
 }

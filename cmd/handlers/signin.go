@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"html"
-	"html/template"
 	"net/http"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
@@ -16,20 +15,10 @@ import (
 	"github.com/a-h/templ"
 )
 
-type SigninPage struct {
-	Title       string
-	Descrtipion string
-	LoggedIn    bool
-	User        services.User
-	Redirect    template.URL
-	Values      map[string]string
-	Errors      map[string]string
-}
-
 /*
-SigninPageHandler handles the GET request to /signin.
+SigninPage handles the GET request to /signin.
 */
-func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func SigninPage(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	redirect, found := r.Context().Value("redirect").(string)
 	if !found {
 		router.InternalError(w, r, p)
@@ -52,9 +41,9 @@ func SigninPageHandler(w http.ResponseWriter, r *http.Request, p map[string]stri
 }
 
 /*
-SigninHandler handles the POST request to /signin.
+Signin handles the POST request to /signin.
 */
-func SigninHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func Signin(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	redirect, found := r.Context().Value("redirect").(string)
 	if !found {
 		router.InternalError(w, r, p)

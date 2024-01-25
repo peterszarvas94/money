@@ -81,11 +81,11 @@ func (r *router) POST(s string, handler HandlerFunc, middlewares ...MiddlewareFu
 }
 
 /*
-Adds a new PUT route to the router.
+Adds a new PATCH route to the router.
 */
-func (r *router) PUT(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *router) PATCH(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.addRoute("PUT", pattern, handler, middlewares...)
+	r.addRoute("PATCH", pattern, handler, middlewares...)
 }
 
 /*

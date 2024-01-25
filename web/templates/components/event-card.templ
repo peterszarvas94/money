@@ -1,0 +1,50 @@
+package components
+
+import (
+	"fmt"
+	"pengoe/web/templates/icons"
+	"time"
+)
+
+type EventCardProps struct {
+	Currency        string
+	EventId         int
+	Name            string
+	Description     string
+	Income          int
+	Reserved        int
+	DeliveredAt     time.Time
+}
+
+templ EventCard(props EventCardProps) {
+	<section class="flex gap-2 max-w-4xl w-full border border-gray-300 bg-white rounded-lg shadow-lg p-4">
+		<div class="flex flex-col sm:flex-row sm:gap-4 w-full">
+			<div class="w-full">
+				<div class="font-semibold">{ props.Name }</div>
+				<div>{ props.DeliveredAt.Format("2006-01-02") }</div>
+				<div>
+					if props.Description != "" {
+						{ props.Description }
+					} else {
+						<span class="text-gray-500">- no description -</span>
+					}
+				</div>
+			</div>
+			<div class="w-full">
+				<div>{ fmt.Sprintf("%s %d", props.Currency, props.Income) }</div>
+				<div>{ fmt.Sprintf("%s %d", props.Currency, props.Reserved) }</div>
+			</div>
+		</div>
+		<button
+ 			class="flex items-start text-lg h-fit w-fit"
+ 			hx-get={ fmt.Sprintf("/ui/edit-event-form/%d", props.EventId) }
+ 			hx-target="closest section"
+ 			hx-swap="outerHTML"
+		>
+			@icons.Edit()
+		</button>
+      @DeleteEventButton(DeleteEventButtonProps{
+        EventId: props.EventId,
+      })
+	</section>
+}

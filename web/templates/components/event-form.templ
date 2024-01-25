@@ -1,185 +1,153 @@
 package components
 
 import (
-	"pengoe/internal/token"
-	"pengoe/internal/services"
 	"strconv"
 	"fmt"
 	"pengoe/web/templates/icons"
+	"time"
 )
 
+// TODO maybe better structure for account id not this mess
 type EventFormProps struct {
-	EmptyFormAccountId int
-	Event              *services.Event
-	Token              *token.Token
-	Currency           string
-	Refetch            bool
-}
-
-func getAccountId(event *services.Event, emptyFormAccountId int) string {
-	if event != nil {
-		return strconv.Itoa(event.AccountId)
-	}
-	
-  return strconv.Itoa(emptyFormAccountId)
-}
-
-func getName(event *services.Event) string {
-	if event != nil {
-		return event.Name
-	}
-	return ""
-}
-
-func getDescription(event *services.Event) string {
-	if event != nil {
-		return event.Description
-	}
-	return ""
-}
-
-func getIncome(event *services.Event) string {
-	if event != nil {
-		return strconv.Itoa(event.Income)
-	}
-	return "0"
-}
-
-func getReserved(event *services.Event) string {
-	if event != nil {
-		return strconv.Itoa(event.Reserved)
-	}
-	return "0"
-}
-
-func getDeliveredAt(event *services.Event) string {
-	if event != nil {
-		return event.DeliveredAt.Format("2006-01-02")
-	}
-	return ""
+	New         bool
+	EventId     int
+	Currency    string
+	Name        string
+	Description string
+	Income      int
+	Reserved    int
+	DeliveredAt time.Time
+  HxTarget    string
 }
 
 templ EventForm(props EventFormProps ) {
-	if props.Event != nil && props.Event.Id > 0 && props.EmptyFormAccountId <= 0 {
+	if props.New {
 		<form
- 			hx-patch={ fmt.Sprintf("/event/%d", props.Event.Id) }
- 			class="m-0 flex max-w-4xl w-full flex-col p-4"
+ 			hx-post="/event"
+ 			class="m-0 flex w-full flex-col"
+ 			hx-trigger="submit,new-event"
+ 			hx-target={ props.HxTarget }
+ 			hx-swap="outerHTML"
+			hx-include="#csrf,#account_id"
 		>
-			@EventFormContent(EventFormProps{
-				Event: props.Event,
-				Token: props.Token,
-				Currency: props.Currency,
-			})
+			@EventFormContent(props)
 		</form>
 	} else {
 		<form
- 			hx-post="/event"
- 			class="m-0 flex max-w-4xl w-full flex-col p-4"
+ 			hx-patch={ fmt.Sprintf("/event/%d", props.EventId) }
+ 			hx-trigger={ fmt.Sprintf("submit,edit-event-%d", props.EventId) }
+ 			hx-target={ props.HxTarget }
+ 			hx-swap="outerHTML"
+ 			class="m-0 flex w-full flex-col"
+			hx-include="#csrf,#account_id"
 		>
-			@EventFormContent(EventFormProps{
-				EmptyFormAccountId: props.EmptyFormAccountId,
-				Token: props.Token,
-				Currency: props.Currency,
-			})
+			@EventFormContent(props)
 		</form>
 	}
 }
 
 templ EventFormContent(props EventFormProps) {
-	<input type="hidden" name="csrf" value={ props.Token.Value }/>
-	<input type="hidden" name="account_id" value={ getAccountId(props.Event, props.EmptyFormAccountId) }/>
-	/* Name */
-	<div class="flex flex-col pb-6">
-		<div class="flex items-center gap-2 pb-2">
-			<label for="name" class="font-semibold">Event name</label>
-			<div class="text-primary text-3xs">
-				@icons.Star()
+	<div class="flex flex-col sm:flex-row sm:gap-4">
+		<div class="w-full">
+			/* Name */
+			<div class="flex flex-col pb-6">
+				<div class="flex items-center gap-2 pb-2">
+					<label for="name" class="font-semibold">Event name</label>
+					<div class="text-primary text-3xs">
+						@icons.Star()
+					</div>
+				</div>
+				<input
+ 					type="text"
+ 					id="name"
+ 					name="name"
+ 					value={ props.Name }
+ 					placeholder="Cool Festival"
+ 					required
+ 					minlength="3"
+ 					class="w-full min-w-0 rounded-md border border-gray-300 p-2"
+				/>
+			</div>
+			/* DeliveredAt */
+			<div class="flex flex-col pb-6">
+				<div class="flex items-center gap-2 pb-2">
+					<label for="name" class="font-semibold">Delivered at (DD-MM-YYYY)</label>
+					<div class="text-primary text-3xs">
+						@icons.Star()
+					</div>
+				</div>
+				<input
+ 					type="date"
+ 					id="delivered_at"
+ 					name="delivered_at"
+ 					value={ props.DeliveredAt.Format("2006-01-02") }
+ 					required
+ 					class="rounded-md border border-gray-300 p-2"
+				/>
+			</div>
+			/* Description */
+			<div class="flex flex-col pb-6">
+				<div class="flex items-center gap-2 pb-2">
+					<label for="name" class="font-semibold">Event description</label>
+				</div>
+				<textarea
+ 					id="description"
+ 					name="description"
+ 					placeholder="2023 balance sheet"
+ 					class="resize-y rounded-md border border-gray-300 p-2"
+				>
+					{ props.Description }
+				</textarea>
 			</div>
 		</div>
-		<input
- 			type="text"
- 			id="name"
- 			name="name"
- 			value={ getName(props.Event) }
- 			placeholder="Cool Festival"
- 			required
- 			minlength="3"
- 			class="rounded-md border border-gray-300 p-2"
-		/>
-	</div>
-	/* Description */
-	<div class="flex flex-col pb-6">
-		<div class="flex items-center gap-2 pb-2">
-			<label for="name" class="font-semibold">Event description</label>
-		</div>
-		<textarea
- 			id="description"
- 			name="description"
- 			placeholder="2023 balance sheet"
- 			class="resize-y rounded-md border border-gray-300 p-2"
-		>
-			{ getDescription(props.Event) }
-		</textarea>
-	</div>
-	/* Income */
-	<div class="flex flex-col pb-6">
-		<div class="flex items-center gap-2 pb-2">
-			<label for="name" class="font-semibold">Income ({ props.Currency })</label>
-			<div class="text-primary text-3xs">
-				@icons.Star()
+		<div class="w-full">
+			/* Income */
+			<div class="flex flex-col pb-6">
+				<div class="flex items-center gap-2 pb-2">
+					<label for="name" class="font-semibold">Income ({ props.Currency })</label>
+					<div class="text-primary text-3xs">
+						@icons.Star()
+					</div>
+				</div>
+				<input
+ 					type="number"
+ 					min="0"
+ 					step="1"
+ 					id="income"
+ 					name="income"
+ 					value={ strconv.Itoa(props.Income) }
+ 					required
+ 					class="rounded-md border border-gray-300 p-2"
+				/>
+			</div>
+			/* Reserved */
+			<div class="flex flex-col pb-6">
+				<div class="flex items-center gap-2 pb-2">
+					<label for="name" class="font-semibold">Reserved ({ props.Currency }) </label>
+				</div>
+				<input
+ 					type="number"
+ 					min="0"
+ 					step="1"
+ 					id="reserved"
+ 					name="reserved"
+ 					value={ strconv.Itoa(props.Reserved) }
+ 					class="rounded-md border border-gray-300 p-2"
+				/>
 			</div>
 		</div>
-		<input
- 			type="number"
- 			min="0"
- 			step="1"
- 			id="income"
- 			name="income"
- 			value={ getIncome(props.Event) }
- 			required
- 			class="rounded-md border border-gray-300 p-2"
-		/>
-	</div>
-	/* Reserved */
-	<div class="flex flex-col pb-6">
-		<div class="flex items-center gap-2 pb-2">
-			<label for="name" class="font-semibold">Reserved ({ props.Currency }) </label>
-		</div>
-		<input
- 			type="number"
- 			min="0"
- 			step="1"
- 			id="reserved"
- 			name="reserved"
- 			value={ getReserved(props.Event) }
- 			class="rounded-md border border-gray-300 p-2"
-		/>
-	</div>
-	/* DeliveredAt */
-	<div class="flex flex-col pb-6">
-		<div class="flex items-center gap-2 pb-2">
-			<label for="name" class="font-semibold">Delivered at (DD-MM-YYYY)</label>
-			<div class="text-primary text-3xs">
-				@icons.Star()
-			</div>
-		</div>
-		<input
- 			type="date"
- 			id="delivered_at"
- 			name="delivered_at"
- 			value={ getDeliveredAt(props.Event) }
- 			required
- 			class="rounded-md border border-gray-300 p-2"
-		/>
 	</div>
 	/* Submit */
 	<div class="flex justify-center">
 		<button
- 			aria-label="Create event"
  			type="submit"
  			class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
 		>
-			Create
+			if props.New {
+				Create new event
+			} else {
+				Update event
+			}
 		</button>
 	</div>
 }

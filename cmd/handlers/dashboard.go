@@ -12,9 +12,9 @@ import (
 )
 
 /*
-DashboardPageHandler handles the GET request to /dashboard.
+DashboardPage handles the GET request to /dashboard.
 */
-func DashboardPageHandler(w http.ResponseWriter, r *http.Request, p map[string]string) error {
+func DashboardPage(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	db, found := r.Context().Value("db").(*sql.DB)
 	if !found {
 		router.InternalError(w, r, p)

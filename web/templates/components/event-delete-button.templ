@@ -1,0 +1,23 @@
+package components
+
+import "pengoe/web/templates/icons"
+import "fmt"
+
+type DeleteEventButtonProps struct {
+	EventId int
+}
+
+templ DeleteEventButton(props DeleteEventButtonProps) {
+	<button
+ 		id={ fmt.Sprintf("delete-event-%d", props.EventId) }
+ 		class="flex items-start text-lg h-fit w-fit"
+ 		hx-include="#csrf,#account_id"
+ 		hx-target="closest li"
+ 		hx-delete={ fmt.Sprintf("/event/%d", props.EventId) }
+ 		hx-trigger={ fmt.Sprintf("confirmed,delete-event-%d", props.EventId) }
+		hx-on:click="showConfirm(event, 'Are you sure you want to delete this event?')"
+ 		hx-swap="outerHTML"
+	>
+		@icons.Delete()
+	</button>
+}

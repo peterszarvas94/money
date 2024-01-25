@@ -1,0 +1,14 @@
+package components
+
+type NewEventCardProps struct {
+	EventCardProps          EventCardProps
+}
+
+templ NewEventCard(props NewEventCardProps) {
+	<li class="flex justify-center">
+		@EventCard(props.EventCardProps)
+	</li>
+	<li class="flex justify-center">
+		@NewEventFormButton()
+	</li>
+}

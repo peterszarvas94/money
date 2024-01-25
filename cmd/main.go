@@ -22,32 +22,36 @@ func main() {
 	r.GET("/", h.HomePageHandler)
 
 	// signup
-	r.GET("/signup", h.SignupPageHandler, m.WithRedirect)
-	r.POST("/signup", h.SignupHandler, m.WithRedirect, m.WithDB)
+	r.GET("/signup", h.SignupPage, m.AuthPage)
+	r.POST("/signup", h.Signup, m.AuthPage, m.DB)
 
 	// signin
-	r.GET("/signin", h.SigninPageHandler, m.WithRedirect)
-	r.POST("/signin", h.SigninHandler, m.WithRedirect, m.WithDB)
+	r.GET("/signin", h.SigninPage, m.AuthPage)
+	r.POST("/signin", h.Signin, m.AuthPage, m.DB)
 
 	// signout
-	r.POST("/signout", h.SignoutHandler, m.WithToken, m.WithDB, m.WithSession)
+	r.POST("/signout", h.Signout, m.Token, m.DB, m.Session)
 
 	// dashboard
-	r.GET("/dashboard", h.DashboardPageHandler, m.WithToken, m.WithDB, m.WithSession)
+	r.GET("/dashboard", h.DashboardPage, m.Token, m.DB, m.Session)
 
 	// account
-	r.GET("/account/new", h.NewAccountPageHandler, m.WithToken, m.WithDB, m.WithSession)
-	r.POST("/account", h.NewAccountHandler, m.WithToken, m.WithDB, m.WithSession)
-	r.DELETE("/account/:id", h.DeleteAccountHandler, m.WithToken, m.WithDB, m.WithSession)
-	r.GET("/account/:id", h.AccountPageHandler, m.WithToken, m.WithDB, m.WithSession)
+	r.GET("/account/new", h.NewAccountPage, m.Token, m.DB, m.Session)
+	r.POST("/account", h.NewAccount, m.Token, m.DB, m.Session)
+	r.GET("/account/:id", h.AccountPage, m.Token, m.DB, m.Session)
+	r.DELETE("/account/:id", h.DeleteAccount, m.Token, m.DB, m.Session)
 
 	// event
-	r.POST("/event", h.NewEventHandler, m.WithToken, m.WithDB, m.WithSession)
+	r.POST("/event", h.NewEvent, m.Token, m.DB, m.Session)
+	r.PATCH("/event/:id", h.EditEvent, m.Token, m.DB, m.Session)
+	r.DELETE("/event/:id", h.DeleteEvent, m.Token, m.DB, m.Session)
 
 	// ui
-	r.GET("/ui/check", h.CheckUserHandler, m.WithDB)
-	r.GET("/ui/new-event-form", h.NewEventFormHandler, m.WithToken)
-	r.GET("/ui/new-event-form-button", h.NewEventFormButtonHandler)
+	r.GET("/ui/check", h.CheckUser, m.DB)
+	r.GET("/ui/new-event-form", h.NewEventForm, m.DB)
+	r.GET("/ui/new-event-form-button", h.NewEventFormButton)
+	r.GET("/ui/edit-event-form/:id", h.EditEventForm, m.DB)
+	r.GET("/ui/event-card/:id", h.EventCard, m.DB)
 
 	// static files
 	r.SetStaticPath("/static", "./web/static")

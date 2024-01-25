@@ -18,7 +18,7 @@ type Session struct {
 type SessionServiceInterface interface {
 	New(user *User) (*Session, error)
 	GetActiveSessions() ([]*Session, error)
-	GetByID(sessionId int) (*Session, error)
+	GetById(sessionId int) (*Session, error)
 	GetByUserID(userId int) (*Session, error)
 	Delete(sessionId int) error
 	CheckCookie(r *http.Request) (*Session, error)
@@ -144,9 +144,9 @@ func (s *sessionService) GetActiveSessions() ([]*Session, error) {
 }
 
 /*
-GetByID returns the session with the given sessionID from the database.
+GetById returns the session with the given sessionID from the database.
 */
-func (s *sessionService) GetByID(sessionId int) (*Session, error) {
+func (s *sessionService) GetById(sessionId int) (*Session, error) {
 	row := s.db.QueryRow(
 		`SELECT
       id,
@@ -240,7 +240,7 @@ func (s *sessionService) CheckCookie(r *http.Request) (*Session, error) {
 		return nil, idErr
 	}
 
-	session, sessionErr := s.GetByID(sessionId)
+	session, sessionErr := s.GetById(sessionId)
 	if sessionErr != nil {
 		return nil, sessionErr
 	}

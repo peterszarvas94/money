@@ -12,12 +12,12 @@ import (
 )
 
 /*
-WithRedirect checks if the user is already logged in.
+AuthPage checks if the user is already logged in.
 If logged in, redirects to "redirect" query param.
 Otherwise, set context value "redirect" to "redirect" query param.
 Used for signup and signin pages.
 */
-func WithRedirect(next router.HandlerFunc) router.HandlerFunc {
+func AuthPage(next router.HandlerFunc) router.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		redirect := utils.GetQueryParam(r.URL.Query(), "redirect")
 
@@ -46,11 +46,11 @@ func WithRedirect(next router.HandlerFunc) router.HandlerFunc {
 }
 
 /*
-WithToken checks if the user is logged in.
+Token checks if the user is logged in.
 If not logged in, redirects to /signin.
 Otherwise, set context value "token" to the token.
 */
-func WithToken(next router.HandlerFunc) router.HandlerFunc {
+func Token(next router.HandlerFunc) router.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		token, tokenErr := t.GetSessionFromCookie(r)
 		if tokenErr != nil {
@@ -70,10 +70,10 @@ func WithToken(next router.HandlerFunc) router.HandlerFunc {
 }
 
 /*
-WithSession injects the session into the request context.
+Session injects the session into the request context.
 It needs WithToken and WithDB to be called before.
 */
-func WithSession(next router.HandlerFunc) router.HandlerFunc {
+func Session(next router.HandlerFunc) router.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		token, tokenFound := r.Context().Value("token").(*t.Token)
 		if !tokenFound {
@@ -87,7 +87,7 @@ func WithSession(next router.HandlerFunc) router.HandlerFunc {
 
 		sessionService := services.NewSessionService(db)
 
-		session, sessionErr := sessionService.GetByID(token.SessionID)
+		session, sessionErr := sessionService.GetById(token.SessionID)
 		if sessionErr != nil {
 			router.InternalError(w, r, p)
 			return sessionErr

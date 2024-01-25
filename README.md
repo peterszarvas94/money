@@ -50,9 +50,9 @@ To run commands, you need to have:
 - [ ] account page
   - [x] delete button
   - [x] new event form
-  - [ ] show events in list
+  - [x] show events in list
   - [ ] events can have new payment form
-  - [ ] edit event form
+  - [x] edit event form
   - [ ] edit payment form
 
 ### Components
