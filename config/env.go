@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"pengoe/internal/logger"
+	"pengoe/internal/utils"
 
 	"github.com/peterszarvas94/envloader"
 )
@@ -17,7 +17,7 @@ type appConfig struct {
 }
 
 func newAppConfig() *appConfig {
-	rootDir, err := GetRootDir()
+	rootDir, err := utils.GetRootDir()
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -25,11 +25,9 @@ func newAppConfig() *appConfig {
 	envFilePath := filepath.Join(rootDir, ".env")
 
 	file, err := os.Open(envFilePath)
-	if err != nil {
-		logger.Fatal(err.Error())
+	if err == nil {
+		envloader.File(file)
 	}
-
-	envloader.File(file)
 
 	var config appConfig
 
@@ -42,32 +40,3 @@ func newAppConfig() *appConfig {
 }
 
 var Env = newAppConfig()
-
-// Returns the root directory of the project
-func GetRootDir() (string, error) {
-	// Get the current working directory
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	// Traverse upwards until a go.mod file is found
-	for {
-		goModPath := filepath.Join(currentDir, "go.mod")
-		_, err := os.Stat(goModPath)
-		if err == nil {
-			return currentDir, nil
-		}
-
-		// Move one directory up
-		parent := filepath.Dir(currentDir)
-
-		// Check if we have reached the root directory
-		if parent == currentDir {
-			return "", fmt.Errorf("go.mod file not found")
-		}
-
-		// Continue the loop with the parent directory
-		currentDir = parent
-	}
-}

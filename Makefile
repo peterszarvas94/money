@@ -11,6 +11,14 @@ run:
 	killport 8080
 	air -c .air.toml -- -log $(LOG_LEVEL)
 
+# Generate tailwindcss classes for development
+tw:
+	tailwindcss -i tailwind.base.css -o web/static/tailwind.css --watch
+
+# Generate templ files
+templ:
+	air -c .air.templ.toml
+
 # Run tests
 test:
 	air -c .air.test.toml
@@ -18,14 +26,6 @@ test:
 # Collect logs
 log:
 	vector --config vector.yaml
-
-# Generate templ files
-templ:
-	air -c .air.templ.toml
-
-# Generate tailwindcss classes for development
-tw:
-	tailwindcss -i tailwind.base.css -o web/static/tailwind.css --watch
 
 # Docker Build
 docker-build:

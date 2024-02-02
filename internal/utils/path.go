@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -55,4 +58,33 @@ func RemoveTrailingSlash(path string) string {
 	}
 
 	return path
+}
+
+// Returns the root directory of the project
+func GetRootDir() (string, error) {
+	// Get the current working directory
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	// Traverse upwards until a go.mod file is found
+	for {
+		goModPath := filepath.Join(currentDir, "go.mod")
+		_, err := os.Stat(goModPath)
+		if err == nil {
+			return currentDir, nil
+		}
+
+		// Move one directory up
+		parent := filepath.Dir(currentDir)
+
+		// Check if we have reached the root directory
+		if parent == currentDir {
+			return "", fmt.Errorf("go.mod file not found")
+		}
+
+		// Continue the loop with the parent directory
+		currentDir = parent
+	}
 }
