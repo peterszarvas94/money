@@ -4,3 +4,4 @@ logs
 main
 db/migrations
 tmp
+vector.yaml
