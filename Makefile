@@ -15,6 +15,10 @@ run:
 test:
 	air -c .air.test.toml
 
+# Collect logs
+log:
+	vector --config vector.yaml
+
 # Generate templ files
 templ:
 	air -c .air.templ.toml

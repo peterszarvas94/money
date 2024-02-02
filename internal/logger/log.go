@@ -59,7 +59,7 @@ func init() {
 		logLevel = slog.LevelInfo
 	}
 
-	now := time.Now().UTC().Format("2006-01-02-15-04-05")
+	now := time.Now().UTC().Format("2006-01-02")
 	logDir := "logs"
 	logFile := fmt.Sprintf("server-%s.log", now)
 	logPath := filepath.Join(logDir, logFile)
