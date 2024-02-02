@@ -3,9 +3,10 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  include_ext = ["go", "html", "sql", "js", "css"]
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./cmd/main.go"
+  delay = 1000
+  kill_delay = 10
+  include_ext = ["go"]
+  cmd = "go test ./tests/... -v"
   exclude_unchanged = false
   follow_symlink = false
   log = "build-errors.log"

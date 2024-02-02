@@ -1,94 +1,97 @@
 package logger
 
 import (
+	"context"
+	"flag"
 	"fmt"
-	"log"
+	"io"
+	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/samber/slog-multi"
 )
 
-type LoglevelEnum int
+var logger slog.Logger
+
+// exported functions
+var Debug = logger.Debug
+var Info = logger.Info
+var Warn = logger.Warn
+var Error = logger.Error
+
+// add FATAL log level
+var ctx = context.Background()
+
+func Fatal(msg string, args ...any) {
+	logger.Log(ctx, LevelFatal, msg, args...)
+	os.Exit(1)
+}
 
 const (
-	INFO LoglevelEnum = iota
-	WARNING
-	ERROR
-	FATAL
+	LevelFatal = slog.Level(12)
 )
 
-const maxLoglevel = int(FATAL)
-
-var Loglevel string
-
-// Returns the string representation of the loglevel
-func llToString(ll LoglevelEnum) string {
-	switch ll {
-	case INFO:
-		return "INFO"
-	case WARNING:
-		return "WARNING"
-	case ERROR:
-		return "ERROR"
-	case FATAL:
-		return "FATAL"
-	default:
-		return "INFO"
-	}
+var LevelNames = map[slog.Leveler]string{
+	LevelFatal: "FATAL",
 }
 
-// Returns the Loglevel from the string representation
-func llToEnum(ll string) LoglevelEnum {
-	switch ll {
+func init() {
+	var logLevelStr string
+
+	flag.StringVar(&logLevelStr, "log", "INFO", "-log DEBUG|INFO|WARNING|ERROR")
+	flag.Parse()
+
+	var logLevel slog.Level
+
+	switch strings.ToUpper(logLevelStr) {
+	case "DEBUG":
+		logLevel = slog.LevelDebug
 	case "INFO":
-		return INFO
+		logLevel = slog.LevelInfo
 	case "WARNING":
-		return WARNING
+		logLevel = slog.LevelWarn
 	case "ERROR":
-		return ERROR
-	case "FATAL":
-		return FATAL
+		logLevel = slog.LevelError
 	default:
-		return INFO
+		logLevel = slog.LevelInfo
 	}
+
+	now := time.Now().UTC().Format("2006-01-02-15-04-05")
+	logDir := "logs"
+	logFile := fmt.Sprintf("server-%s.log", now)
+	logPath := filepath.Join(logDir, logFile)
+
+	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening log file:", err)
+	}
+
+	all := newJSONHandler(file, logLevel)
+	error := newJSONHandler(os.Stderr, slog.LevelError)
+
+	logger = *slog.New(slogmulti.Fanout(all, error))
 }
 
-// Logs into log.txt in the following format:
-// LEVEL location YYYY-MM-DD HH:MM:SS - message
-func Log(messageLoglevelEnum LoglevelEnum, location string, message string) {
-	// check if message loglevel is less than the loglevel
-	// e.g. if message loglevel is INFO and loglevel is WARNING, don't log
-	loglevelEnum := GetLogLevel()
-	if messageLoglevelEnum < loglevelEnum {
-		return
-	}
+func newJSONHandler(w io.Writer, level slog.Level) slog.Handler {
+	return slog.NewJSONHandler(w, &slog.HandlerOptions{
+		Level:     level,
+		AddSource: true,
+    // search the custom log level name, like "FATAL"
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.LevelKey {
+				level := a.Value.Any().(slog.Level)
+				levelLabel, exists := LevelNames[level]
+				if !exists {
+					levelLabel = level.String()
+				}
 
-	fileName := "logs"
-	now := time.Now().UTC().Format("2006-01-02 15:04:05")
+				a.Value = slog.StringValue(levelLabel)
+			}
 
-	file, fileErr := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if fileErr != nil {
-		logger := log.New(os.Stdout, "", 0)
-		logger.Printf("ERROR log/file %s - %s", now, fileErr.Error())
-	}
-	defer file.Close()
-
-	formattedMessage := fmt.Sprintf("%s %s %s - %s", llToString(messageLoglevelEnum), location, now, message)
-	logger := log.New(file, "", 0)
-
-	if messageLoglevelEnum == FATAL {
-		logger.Fatal(formattedMessage)
-	} else {
-		logger.Println(formattedMessage)
-	}
-
-	if messageLoglevelEnum == ERROR {
-		fmt.Println(formattedMessage)
-	}
-}
-
-// Returns the loggin level from the -l flag, defaulting to INFO
-func GetLogLevel() LoglevelEnum {
-	upperLoglevel := strings.ToUpper(Loglevel)
-	return llToEnum(upperLoglevel)
+			return a
+		},
+	})
 }

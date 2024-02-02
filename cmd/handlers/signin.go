@@ -5,10 +5,10 @@ import (
 	"errors"
 	"html"
 	"net/http"
+	"pengoe/config"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/token"
-	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
 	"strconv"
 
@@ -114,9 +114,9 @@ func Signin(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		return err
 	}
 
-	secure := utils.Env.ENVIRONMENT == "production"
+	secure := config.Env.ENVIRONMENT == "production"
 	var sameSite http.SameSite
-	if utils.Env.ENVIRONMENT == "production" {
+	if config.Env.ENVIRONMENT == "production" {
 		sameSite = http.SameSiteLaxMode
 	} else {
 		sameSite = http.SameSiteDefaultMode

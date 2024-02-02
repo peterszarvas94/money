@@ -1,10 +1,12 @@
 module pengoe
 
-go 1.21.1
+go 1.21.6
 
 require (
 	github.com/a-h/templ v0.2.476
 	github.com/libsql/libsql-client-go v0.0.0-20230917132930-48c310b27e7b
+	github.com/peterszarvas94/envloader v1.1.0
+	github.com/samber/slog-multi v1.0.2
 	golang.org/x/crypto v0.14.0
 )
 
@@ -17,6 +19,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/libsql/sqlite-antlr4-parser v0.0.0-20230802215326-5cb5bb604475 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/samber/lo v1.38.1 // indirect
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

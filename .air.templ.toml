@@ -3,10 +3,8 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  include_ext = ["go", "html", "sql", "js", "css"]
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./cmd/main.go"
-  exclude_unchanged = false
+  include_ext = ["templ"]
+  cmd = "templ generate"
   follow_symlink = false
   log = "build-errors.log"
   send_interrupt = false

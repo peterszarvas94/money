@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"pengoe/config"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/token"
-	"pengoe/internal/utils"
 	"time"
 )
 
@@ -22,9 +22,9 @@ func Signout(w http.ResponseWriter, r *http.Request, p map[string]string) error 
 		return errors.New("Should use db middleware")
 	}
 
-	secure := utils.Env.ENVIRONMENT == "production"
+	secure := config.Env.ENVIRONMENT == "production"
 	var sameSite http.SameSite
-	if utils.Env.ENVIRONMENT == "production" {
+	if config.Env.ENVIRONMENT == "production" {
 		sameSite = http.SameSiteLaxMode
 	} else {
 		sameSite = http.SameSiteDefaultMode

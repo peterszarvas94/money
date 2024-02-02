@@ -5,10 +5,13 @@ Split income and log expenses.
 
 ## Stack
 
-- HTMX for interactivity
-- turso database
-- tailwindcss for styling
-- go webserver with [templ](https://github.com/a-h/templ) templates
+GOTH
+
+- [go](https://go.dev) server
+- [templ](https://github.com/a-h/templ) templates
+- [turso](https://turso.tech/) db
+- [tailwindcss](https://tailwindcss.com)
+- [htmx](https://htmx.org) for reactivity
 
 ## Commands
 
@@ -18,7 +21,7 @@ Split income and log expenses.
 - `make docker-run` - run docker image
 - `make push db=<db-name>` - push schema to an empty turso db
 
-### Prerequisites
+### Dependencies
 
 To run commands, you need to have:
 
@@ -27,9 +30,13 @@ To run commands, you need to have:
 - `air` for development server
 - `tailwindcss` cli for css class generation
 - `turso` cli for pushing migrations
-- `killport` from my [dotfiles](https://github.com/peterszarvas94/dots/blob/main/.local/bin/killport)
+- `killport` from my [dotfiles](https://github.com/peterszarvas94/dots/blob/main/.local/bin/killport), because air is buggy
 
 ## Todo
+
+### Router
+
+- [ ] switch from custom router to servemux once go 1.22 released
 
 ### Auth
 

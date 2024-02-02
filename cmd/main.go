@@ -1,20 +1,15 @@
 package main
 
 import (
-	"flag"
 	"net/http"
-	"os"
 	h "pengoe/cmd/handlers"
 	m "pengoe/cmd/middlewares"
+	"pengoe/config"
 	"pengoe/internal/logger"
 	"pengoe/internal/router"
 )
 
 func main() {
-	// get log level from command line flag -log
-	flag.StringVar(&logger.Loglevel, "log", "INFO", "-log INFO|WARNING|ERROR|FATAL")
-	flag.Parse()
-
 	// create router
 	r := router.NewRouter()
 
@@ -57,8 +52,7 @@ func main() {
 	r.SetStaticPath("/static", "./web/static")
 
 	err := http.ListenAndServe(":8080", r)
-	if err != nil {
-		logger.Log(logger.FATAL, "main/listen", err.Error())
-		os.Exit(1)
+	if err != nil && config.Env.ENVIRONMENT == "production" {
+		logger.Fatal(err.Error())
 	}
 }

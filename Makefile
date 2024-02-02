@@ -1,15 +1,23 @@
 #!make
 
 # Include environment variables from .env file
-ENV_FILE := .env
-include $(ENV_FILE)
-export $(shell sed 's/=.*//' $(ENV_FILE))
+# ENV_FILE := .env
+# include $(ENV_FILE)
+# export $(shell sed 's/=.*//' $(ENV_FILE))
 
-LOG_LEVEL ?= info
+LOG_LEVEL ?= DEBUG
 
 run:
 	killport 8080
-	air -- -log $(LOG_LEVEL)
+	air -c .air.toml -- -log $(LOG_LEVEL)
+
+# Run tests
+test:
+	air -c .air.test.toml
+
+# Generate templ files
+templ:
+	air -c .air.templ.toml
 
 # Generate tailwindcss classes for development
 tw:

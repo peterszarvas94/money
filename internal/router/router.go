@@ -8,17 +8,17 @@ import (
 	"strings"
 )
 
-type router struct {
-	routes       []*route
-	staticPrefix string
-	staticPath   string
+type Router struct {
+	Routes       []*Route
+	StaticPrefix string
+	StaticPath   string
 }
 
-type route struct {
-	pattern     []string
-	method      string
-	handler     HandlerFunc
-	middlewares []MiddlewareFunc
+type Route struct {
+	Pattern     []string
+	Method      string
+	Handler     HandlerFunc
+	Middlewares []MiddlewareFunc
 }
 
 type HandlerFunc func(http.ResponseWriter, *http.Request, map[string]string) error
@@ -27,11 +27,11 @@ type MiddlewareFunc func(HandlerFunc) HandlerFunc
 /*
 Utility function for creating a new router.
 */
-func NewRouter() *router {
-	return &router{
-		routes:       []*route{},
-		staticPrefix: "",
-		staticPath:   "",
+func NewRouter() *Router {
+	return &Router{
+		Routes:       []*Route{},
+		StaticPrefix: "",
+		StaticPath:   "",
 	}
 }
 
@@ -39,77 +39,77 @@ func NewRouter() *router {
 SetStaticPath sets the static path for serving static files.
 Accepts URL prefix and path to the static file directory.
 */
-func (r *router) SetStaticPath(prefix, path string) {
-	r.staticPrefix = prefix
-	r.staticPath = path
+func (r *Router) SetStaticPath(prefix, path string) {
+	r.StaticPrefix = prefix
+	r.StaticPath = path
 }
 
 /*
 Utility function for adding a new route to the router.
 */
-func (r *router) addRoute(method string, pattern []string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	for _, route := range r.routes {
-		if utils.SliceEqual(route.pattern, pattern) && route.method == method {
+func (r *Router) AddRoute(method string, pattern []string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+	for _, route := range r.Routes {
+		if utils.SliceEqual(route.Pattern, pattern) && route.Method == method {
 			return
 		}
 	}
 
-	newRoute := &route{
+	newRoute := &Route{
 		pattern,
 		method,
 		handler,
 		middlewares,
 	}
 
-	r.routes = append(r.routes, newRoute)
+	r.Routes = append(r.Routes, newRoute)
 }
 
 /*
 Adds a new GET route to the router.
 */
-func (r *router) GET(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) GET(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.addRoute("GET", pattern, handler, middlewares...)
+	r.AddRoute("GET", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new POST route to the router.
 */
-func (r *router) POST(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) POST(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.addRoute("POST", pattern, handler, middlewares...)
+	r.AddRoute("POST", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new PATCH route to the router.
 */
-func (r *router) PATCH(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) PATCH(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.addRoute("PATCH", pattern, handler, middlewares...)
+	r.AddRoute("PATCH", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new DELETE route to the router.
 */
-func (r *router) DELETE(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) DELETE(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.addRoute("DELETE", pattern, handler, middlewares...)
+	r.AddRoute("DELETE", pattern, handler, middlewares...)
 }
 
 /*
 ServeHTTP is mandatory.
 It searches for a matching route and calls the handler function.
 */
-func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	pathStr := removeTrailingSlash(req.URL.Path)
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	pathStr := utils.RemoveTrailingSlash(req.URL.Path)
 	method := req.Method
 
 	// handle static files
-	if r.staticPrefix != "" && strings.HasPrefix(pathStr, r.staticPrefix) {
+	if r.StaticPrefix != "" && strings.HasPrefix(pathStr, r.StaticPrefix) {
 		// w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		fs := http.FileServer(http.Dir(r.staticPath))
-		staticHandler := http.StripPrefix(r.staticPrefix, fs)
+		fs := http.FileServer(http.Dir(r.StaticPath))
+		staticHandler := http.StripPrefix(r.StaticPrefix, fs)
 		staticHandler.ServeHTTP(w, req)
 
 		return
@@ -119,17 +119,17 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := utils.GetPatternFromStr(pathStr)
 
 	// same length routes
-	sameLengthRoutes := getSameLengthRoutes(r.routes, path)
+	sameLengthRoutes := GetSameLengthRoutes(r.Routes, path)
 
 	// [account :id] -> [account 1]
-	matchingRoutes, matchErr := matchRoutes(sameLengthRoutes, path)
+	matchingRoutes, matchErr := MatchRoutes(sameLengthRoutes, path)
 	if matchErr != nil {
 		NotFound(w, req, nil)
 		return
 	}
 
 	// GET -> GET
-	route, methodErr := matchMethod(matchingRoutes, method)
+	route, methodErr := MatchMethod(matchingRoutes, method)
 	if methodErr != nil {
 		if len(matchingRoutes) < 1 && method == "GET" {
 			MethodNotAllowed(w, req, nil)
@@ -140,30 +140,30 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// [account 1], [account :id] -> {id: 1}
-	variables := utils.GetPathVariables(route.pattern, path)
+	variables := utils.GetPathVariables(route.Pattern, path)
 
-	handler := route.handler
+	handler := route.Handler
 
 	// apply middlewares backwards
-	for i := len(route.middlewares) - 1; i >= 0; i-- {
-		handler = route.middlewares[i](handler)
+	for i := len(route.Middlewares) - 1; i >= 0; i-- {
+		handler = route.Middlewares[i](handler)
 	}
 
 	// call handler
 	handlerErr := handler(w, req, variables)
 	if handlerErr != nil {
-		logger.Log(logger.ERROR, "handler", handlerErr.Error())
+		logger.Error(handlerErr.Error())
 	}
 }
 
 /*
-getSameLengthRoutes returns routes with the same length as path.
+GetSameLengthRoutes returns routes with the same length as path.
 */
-func getSameLengthRoutes(routes []*route, path []string) []*route {
-	possible := []*route{}
+func GetSameLengthRoutes(routes []*Route, path []string) []*Route {
+	possible := []*Route{}
 
 	for _, route := range routes {
-		if len(route.pattern) != len(path) {
+		if len(route.Pattern) != len(path) {
 			continue
 		}
 		possible = append(possible, route)
@@ -173,19 +173,19 @@ func getSameLengthRoutes(routes []*route, path []string) []*route {
 }
 
 /*
-matchRoutes returns the route that matches the path.
+MatchRoutes returns the route that matches the path.
 Works only for same length routes.
 You must filter routes by getSameLengthRoutes first.
 */
-func matchRoutes(routes []*route, path []string) ([]*route, error) {
+func MatchRoutes(routes []*Route, path []string) ([]*Route, error) {
 	result := routes
 
 	// get possible routes (should be only one)
 	for i, pathSegment := range path {
-		newPossible := []*route{}
+		newPossible := []*Route{}
 		// check for exact match
 		for _, route := range result {
-			patternSegment := route.pattern[i]
+			patternSegment := route.Pattern[i]
 			if pathSegment == patternSegment {
 				newPossible = append(newPossible, route)
 			}
@@ -193,7 +193,7 @@ func matchRoutes(routes []*route, path []string) ([]*route, error) {
 		// if no exact match, check for variable match
 		if len(newPossible) == 0 {
 			for _, route := range result {
-				patternSegment := route.pattern[i]
+				patternSegment := route.Pattern[i]
 				if strings.HasPrefix(patternSegment, ":") {
 					newPossible = append(newPossible, route)
 				}
@@ -210,26 +210,14 @@ func matchRoutes(routes []*route, path []string) ([]*route, error) {
 }
 
 /*
-matchMethod returns the route that matches the method.
+MatchMethod returns the route that matches the method.
 */
-func matchMethod(routes []*route, method string) (*route, error) {
+func MatchMethod(routes []*Route, method string) (*Route, error) {
 	for _, route := range routes {
-		if route.method == method {
+		if route.Method == method {
 			return route, nil
 		}
 	}
 
 	return nil, errors.New("No matching route found")
 }
-
-/*
-removeTrailingSlash removes trailing slash from path.
-*/
-func removeTrailingSlash(path string) string {
-	if path != "/" && strings.HasSuffix(path, "/") {
-		return path[:len(path)-1]
-	}
-
-	return path
-}
-

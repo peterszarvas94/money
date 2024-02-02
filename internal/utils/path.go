@@ -29,7 +29,7 @@ func GetPathVariables(pattern []string, path []string) map[string]string {
 	return variables
 }
 
-func GetQueryParam(values url.Values, param string) (string) {
+func GetQueryParam(values url.Values, param string) string {
 	for key, value := range values {
 		if key == param {
 			return value[0]
@@ -44,4 +44,15 @@ func IsValidRedirect(redirect string, encoded bool) bool {
 	}
 
 	return strings.HasPrefix(redirect, "/")
+}
+
+/*
+RemoveTrailingSlash removes trailing slash from path.
+*/
+func RemoveTrailingSlash(path string) string {
+	if path != "/" && strings.HasSuffix(path, "/") {
+		return path[:len(path)-1]
+	}
+
+	return path
 }

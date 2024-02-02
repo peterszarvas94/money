@@ -1,4 +1,4 @@
-package utils_test
+package tests
 
 import (
 	"pengoe/internal/utils"

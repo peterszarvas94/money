@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"pengoe/internal/db"
 	"pengoe/internal/logger"
 	"pengoe/internal/services"
@@ -63,7 +62,7 @@ func (m *TokenManager) Create(sessionID int) (*Token, error) {
 		SessionID: sessionID,
 		Value:     csrfToken,
 		// TODO: change to 9 minutes
-		Valid:     time.Now().Add(10 * time.Second).UTC(),
+		Valid: time.Now().Add(10 * time.Second).UTC(),
 	}
 
 	m.tokens[sessionID] = token
@@ -128,7 +127,7 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 		SessionID: sessionID,
 		Value:     newToken,
 		// TODO: change to 10 minutes
-		Valid:     time.Now().Add(10 * time.Second).UTC(),
+		Valid: time.Now().Add(10 * time.Second).UTC(),
 	}
 
 	token = newCsrfToken
@@ -194,8 +193,7 @@ func init() {
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Log(logger.FATAL, "csrftoken/init/db", dbErr.Error())
-		os.Exit(1)
+		logger.Fatal(dbErr.Error())
 	}
 	defer db.Close()
 	sessionService := services.NewSessionService(db)
@@ -203,16 +201,14 @@ func init() {
 	// get all active sessions from the database
 	sessions, sessionsErr := sessionService.GetActiveSessions()
 	if sessionsErr != nil {
-		logger.Log(logger.FATAL, "csrftoken/init/active", sessionsErr.Error())
-		os.Exit(1)
+		logger.Fatal(sessionsErr.Error())
 	}
 
 	// create a new token for each active session
 	for _, session := range sessions {
 		_, createErr := Manager.Create(session.Id)
 		if createErr != nil {
-			logger.Log(logger.FATAL, "csrftoken/init/create", createErr.Error())
-			os.Exit(1)
+			logger.Fatal(createErr.Error())
 		}
 	}
 }
