@@ -14,7 +14,7 @@ import "pengoe/web/templates/icons"
 import "fmt"
 
 type DeleteEventButtonProps struct {
-	EventId int
+	EventId string
 }
 
 func DeleteEventButton(props DeleteEventButtonProps) templ.Component {
@@ -34,7 +34,7 @@ func DeleteEventButton(props DeleteEventButtonProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("delete-event-%d", props.EventId)))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("delete-event-%s", props.EventId)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,7 +42,7 @@ func DeleteEventButton(props DeleteEventButtonProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/event/%d", props.EventId)))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/event/%s", props.EventId)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func DeleteEventButton(props DeleteEventButtonProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("confirmed,delete-event-%d", props.EventId)))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("confirmed,delete-event-%s", props.EventId)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

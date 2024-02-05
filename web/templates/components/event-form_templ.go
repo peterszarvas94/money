@@ -20,7 +20,7 @@ import (
 // TODO maybe better structure for account id not this mess
 type EventFormProps struct {
 	New         bool
-	EventId     int
+	EventId     string
 	Currency    string
 	Name        string
 	Description string
@@ -69,7 +69,7 @@ func EventForm(props EventFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/event/%d", props.EventId)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/event/%s", props.EventId)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,7 +77,8 @@ func EventForm(props EventFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("submit,edit-event-%d", props.EventId)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("submit,edit-event-%s",
+				props.EventId)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

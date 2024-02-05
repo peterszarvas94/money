@@ -20,13 +20,13 @@ templ Signin(props SigninProps) {
 		Description: props.Descrtipion,
 	}) {
 		<div
- 			class="from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text"
- 			hx-ext="description"
- 			id="page"
+			class="from-background to-secondary font-slab min-h-screen bg-gradient-to-br text-text"
+			hx-ext="description"
+			id="page"
 		>
 			<!-- background -->
 			<figure
- 				class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
+				class="z-0 text-secondary text-giant absolute flex h-full w-full items-end justify-center pb-10"
 			>
 				@icons.Logo()
 			</figure>
@@ -45,33 +45,33 @@ templ Signin(props SigninProps) {
 				</header>
 				<main class="flex flex-col items-center gap-10 bg-transparent">
 					<form
- 						hx-post={ fmt.Sprintf("/signin?redirect=%s", props.RedirectUrl) }
- 						hx-target="body"
- 						hx-ext="show-client-error"
- 						hx-replace-url="true"
- 						class="flex w-full max-w-sm flex-col gap-4"
+						hx-post={ fmt.Sprintf("/signin?redirect=%s", props.RedirectUrl) }
+						hx-target="body"
+						hx-ext="show-client-error"
+						hx-replace-url="true"
+						class="flex w-full max-w-sm flex-col gap-4"
 					>
 						<input
- 							aria-label="Username or email"
- 							name="user"
- 							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
- 							placeholder="Username or email"
- 							value={ props.UsernameOrEmail }
- 							require
+							aria-label="Username or email"
+							name="user"
+							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+							placeholder="Username or email"
+							value={ props.UsernameOrEmail }
+							require
 						/>
 						<input
- 							aria-label="Password"
- 							name="password"
- 							type="password"
- 							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
- 							placeholder="Password"
- 							required
+							aria-label="Password"
+							name="password"
+							type="password"
+							class="border-text flex items-center rounded border bg-transparent px-2 py-1 focus:outline-none"
+							placeholder="Password"
+							required
 						/>
 						<div class="flex justify-center">
 							<button
- 								aria-label="Sign up"
- 								type="submit"
- 								class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
+								aria-label="Sign up"
+								type="submit"
+								class="border-accent text-accent hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary flex h-10 w-fit items-center rounded-lg border bg-transparent px-2 focus:outline-none"
 							>
 								Sign in
 							</button>
@@ -80,8 +80,8 @@ templ Signin(props SigninProps) {
 					<nav class="flex w-full max-w-sm justify-center gap-2">
 						<div>Not a member yet?</div>
 						<a
- 							href={ templ.SafeURL(fmt.Sprintf("/signup?redirect=%s", props.RedirectUrl)) }
- 							class="border-primary hover:border-accent focus:border-accent border-b focus:outline-none"
+							href={ templ.SafeURL(fmt.Sprintf("/signup?redirect=%s", props.RedirectUrl)) }
+							class="border-primary hover:border-accent focus:border-accent border-b focus:outline-none"
 						>
 							Sign up here.
 						</a>

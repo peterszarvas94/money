@@ -9,8 +9,8 @@ import (
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	"pengoe/internal/token"
+	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
-	"strconv"
 
 	"github.com/a-h/templ"
 )
@@ -62,24 +62,24 @@ func Signin(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		return err
 	}
 
-  form := r.Form
+	form := r.Form
 
-  usernameOrEmail := html.EscapeString(form.Get("user"))
-  if usernameOrEmail == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Username or email is required")
-  }
+	usernameOrEmail := html.EscapeString(form.Get("user"))
+	if usernameOrEmail == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Username or email is required")
+	}
 
-  password := html.EscapeString(form.Get("password"))
-  if password == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Password is required")
-  }
+	password := html.EscapeString(form.Get("password"))
+	if password == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Password is required")
+	}
 
 	userService := services.NewUserService(db)
 
 	// login the user
-	user, err := userService.Signin(usernameOrEmail, password)
+	userId, err := userService.Signin(usernameOrEmail, password)
 
 	// if the login was unsuccessful
 	if err != nil {
@@ -101,8 +101,11 @@ func Signin(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 	}
 
 	// if the login was successful
+
+	id := utils.NewUUID("ses")
+
 	sessionService := services.NewSessionService(db)
-	session, err := sessionService.New(user)
+	session, err := sessionService.New(id, userId)
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
@@ -122,14 +125,12 @@ func Signin(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		sameSite = http.SameSiteDefaultMode
 	}
 
-	sessionId := strconv.Itoa(session.Id)
-
 	valid := session.ValidUntil.UTC()
 
 	// set the session id to cookie
 	cookie := &http.Cookie{
 		Name:     "session",
-		Value:    sessionId,
+		Value:    session.Id,
 		Path:     "/",
 		Expires:  valid,
 		HttpOnly: true,

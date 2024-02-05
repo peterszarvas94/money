@@ -34,7 +34,7 @@ func Signout(w http.ResponseWriter, r *http.Request, p map[string]string) error 
 	sessionService := services.NewSessionService(db)
 
 	// get old session form cookie
-	session, sessionErr := sessionService.CheckCookie(r)
+	session, sessionErr := sessionService.CheckFromCookie(r)
 	if sessionErr != nil {
 		return sessionErr
 	}

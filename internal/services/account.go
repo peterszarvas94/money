@@ -7,7 +7,7 @@ import (
 )
 
 type Account struct {
-	Id          int
+	Id          string
 	Name        string
 	Description string
 	Currency    string
@@ -16,10 +16,10 @@ type Account struct {
 }
 
 type AccountServiceInterface interface {
-	New(user *Account) (*Account, error)
-	GetByUserId(userId int) ([]*Account, error)
-	GetById(accountId int) (*Account, error)
-	Delete(accountId int) error
+	New(id, name, description, currency string) error
+	GetByUserId(userId string) ([]*Account, error)
+	GetById(id string) (*Account, error)
+	Delete(id string) error
 }
 
 type accountService struct {
@@ -32,87 +32,87 @@ func NewAccountService(db *sql.DB) AccountServiceInterface {
 
 /*
 New is a function that adds an account to the database.
+Gives back the id of the new account.
 */
-func (s *accountService) New(account *Account) (*Account, error) {
-
+func (s *accountService) New(id, name, description, currency string) error {
 	now := time.Now().UTC()
 
-	mutation, mutationErr := s.db.Exec(
+	_, err := s.db.Exec(
 		`INSERT INTO account (
-			name, description, currency, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?)`,
-		account.Name, account.Description, account.Currency, now, now,
+			id,
+			name,
+			description,
+			currency,
+			created_at,
+			updated_at
+		) VALUES (?, ?, ?, ?, ?, ?)`,
+		id,
+		name,
+		description,
+		currency,
+		now,
+		now,
 	)
-	if mutationErr != nil {
-		return nil, mutationErr
+	if err != nil {
+		return err
 	}
 
-	id, idErr := mutation.LastInsertId()
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	newAccount := &Account{
-		Id:          int(id),
-		Name:        account.Name,
-		Description: account.Description,
-		Currency:    account.Currency,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
-
-	return newAccount, nil
+	return nil
 }
 
 /*
 GetByUserId is a function that returns all accounts for a given user.
 */
-func (s *accountService) GetByUserId(userId int) ([]*Account, error) {
-	rows, rowsErr := s.db.Query(
+func (s *accountService) GetByUserId(userId string) ([]*Account, error) {
+	rows, err := s.db.Query(
 		`SELECT 
-			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
+			account.id,
+			account.name,
+			account.description,
+			account.currency,
+			account.created_at,
+			account.updated_at
 		FROM account
 		INNER JOIN access ON account.id = access.account_id
 		WHERE access.user_id = ?`,
 		userId,
 	)
-	if rowsErr != nil {
-		return nil, rowsErr
+	if err != nil {
+		return nil, err
 	}
 
 	accounts := []*Account{}
 
 	for rows.Next() {
-		var id int
-		var name string
-		var description string
-		var currency string
-		var createdAt string
-		var updatedAt string
+		account := &Account{}
 
-		scanErr := rows.Scan(&id, &name, &description, &currency, &createdAt, &updatedAt)
-		if scanErr != nil {
-			return nil, scanErr
+		var createdAtStr string
+		var updatedAtStr string
+
+		err := rows.Scan(
+			&account.Id,
+			&account.Name,
+			&account.Description,
+			&account.Currency,
+			&createdAtStr,
+			&updatedAtStr,
+		)
+		if err != nil {
+			return nil, err
 		}
 
-		created, createdErr := utils.ConvertToTime(createdAt)
-		if createdErr != nil {
-			return nil, createdErr
+		createdAt, err := utils.ConvertToTime(createdAtStr)
+		if err != nil {
+			return nil, err
 		}
 
-		updated, updatedErr := utils.ConvertToTime(updatedAt)
-		if updatedErr != nil {
-			return nil, updatedErr
+		updated, err := utils.ConvertToTime(updatedAtStr)
+		if err != nil {
+			return nil, err
 		}
 
-		account := &Account{
-			Id:          id,
-			Name:        name,
-			Description: description,
-			Currency:    currency,
-			CreatedAt:   created,
-			UpdatedAt:   updated,
-		}
+		account.CreatedAt = createdAt
+		account.UpdatedAt = updated
 
 		accounts = append(accounts, account)
 	}
@@ -123,45 +123,49 @@ func (s *accountService) GetByUserId(userId int) ([]*Account, error) {
 /*
 GetById is a function that returns an account for a given id.
 */
-func (s *accountService) GetById(accountId int) (*Account, error) {
+func (s *accountService) GetById(id string) (*Account, error) {
 	row := s.db.QueryRow(
 		`SELECT
-			account.id, account.name, account.description, account.currency, account.created_at, account.updated_at
+			id,
+			name,
+			description,
+			currency,
+			created_at,
+			updated_at
 		FROM account
 		WHERE account.id = ?`,
-		accountId,
+		id,
 	)
 
-	var id int
-	var name string
-	var description string
-	var currency string
-	var createdAt string
-	var updatedAt string
+	var createdAtStr string
+	var updatedAtStr string
 
-	scanErr := row.Scan(&id, &name, &description, &currency, &createdAt, &updatedAt)
-	if scanErr != nil {
-		return nil, scanErr
+	account := &Account{}
+
+	err := row.Scan(
+		&account.Id,
+		&account.Name,
+		&account.Description,
+		&account.Currency,
+		&createdAtStr,
+		&updatedAtStr,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	created, createdErr := utils.ConvertToTime(createdAt)
-	if createdErr != nil {
-		return nil, createdErr
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	updated, updatedErr := utils.ConvertToTime(updatedAt)
-	if updatedErr != nil {
-		return nil, updatedErr
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	account := &Account{
-		Id:          id,
-		Name:        name,
-		Description: description,
-		Currency:    currency,
-		CreatedAt:   created,
-		UpdatedAt:   updated,
-	}
+	account.CreatedAt = createdAt
+	account.UpdatedAt = updatedAt
 
 	return account, nil
 }
@@ -169,13 +173,13 @@ func (s *accountService) GetById(accountId int) (*Account, error) {
 /*
 Delete is a function that deletes an account from the database.
 */
-func (s *accountService) Delete(accountId int) error {
-	_, deleteErr := s.db.Exec(
+func (s *accountService) Delete(id string) error {
+	_, err := s.db.Exec(
 		`DELETE FROM account WHERE id = ?`,
-		accountId,
+		id,
 	)
-	if deleteErr != nil {
-		return deleteErr
+	if err != nil {
+		return err
 	}
 
 	return nil

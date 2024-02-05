@@ -11,6 +11,7 @@ import (
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	t "pengoe/internal/token"
+	"pengoe/internal/utils"
 	"pengoe/web/templates/components"
 	c "pengoe/web/templates/components"
 	"strconv"
@@ -45,17 +46,15 @@ func NewEvent(w http.ResponseWriter, r *http.Request, p map[string]string) error
 	form := r.Form
 
 	formToken := html.EscapeString(form.Get("csrf"))
-
-	accountIdStr := html.EscapeString(form.Get("account_id"))
-	if accountIdStr == "" {
+	if formToken == "" {
 		router.BadRequest(w, r, p)
-		return errors.New("Account id is required")
+		return errors.New("CSRF token is required")
 	}
 
-	accountId, err := strconv.Atoi(accountIdStr)
-	if err != nil {
+	accountId := html.EscapeString(form.Get("account_id"))
+	if accountId == "" {
 		router.BadRequest(w, r, p)
-		return err
+		return errors.New("Account ID is required")
 	}
 
 	name := html.EscapeString(form.Get("name"))
@@ -66,16 +65,28 @@ func NewEvent(w http.ResponseWriter, r *http.Request, p map[string]string) error
 
 	description := html.EscapeString(form.Get("description"))
 
-	income := html.EscapeString(form.Get("income"))
-	if income == "" {
+	incomeStr := html.EscapeString(form.Get("income"))
+	if incomeStr == "" {
 		router.BadRequest(w, r, p)
 		return errors.New("Income is required")
 	}
 
-	reserved := html.EscapeString(form.Get("reserved"))
-	if reserved == "" {
+	income, err := strconv.Atoi(incomeStr)
+	if err != nil {
+		router.BadRequest(w, r, p)
+		return err
+	}
+
+	reservedStr := html.EscapeString(form.Get("reserved"))
+	if reservedStr == "" {
 		router.BadRequest(w, r, p)
 		return errors.New("Reserved is required")
+	}
+
+	reserved, err := strconv.Atoi(reservedStr)
+	if err != nil {
+		router.BadRequest(w, r, p)
+		return err
 	}
 
 	deliveredAtStr := html.EscapeString(form.Get("delivered_at"))
@@ -90,25 +101,13 @@ func NewEvent(w http.ResponseWriter, r *http.Request, p map[string]string) error
 		return err
 	}
 
-	incomeInt, err := strconv.Atoi(income)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
-	}
-
-	reservedInt, err := strconv.Atoi(reserved)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
-	}
-
 	eventService := services.NewEventService(db)
 	accessService := services.NewAccessService(db)
 	accountService := services.NewAccountService(db)
 
 	// check if user has access to account
-	err = accessService.Check(session.UserId, accountId)
-	if err != nil {
+	ok := accessService.Check(session.UserId, accountId)
+	if !ok {
 		router.Unauthorized(w, r, p)
 		return err
 	}
@@ -140,20 +139,12 @@ func NewEvent(w http.ResponseWriter, r *http.Request, p map[string]string) error
 	}
 
 	// csrf token is not expired
+	id := utils.NewUUID("evt")
 
-	newEvent := &services.Event{
-		AccountId:   accountId,
-		Name:        name,
-		Description: description,
-		Income:      incomeInt,
-		Reserved:    reservedInt,
-		DeliveredAt: deliveredAt,
-	}
-
-	event, newEventErr := eventService.New(newEvent)
-	if newEventErr != nil {
+	err = eventService.New(id, name, description, income, reserved, deliveredAt, accountId)
+	if err != nil {
 		router.InternalError(w, r, p)
-		return newEventErr
+		return err
 	}
 
 	account, err := accountService.GetById(accountId)
@@ -165,12 +156,12 @@ func NewEvent(w http.ResponseWriter, r *http.Request, p map[string]string) error
 	component := c.NewEventCard(c.NewEventCardProps{
 		EventCardProps: c.EventCardProps{
 			Currency:    account.Currency,
-			EventId:     event.Id,
-			Name:        event.Name,
-			Description: event.Description,
-			Income:      event.Income,
-			Reserved:    event.Reserved,
-			DeliveredAt: event.DeliveredAt,
+			EventId:     id,
+			Name:        name,
+			Description: description,
+			Income:      income,
+			Reserved:    reserved,
+			DeliveredAt: deliveredAt,
 		},
 	})
 	handler := templ.Handler(component)
@@ -196,33 +187,29 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 		return errors.New("Should use session middleware")
 	}
 
-	id := p["id"]
-	eventId, err := strconv.Atoi(id)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
+	eventId, found := p["id"]
+	if !found {
+		router.NotFound(w, r, p)
+		return errors.New("Path variable \"id\" not found")
 	}
 
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
 	}
 
 	form := r.Form
-
 	formToken := html.EscapeString(form.Get("csrf"))
-
-	accountIdStr := html.EscapeString(form.Get("account_id"))
-	if accountIdStr == "" {
+	if formToken == "" {
 		router.BadRequest(w, r, p)
-		return errors.New("Account id is required")
+		return errors.New("CSRF token is required")
 	}
 
-	accountId, err := strconv.Atoi(accountIdStr)
-	if err != nil {
+	accountId := html.EscapeString(form.Get("account_id"))
+	if accountId == "" {
 		router.BadRequest(w, r, p)
-		return err
+		return errors.New("Account id is required")
 	}
 
 	accountService := services.NewAccountService(db)
@@ -240,16 +227,28 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 
 	description := html.EscapeString(form.Get("description"))
 
-	income := html.EscapeString(form.Get("income"))
-	if income == "" {
+	incomeStr := html.EscapeString(form.Get("income"))
+	if incomeStr == "" {
 		router.BadRequest(w, r, p)
 		return errors.New("Income is required")
 	}
 
-	reserved := html.EscapeString(form.Get("reserved"))
-	if reserved == "" {
+	income, err := strconv.Atoi(incomeStr)
+	if err != nil {
+		router.BadRequest(w, r, p)
+		return err
+	}
+
+	reservedStr := html.EscapeString(form.Get("reserved"))
+	if reservedStr == "" {
 		router.BadRequest(w, r, p)
 		return errors.New("Reserved is required")
+	}
+
+	reserved, err := strconv.Atoi(reservedStr)
+	if err != nil {
+		router.BadRequest(w, r, p)
+		return err
 	}
 
 	deliveredAtStr := html.EscapeString(form.Get("delivered_at"))
@@ -264,34 +263,12 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 		return err
 	}
 
-	incomeInt, err := strconv.Atoi(income)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
-	}
-
-	reservedInt, err := strconv.Atoi(reserved)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
-	}
-
-	newEvent := &services.Event{
-		Id:          eventId,
-		AccountId:   accountId,
-		Name:        name,
-		Description: description,
-		Income:      incomeInt,
-		Reserved:    reservedInt,
-		DeliveredAt: deliveredAt,
-	}
-
 	eventService := services.NewEventService(db)
 	accessService := services.NewAccessService(db)
 
 	// check if user has access to account
-	err = accessService.Check(session.UserId, accountId)
-	if err != nil {
+	ok := accessService.Check(session.UserId, accountId)
+	if !ok {
 		router.Unauthorized(w, r, p)
 		return err
 	}
@@ -309,7 +286,7 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 		}
 
 		w.Header().Set("HX-Retarget", "#csrf")
-		w.Header().Set("HX-Trigger", fmt.Sprintf("edit-event-%d", eventId))
+		w.Header().Set("HX-Trigger", fmt.Sprintf("edit-event-%s", eventId))
 
 		data := c.CsrfProps{
 			Token: newToken,
@@ -322,7 +299,7 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 
 	// csrf token is not expired
 
-	_, err = eventService.Update(newEvent)
+	err = eventService.Update(eventId, name, description, income, reserved, deliveredAt)
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
@@ -330,12 +307,12 @@ func EditEvent(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 
 	data := c.EventCardProps{
 		Currency:    account.Currency,
-		EventId:     newEvent.Id,
-		Name:        newEvent.Name,
-		Description: newEvent.Description,
-		Income:      newEvent.Income,
-		Reserved:    newEvent.Reserved,
-		DeliveredAt: newEvent.DeliveredAt,
+		EventId:     eventId,
+		Name:        name,
+		Description: description,
+		Income:      income,
+		Reserved:    reserved,
+		DeliveredAt: deliveredAt,
 	}
 
 	component := c.EventCard(data)
@@ -362,14 +339,13 @@ func DeleteEvent(w http.ResponseWriter, r *http.Request, p map[string]string) er
 		return errors.New("Should use session middleware")
 	}
 
-	id := p["id"]
-	eventId, err := strconv.Atoi(id)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
+	eventId, found := p["id"]
+	if !found {
+		router.NotFound(w, r, p)
+		return errors.New("Path variable \"id\" not found")
 	}
 
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
@@ -390,24 +366,18 @@ func DeleteEvent(w http.ResponseWriter, r *http.Request, p map[string]string) er
 
 	formToken := html.EscapeString(formValues.Get("csrf"))
 
-	accountIdStr := html.EscapeString(formValues.Get("account_id"))
-	if accountIdStr == "" {
+	accountId := html.EscapeString(formValues.Get("account_id"))
+	if accountId == "" {
 		router.BadRequest(w, r, p)
 		return errors.New("Account id is required")
-	}
-
-	accountId, err := strconv.Atoi(accountIdStr)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
 	}
 
 	eventService := services.NewEventService(db)
 	accessService := services.NewAccessService(db)
 
 	// check if user has access to account
-	err = accessService.Check(session.UserId, accountId)
-	if err != nil {
+	ok := accessService.Check(session.UserId, accountId)
+	if !ok {
 		router.Unauthorized(w, r, p)
 		return err
 	}
@@ -431,7 +401,7 @@ func DeleteEvent(w http.ResponseWriter, r *http.Request, p map[string]string) er
 		}
 
 		w.Header().Set("HX-Retarget", fmt.Sprintf("#csrf"))
-		w.Header().Set("HX-Trigger", fmt.Sprintf("delete-event-%d", eventId))
+		w.Header().Set("HX-Trigger", fmt.Sprintf("delete-event-%s", eventId))
 
 		component := components.Csrf(data)
 		handler := templ.Handler(component)

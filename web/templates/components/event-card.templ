@@ -7,13 +7,13 @@ import (
 )
 
 type EventCardProps struct {
-	Currency        string
-	EventId         int
-	Name            string
-	Description     string
-	Income          int
-	Reserved        int
-	DeliveredAt     time.Time
+	Currency    string
+	EventId     string
+	Name        string
+	Description string
+	Income      int
+	Reserved    int
+	DeliveredAt time.Time
 }
 
 templ EventCard(props EventCardProps) {
@@ -36,15 +36,15 @@ templ EventCard(props EventCardProps) {
 			</div>
 		</div>
 		<button
- 			class="flex items-start text-lg h-fit w-fit"
- 			hx-get={ fmt.Sprintf("/ui/edit-event-form/%d", props.EventId) }
- 			hx-target="closest section"
- 			hx-swap="outerHTML"
+			class="flex items-start text-lg h-fit w-fit"
+			hx-get={ fmt.Sprintf("/ui/edit-event-form/%s", props.EventId) }
+			hx-target="closest section"
+			hx-swap="outerHTML"
 		>
 			@icons.Edit()
 		</button>
-      @DeleteEventButton(DeleteEventButtonProps{
-        EventId: props.EventId,
-      })
+		@DeleteEventButton(DeleteEventButtonProps{
+			EventId: props.EventId,
+		})
 	</section>
 }

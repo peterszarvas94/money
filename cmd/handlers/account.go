@@ -11,9 +11,9 @@ import (
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	t "pengoe/internal/token"
+	"pengoe/internal/utils"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/pages"
-	"strconv"
 	"time"
 
 	"github.com/a-h/templ"
@@ -39,17 +39,10 @@ func AccountPage(w http.ResponseWriter, r *http.Request, p map[string]string) er
 		return errors.New("Should use session middleware")
 	}
 
-	id, found := p["id"]
+	accountId, found := p["id"]
 	if !found {
 		router.NotFound(w, r, p)
 		return errors.New("Path variable \"id\" not found")
-	}
-
-	// id to int
-	accountId, err := strconv.Atoi(id)
-	if err != nil {
-		router.NotFound(w, r, p)
-		return err
 	}
 
 	accountService := services.NewAccountService(db)
@@ -64,8 +57,8 @@ func AccountPage(w http.ResponseWriter, r *http.Request, p map[string]string) er
 	}
 
 	// check if the user has access to the account
-	err = accessService.Check(session.UserId, accountId)
-	if err != nil {
+	ok := accessService.Check(session.UserId, accountId)
+	if !ok {
 		http.Redirect(w, r, "/dashboard", http.StatusUnauthorized)
 		return err
 	}
@@ -86,10 +79,13 @@ func AccountPage(w http.ResponseWriter, r *http.Request, p map[string]string) er
 
 	data := pages.AccountProps{
 		Title:                fmt.Sprintf("pengoe - %s", account.Name),
-		Description:          fmt.Sprintf("Account page for %s", account.Name),
+		PageDescription:      fmt.Sprintf("Account page for %s", account.Name),
 		Accounts:             accounts,
 		ShowNewAccountButton: true,
-		Account:              account,
+		Id:                   account.Id,
+		Name:                 account.Name,
+		Description:          account.Description,
+		Currency:             account.Currency,
 		Token:                token,
 		Events:               events,
 	}
@@ -121,27 +117,19 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		return errors.New("Should use session middleware")
 	}
 
-	id, found := p["id"]
+	accountId, found := p["id"]
 	if !found {
 		router.NotFound(w, r, p)
 		return errors.New("Path variable \"id\" not found")
-	}
-
-	// id to int
-	accountId, err := strconv.Atoi(id)
-	if err != nil {
-		router.NotFound(w, r, p)
-		return err
 	}
 
 	accountService := services.NewAccountService(db)
 	accessService := services.NewAccessService(db)
 
 	// check if the user has access to the account
-	err = accessService.Check(session.UserId, accountId)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return err
+	ok := accessService.Check(session.UserId, accountId)
+	if !ok {
+		return router.Unauthorized(w, r, p)
 	}
 
 	// manually parse body, (because DELETE request)
@@ -236,7 +224,6 @@ func NewAccountPage(w http.ResponseWriter, r *http.Request, p map[string]string)
 	data := pages.NewAccountProps{
 		Title:                "pengoe - New Account",
 		Description:          "New Account for pengoe",
-		SelectedAccountId:    0,
 		Accounts:             accounts,
 		ShowNewAccountButton: false,
 		Token:                token,
@@ -330,31 +317,24 @@ func NewAccount(w http.ResponseWriter, r *http.Request, p map[string]string) err
 	// csrf token is not expired
 
 	// create new account
-	account := &services.Account{
-		Name:        name,
-		Description: description,
-		Currency:    currency,
-	}
 
-	newAccount, err := accountService.New(account)
+	accountId := utils.NewUUID("acc")
+
+	err = accountService.New(accountId, name, description, currency)
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
 	}
 
-	// create new access
-	access := &services.Access{
-		Role:      services.Admin,
-		UserId:    session.UserId,
-		AccountId: newAccount.Id,
-	}
+	// create new access as admin
+	accessId := utils.NewUUID("acs")
 
-	_, err = accessService.New(access)
+	err = accessService.New(accessId, services.Admin, session.UserId, accountId)
 	if err != nil {
 		router.InternalError(w, r, p)
 		return err
 	}
 
-	w.Header().Set("HX-Redirect", fmt.Sprintf("/account/%d", newAccount.Id))
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/account/%s", accountId))
 	return nil
 }

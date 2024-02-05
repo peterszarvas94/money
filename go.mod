@@ -3,7 +3,8 @@ module pengoe
 go 1.21.6
 
 require (
-	github.com/a-h/templ v0.2.476
+	github.com/a-h/templ v0.2.543
+	github.com/google/uuid v1.6.0
 	github.com/libsql/libsql-client-go v0.0.0-20230917132930-48c310b27e7b
 	github.com/peterszarvas94/envloader v1.1.0
 	github.com/samber/slog-multi v1.0.2

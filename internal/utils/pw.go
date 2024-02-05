@@ -15,11 +15,11 @@ func HashPassword(password string) (string, error) {
 }
 
 // CheckPasswordHash checks if the password matches the hash
-func CheckPasswordHash(hash, password string) error {
+func CheckPasswordHash(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }

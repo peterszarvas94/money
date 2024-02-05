@@ -38,7 +38,7 @@ docker-run:
 
 # Push migration
 push:
-	turso db shell $(db) < internal/db/schema.sql
+	turso db shell $(db) < internal/db/schema.sqlite
 
 clear:
-	turso db shell $(db) < internal/db/clear.sql
+	turso db shell $(db) < internal/db/clear.sqlite

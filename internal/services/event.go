@@ -3,12 +3,12 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"pengoe/internal/utils"
 	"time"
 )
 
 type Event struct {
-	Id          int
-	AccountId   int
+	Id          string
 	Name        string
 	Description string
 	Income      int
@@ -16,14 +16,15 @@ type Event struct {
 	DeliveredAt time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	AccountId   string
 }
 
 type EventService interface {
-	New(user *Event) (*Event, error)
-	GetById(id int) (*Event, error)
-	GetByAccountId(accountId int) ([]*Event, error)
-	Update(event *Event) (*Event, error)
-	Delete(id int) error
+	New(id, name, description string, income, reserved int, deliveredAt time.Time, accountId string) error
+	GetById(id string) (*Event, error)
+	GetByAccountId(accountId string) ([]*Event, error)
+	Update(id, name, description string, income, reserved int, deliveredAt time.Time) error
+	Delete(id string) error
 }
 
 type eventService struct {
@@ -37,69 +38,54 @@ func NewEventService(db *sql.DB) EventService {
 /*
 New is a function that adds an event to the database.
 */
-func (s *eventService) New(event *Event) (*Event, error) {
+func (s *eventService) New(id, name, description string, income, reserved int, deliveredAt time.Time, accountId string) error {
 	now := time.Now().UTC()
 
-	mutation, mutationErr := s.db.Exec(
+	_, err := s.db.Exec(
 		`INSERT INTO event (
-			account_id,
+			id,
 			name,
 			description,
 			income,
 			reserved,
 			delivered_at,
 			created_at,
-			updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-		event.AccountId,
-		event.Name,
-		event.Description,
-		event.Income,
-		event.Reserved,
-		event.DeliveredAt,
+			updated_at,
+			account_id
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+		id,
+		name,
+		description,
+		income,
+		reserved,
+		deliveredAt,
 		now,
 		now,
+		accountId,
 	)
 
-	if mutationErr != nil {
-		return nil, mutationErr
+	if err != nil {
+		return err
 	}
 
-	id, idErr := mutation.LastInsertId()
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	newEvent := &Event{
-		Id:          int(id),
-		AccountId:   event.AccountId,
-		Name:        event.Name,
-		Description: event.Description,
-		Income:      event.Income,
-		Reserved:    event.Reserved,
-		DeliveredAt: event.DeliveredAt,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
-
-	return newEvent, nil
+	return nil
 }
 
 /*
 GetById is a function that returns an event by id.
 */
-func (s *eventService) GetById(id int) (*Event, error) {
+func (s *eventService) GetById(id string) (*Event, error) {
 	row := s.db.QueryRow(
 		`SELECT
 			id,
-			account_id,
 			name,
 			description,
 			income,
 			reserved,
 			delivered_at,
 			created_at,
-			updated_at
+			updated_at,
+			account_id
 		FROM event
 		WHERE id = ?;`,
 		id,
@@ -107,21 +93,44 @@ func (s *eventService) GetById(id int) (*Event, error) {
 
 	event := &Event{}
 
+	var deliveredAtStr string
+	var createdAtStr string
+	var updatedAtStr string
+
 	err := row.Scan(
 		&event.Id,
-		&event.AccountId,
 		&event.Name,
 		&event.Description,
 		&event.Income,
 		&event.Reserved,
-		&event.DeliveredAt,
-		&event.CreatedAt,
-		&event.UpdatedAt,
+		&deliveredAtStr,
+		&createdAtStr,
+		&updatedAtStr,
+		&event.AccountId,
 	)
 
 	if err != nil {
 		return nil, err
 	}
+
+	deliveredAt, err := utils.ConvertToTime(deliveredAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	event.DeliveredAt = deliveredAt
+	event.CreatedAt = createdAt
+	event.UpdatedAt = updatedAt
 
 	return event, nil
 }
@@ -129,18 +138,18 @@ func (s *eventService) GetById(id int) (*Event, error) {
 /*
 GetByAccountId is a function that returns all events for an account.
 */
-func (s *eventService) GetByAccountId(accountId int) ([]*Event, error) {
+func (s *eventService) GetByAccountId(accountId string) ([]*Event, error) {
 	rows, err := s.db.Query(
 		`SELECT
 			id,
-			account_id,
 			name,
 			description,
 			income,
 			reserved,
 			delivered_at,
 			created_at,
-			updated_at
+			updated_at,
+			account_id
 		FROM event
 		WHERE account_id = ?;`,
 		accountId,
@@ -155,21 +164,44 @@ func (s *eventService) GetByAccountId(accountId int) ([]*Event, error) {
 	for rows.Next() {
 		event := &Event{}
 
+		var deliveredAtStr string
+		var createdAtStr string
+		var updatedAtStr string
+
 		err := rows.Scan(
 			&event.Id,
-			&event.AccountId,
 			&event.Name,
 			&event.Description,
 			&event.Income,
 			&event.Reserved,
-			&event.DeliveredAt,
-			&event.CreatedAt,
-			&event.UpdatedAt,
+			&deliveredAtStr,
+			&createdAtStr,
+			&updatedAtStr,
+			&event.AccountId,
 		)
 
 		if err != nil {
 			return nil, err
 		}
+
+		deliveredAt, err := utils.ConvertToTime(deliveredAtStr)
+		if err != nil {
+			return nil, err
+		}
+
+		createdAt, err := utils.ConvertToTime(createdAtStr)
+		if err != nil {
+			return nil, err
+		}
+
+		updatedAt, err := utils.ConvertToTime(updatedAtStr)
+		if err != nil {
+			return nil, err
+		}
+
+		event.DeliveredAt = deliveredAt
+		event.CreatedAt = createdAt
+		event.UpdatedAt = updatedAt
 
 		events = append(events, event)
 	}
@@ -180,8 +212,8 @@ func (s *eventService) GetByAccountId(accountId int) ([]*Event, error) {
 /*
 Update is a function that updates an event in the database.
 */
-func (s *eventService) Update(event *Event) (*Event, error) {
-	mutation, mutationErr := s.db.Exec(
+func (s *eventService) Update(id, name, description string, income, reserved int, deliveredAt time.Time) error {
+	mutation, err := s.db.Exec(
 		`UPDATE event
 		SET
 			name = ?,
@@ -191,48 +223,48 @@ func (s *eventService) Update(event *Event) (*Event, error) {
 			delivered_at = ?,
 			updated_at = ?
 		WHERE id = ?;`,
-		event.Name,
-		event.Description,
-		event.Income,
-		event.Reserved,
-		event.DeliveredAt,
+		name,
+		description,
+		income,
+		reserved,
+		deliveredAt,
 		time.Now().UTC(),
-		event.Id,
+		id,
 	)
 
-	if mutationErr != nil {
-		return nil, mutationErr
+	if err != nil {
+		return err
 	}
 
-	rowsAffected, rowsAffectedErr := mutation.RowsAffected()
-	if rowsAffectedErr != nil {
-		return nil, rowsAffectedErr
+	rowsAffected, err := mutation.RowsAffected()
+	if err != nil {
+		return err
 	}
 
 	if rowsAffected == 0 {
-		return nil, errors.New("No rows affected")
+		return errors.New("No rows affected")
 	}
 
-	return event, nil
+	return nil
 }
 
 /*
 Delete is a function that deletes an event from the database.
 */
-func (s *eventService) Delete(id int) error {
-	mutation, mutationErr := s.db.Exec(
+func (s *eventService) Delete(id string) error {
+	mutation, err := s.db.Exec(
 		`DELETE FROM event
 		WHERE id = ?;`,
 		id,
 	)
 
-	if mutationErr != nil {
-		return mutationErr
+	if err != nil {
+		return err
 	}
 
-	rowsAffected, rowsAffectedErr := mutation.RowsAffected()
-	if rowsAffectedErr != nil {
-		return rowsAffectedErr
+	rowsAffected, err := mutation.RowsAffected()
+	if err != nil {
+		return err
 	}
 
 	if rowsAffected == 0 {

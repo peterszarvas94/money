@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"errors"
 	"time"
 )
 
@@ -14,17 +13,17 @@ const (
 )
 
 type Access struct {
-	Id        int
+	Id        string
 	Role      Role
-	UserId    int
-	AccountId int
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	UserId    string
+	AccountId string
 }
 
 type AccessService interface {
-	New(user *Access) (*Access, error)
-	Check(userId int, accountId int) error
+	New(id string, role Role, userId string, accountId string) error
+	Check(userId, accountId string) bool
 }
 
 type accessService struct {
@@ -38,57 +37,53 @@ func NewAccessService(db *sql.DB) AccessService {
 /*
 New is a function that adds an access to the database.
 */
-func (s *accessService) New(access *Access) (*Access, error) {
+func (s *accessService) New(id string, role Role, userId, accountId string) error {
 	now := time.Now().UTC()
 
-	mutation, mutationErr := s.db.Exec(
+	_, err := s.db.Exec(
 		`INSERT INTO access (
-			role, user_id, account_id, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?)`,
-		access.Role, access.UserId, access.AccountId, now, now,
+			id,
+			role,
+			created_at,
+			updated_at,
+			user_id,
+			account_id
+		) VALUES (?, ?, ?, ?, ?, ?)`,
+		id,
+		role,
+		now,
+		now,
+		userId,
+		accountId,
 	)
 
-	if mutationErr != nil {
-		return nil, mutationErr
+	if err != nil {
+		return err
 	}
 
-	id, idErr := mutation.LastInsertId()
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	newAccess := &Access{
-		Id:        int(id),
-		Role:      access.Role,
-		AccountId: access.AccountId,
-		UserId:    access.UserId,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-
-	return newAccess, nil
+	return nil
 }
 
 /*
 Check is a function that checks if a user has access to an account.
 */
-func (s *accessService) Check(userId int, accountId int) error {
-	var count int
-
+func (s *accessService) Check(userId string, accountId string) bool {
 	row := s.db.QueryRow(
 		`SELECT COUNT(*) FROM access WHERE user_id = ? AND account_id = ?`,
 		userId,
 		accountId,
 	)
 
+	var count int
+
 	err := row.Scan(&count)
 	if err != nil {
-		return err
+		return false
 	}
 
 	if count == 0 {
-		return errors.New("No access")
+		return false
 	}
 
-	return nil
+	return true
 }

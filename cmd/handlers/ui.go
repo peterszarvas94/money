@@ -9,7 +9,6 @@ import (
 	"pengoe/internal/router"
 	"pengoe/internal/services"
 	c "pengoe/web/templates/components"
-	"strconv"
 	"time"
 
 	"github.com/a-h/templ"
@@ -33,11 +32,10 @@ func NewEventForm(w http.ResponseWriter, r *http.Request, p map[string]string) e
 
 	form := r.Form
 
-	accountIdStr := html.EscapeString(form.Get("account_id"))
-	accountId, err := strconv.Atoi(accountIdStr)
-	if err != nil {
+	accountId := html.EscapeString(form.Get("account_id"))
+	if accountId == "" {
 		router.BadRequest(w, r, p)
-		return err
+		return errors.New("Account ID is required")
 	}
 
 	accountService := services.NewAccountService(db)
@@ -89,11 +87,10 @@ func EditEventForm(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		return errors.New("Should use db middleware")
 	}
 
-	idStr := p["id"]
-	eventId, err := strconv.Atoi(idStr)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
+	eventId, found := p["id"]
+	if !found {
+		router.NotFound(w, r, p)
+		return errors.New("Path variable \"id\" not found")
 	}
 
 	eventService := services.NewEventService(db)
@@ -126,7 +123,7 @@ func EditEventForm(w http.ResponseWriter, r *http.Request, p map[string]string) 
 
 	popupData := c.PopupProps{
 		CloseUrl: fmt.Sprintf(
-			"/ui/event-card/%d",
+			"/ui/event-card/%s",
 			eventId,
 		),
 		Child: eventForm,
@@ -149,11 +146,10 @@ func EventCard(w http.ResponseWriter, r *http.Request, p map[string]string) erro
 		return errors.New("Should use db middleware")
 	}
 
-	idStr := p["id"]
-	eventId, err := strconv.Atoi(idStr)
-	if err != nil {
-		router.BadRequest(w, r, p)
-		return err
+	eventId, found := p["id"]
+	if !found {
+		router.NotFound(w, r, p)
+		return errors.New("Path variable \"id\" not found")
 	}
 
 	eventService := services.NewEventService(db)

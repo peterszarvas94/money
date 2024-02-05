@@ -2,13 +2,13 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"pengoe/internal/utils"
 	"time"
 )
 
-
 type User struct {
-	Id        int
+	Id        string
 	Username  string
 	Email     string
 	Fistname  string
@@ -19,9 +19,9 @@ type User struct {
 }
 
 type UserServiceInterface interface {
-	Signup(user *User) (*User, error)
-	Signin(usernameOrEmail, password string) (*User, error)
-	GetById(id int) (*User, error)
+	Signup(id, username, email, firstname, lastname, password string) error
+	Signin(usernameOrEmail, password string) (string, error)
+	GetById(id string) (*User, error)
 	GetByUsername(username string) (*User, error)
 	GetByEmail(email string) (*User, error)
 }
@@ -37,52 +37,39 @@ func NewUserService(db *sql.DB) UserServiceInterface {
 /*
 Signup is a function that adds a new user to the database.
 */
-func (s *userService) Signup(user *User) (*User, error) {
-	hashedPassword, hashErr := utils.HashPassword(user.Password)
-	if hashErr != nil {
-		return nil, hashErr
+func (s *userService) Signup(id, username, email, firstname, lastname, password string) error {
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return err
 	}
 
 	now := time.Now().UTC()
 
-	mutation, mutationErr := s.db.Exec(
+	_, err = s.db.Exec(
 		`INSERT INTO user (
+			id,
 			username,
-      email,
-      firstname,
-      lastname,
-      password,
-      created_at,
-      updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		user.Username,
-		user.Email,
-		user.Fistname,
-		user.Lastname,
+			email,
+			firstname,
+			lastname,
+			password,
+			created_at,
+			updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		id,
+		username,
+		email,
+		firstname,
+		lastname,
 		hashedPassword,
 		now,
 		now,
 	)
-	if mutationErr != nil {
-		return nil, mutationErr
+	if err != nil {
+		return err
 	}
 
-	id, idErr := mutation.LastInsertId()
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	newUser := &User{
-		Id:        int(id),
-		Username:  user.Username,
-		Email:     user.Email,
-		Fistname:  user.Fistname,
-		Lastname:  user.Lastname,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-
-	return newUser, nil
+	return nil
 }
 
 /*
@@ -90,145 +77,87 @@ Signin is a function that gets a user from the database by username or email,
 and checks if the passwords match.
 If correct, it returns the user's id.
 */
-func (s *userService) Signin(usernameOrEmail, password string) (*User, error) {
-	query, queryErr := s.db.Query(
+func (s *userService) Signin(usernameOrEmail, password string) (id string, err error) {
+	query, err := s.db.Query(
 		`SELECT
-      id,
-      username,
-      email,
-      firstname,
-      lastname,
-      password as hash,
-      created_at,
-      updated_at
+			id,
+			password
 		FROM user
-    WHERE username = ?
-    OR email = ?`,
+		WHERE username = ?
+		OR email = ?`,
 		usernameOrEmail,
 		usernameOrEmail,
 	)
-	if queryErr != nil {
-		return nil, queryErr
+	if err != nil {
+		return "", err
 	}
 
-	var id int
-	var username string
-	var email string
-	var firstname string
-	var lastname string
 	var hash string
-	var created_at string
-	var updated_at string
 
 	for query.Next() {
-		scanErr := query.Scan(
+		err = query.Scan(
 			&id,
-			&username,
-			&email,
-			&firstname,
-			&lastname,
 			&hash,
-			&created_at,
-			&updated_at,
 		)
-		if scanErr != nil {
-			return nil, scanErr
+		if err != nil {
+			return "", err
 		}
 	}
 
-	if id == 0 {
-		return nil, sql.ErrNoRows
-	}
-
 	match := utils.CheckPasswordHash(hash, password)
-	if match != nil {
-		return nil, sql.ErrNoRows
+	if !match {
+		return "", errors.New("Invalid password")
 	}
 
-	created, createdErr := utils.ConvertToTime(created_at)
-	if createdErr != nil {
-		return nil, createdErr
-	}
-
-	updated, updatedErr := utils.ConvertToTime(updated_at)
-	if updatedErr != nil {
-		return nil, updatedErr
-	}
-
-	user := User{
-		Id:        id,
-		Username:  username,
-		Email:     email,
-		Fistname:  firstname,
-		Lastname:  lastname,
-		CreatedAt: created,
-		UpdatedAt: updated,
-	}
-
-	return &user, nil
+	return id, nil
 }
 
 /*
 GetById is a function that gets a user from the database by username.
 */
-func (s *userService) GetById(id int) (*User, error) {
-	var user User
-
-	query, queryErr := s.db.Query(
+func (s *userService) GetById(id string) (*User, error) {
+	query, err := s.db.Query(
 		"SELECT * FROM user WHERE id = ?",
 		id,
 	)
-	if queryErr != nil {
-		return &user, queryErr
+	if err != nil {
+		return nil, err
 	}
 
-	var username string
-	var email string
-	var firstname string
-	var lastname string
-	var password string
-	var created_at string
-	var updated_at string
+	user := User{}
+
+	var createdAtStr string
+	var updatedAtStr string
 
 	for query.Next() {
-		scanErr := query.Scan(
-			&id,
-			&username,
-			&email,
-			&firstname,
-			&lastname,
-			&password,
-			&created_at,
-			&updated_at,
+		err := query.Scan(
+			&user.Id,
+			&user.Username,
+			&user.Email,
+			&user.Fistname,
+			&user.Lastname,
+			&user.Password,
+			&createdAtStr,
+			&updatedAtStr,
 		)
-		if scanErr != nil {
-			return &user, scanErr
+		if err != nil {
+			return &user, err
 		}
 	}
 
-	if id == 0 {
-		return &user, sql.ErrNoRows
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	created, createdErr := utils.ConvertToTime(created_at)
-	if createdErr != nil {
-		return nil, createdErr
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	updated, updatedErr := utils.ConvertToTime(updated_at)
-	if updatedErr != nil {
-		return nil, updatedErr
-	}
-
-	user = User{
-		Id:        id,
-		Username:  username,
-		Email:     email,
-		Fistname:  firstname,
-		Lastname:  lastname,
-		CreatedAt: created,
-		UpdatedAt: updated,
-	}
+	user.Password = ""
+	user.CreatedAt = createdAt
+	user.UpdatedAt = updatedAt
 
 	return &user, nil
 }
@@ -237,63 +166,48 @@ func (s *userService) GetById(id int) (*User, error) {
 GetByUsername is a function that gets a user from the database by username.
 */
 func (s *userService) GetByUsername(username string) (*User, error) {
-	var user User
-
-	query, queryErr := s.db.Query(
+	query, err := s.db.Query(
 		"SELECT * FROM user WHERE username = ?",
 		username,
 	)
-	if queryErr != nil {
-		return &user, queryErr
+	if err != nil {
+		return nil, err
 	}
 
-	var id int
-	var email string
-	var firstname string
-	var lastname string
-	var password string
-	var created_at string
-	var updated_at string
+	user := User{}
+
+	var createdAtStr string
+	var updatedAtStr string
 
 	for query.Next() {
-		scanErr := query.Scan(
-			&id,
-			&username,
-			&email,
-			&firstname,
-			&lastname,
-			&password,
-			&created_at,
-			&updated_at,
+		err := query.Scan(
+			&user.Id,
+			&user.Username,
+			&user.Email,
+			&user.Fistname,
+			&user.Lastname,
+			&user.Password,
+			&createdAtStr,
+			&updatedAtStr,
 		)
-		if scanErr != nil {
-			return &user, scanErr
+		if err != nil {
+			return &user, err
 		}
 	}
 
-	if id == 0 {
-		return &user, sql.ErrNoRows
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	created, createdErr := utils.ConvertToTime(created_at)
-	if createdErr != nil {
-		return nil, createdErr
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	updated, updatedErr := utils.ConvertToTime(updated_at)
-	if updatedErr != nil {
-		return nil, updatedErr
-	}
-
-	user = User{
-		Id:        id,
-		Username:  username,
-		Email:     email,
-		Fistname:  firstname,
-		Lastname:  lastname,
-		CreatedAt: created,
-		UpdatedAt: updated,
-	}
+	user.Password = ""
+	user.CreatedAt = createdAt
+	user.UpdatedAt = updatedAt
 
 	return &user, nil
 }
@@ -302,60 +216,45 @@ func (s *userService) GetByUsername(username string) (*User, error) {
 GetByEmail is a function that gets a user from the database by email.
 */
 func (s *userService) GetByEmail(email string) (*User, error) {
-	var user User
-
-	query, queryErr := s.db.Query("SELECT * FROM user WHERE email = ?", email)
-	if queryErr != nil {
-		return &user, queryErr
+	query, err := s.db.Query("SELECT * FROM user WHERE email = ?", email)
+	if err != nil {
+		return nil, err
 	}
 
-	var id int
-	var username string
-	var firstname string
-	var lastname string
-	var password string
-	var created_at string
-	var updated_at string
+	user := User{}
+
+	var createdAtStr string
+	var updatedAtStr string
 
 	for query.Next() {
-		scanErr := query.Scan(
-			&id,
-			&username,
-			&email,
-			&firstname,
-			&lastname,
-			&password,
-			&created_at,
-			&updated_at,
+		err := query.Scan(
+			&user.Id,
+			&user.Username,
+			&user.Email,
+			&user.Fistname,
+			&user.Lastname,
+			&user.Password,
+			&createdAtStr,
+			&updatedAtStr,
 		)
-		if scanErr != nil {
-			return &user, scanErr
+		if err != nil {
+			return &user, err
 		}
 	}
 
-	if id == 0 {
-		return &user, sql.ErrNoRows
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	created, createdErr := utils.ConvertToTime(created_at)
-	if createdErr != nil {
-		return nil, createdErr
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
 	}
 
-	updated, updatedErr := utils.ConvertToTime(updated_at)
-	if updatedErr != nil {
-		return nil, updatedErr
-	}
-
-	user = User{
-		Id:        id,
-		Username:  username,
-		Email:     email,
-		Fistname:  firstname,
-		Lastname:  lastname,
-		CreatedAt: created,
-		UpdatedAt: updated,
-	}
+	user.Password = ""
+	user.CreatedAt = createdAt
+	user.UpdatedAt = updatedAt
 
 	return &user, nil
 }

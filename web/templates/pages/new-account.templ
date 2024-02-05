@@ -32,7 +32,7 @@ func getAccountCurrency(account *services.Account) string {
 type NewAccountProps struct {
 	Title                string
 	Description          string
-	SelectedAccountId    int
+	SelectedAccountId    string
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
 	Token                *token.Token
@@ -40,31 +40,31 @@ type NewAccountProps struct {
 
 templ NewAccount(props NewAccountProps) {
 	@layouts.Base(layouts.BaseProps{
-		Title: props.Title,
+		Title:       props.Title,
 		Description: props.Description,
 	}) {
 		<div hx-ext="description" id="page">
 			@components.Csrf(components.CsrfProps{
-        Token: props.Token,
-      })
+				Token: props.Token,
+			})
 			@components.Leftpanel()
 			/* content */
 			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
 				@components.Topbar(components.TopbarProps{
-          SelectedAccountId: props.SelectedAccountId,
-          Accounts: props.Accounts,
-          ShowNewAccountButton: props.ShowNewAccountButton,
-        })
+					SelectedAccountId:    props.SelectedAccountId,
+					Accounts:             props.Accounts,
+					ShowNewAccountButton: props.ShowNewAccountButton,
+				})
 				<div class="flex flex-col items-center justify-center p-10">
 					<h1 class="text-2xl font-semibold">New account</h1>
 				</div>
 				<form
- 					hx-post="/account"
-          hx-include="#csrf"
-          hx-target="#csrf"
-          hx-swap="outerHTML"
-          hx-trigger="submit,new-account"
- 					class="mx-auto flex max-w-2xl flex-col p-4"
+					hx-post="/account"
+					hx-include="#csrf"
+					hx-target="#csrf"
+					hx-swap="outerHTML"
+					hx-trigger="submit,new-account"
+					class="mx-auto flex max-w-2xl flex-col p-4"
 				>
 					/* Name */
 					<div class="flex flex-col pb-6">
@@ -75,13 +75,13 @@ templ NewAccount(props NewAccountProps) {
 							</div>
 						</div>
 						<input
- 							type="text"
- 							id="name"
- 							name="name"
- 							placeholder="Our folk band"
- 							required
- 							minlength="3"
- 							class="rounded-md border border-gray-300 p-2"
+							type="text"
+							id="name"
+							name="name"
+							placeholder="Our folk band"
+							required
+							minlength="3"
+							class="rounded-md border border-gray-300 p-2"
 						/>
 					</div>
 					/* Description */
@@ -92,12 +92,11 @@ templ NewAccount(props NewAccountProps) {
 							</label>
 						</div>
 						<textarea
- 							id="description"
- 							name="description"
- 							placeholder="2023 balance sheet"
- 							class="resize-y rounded-md border border-gray-300 p-2"
-						>
-						</textarea>
+							id="description"
+							name="description"
+							placeholder="2023 balance sheet"
+							class="resize-y rounded-md border border-gray-300 p-2"
+						></textarea>
 					</div>
 					/* Currency */
 					<div class="flex flex-col pb-6">
@@ -108,13 +107,13 @@ templ NewAccount(props NewAccountProps) {
 							</div>
 						</div>
 						<input
- 							type="text"
- 							id="currency"
- 							name="currency"
- 							placeholder="EUR"
- 							minlength="1"
- 							required
- 							class="rounded-md border border-gray-300 p-2"
+							type="text"
+							id="currency"
+							name="currency"
+							placeholder="EUR"
+							minlength="1"
+							required
+							class="rounded-md border border-gray-300 p-2"
 						/>
 					</div>
 					<div class="pb-6 flex gap-2 items-center">
@@ -125,9 +124,9 @@ templ NewAccount(props NewAccountProps) {
 					</div>
 					<div class="flex justify-center">
 						<button
- 							aria-label="Create account"
- 							type="submit"
- 							class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
+							aria-label="Create account"
+							type="submit"
+							class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
 						>
 							Create new account
 						</button>

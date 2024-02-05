@@ -70,8 +70,8 @@ To run commands, you need to have:
 
 ### Misc
 
-- [ ] switch to uuid
-- [ ] add red_id to easch request and log them
+- [x] switch to uuid
+- [ ] add req_id to easch request and log them
 - [ ] loading states
   - [x] for protected pages
   - [ ] for button presses

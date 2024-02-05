@@ -9,29 +9,29 @@ import (
 )
 
 type Router struct {
-	Routes       []*Route
-	StaticPrefix string
-	StaticPath   string
+	routes       []*route
+	staticPrefix string
+	staticPath   string
 }
 
-type Route struct {
-	Pattern     []string
-	Method      string
-	Handler     HandlerFunc
-	Middlewares []MiddlewareFunc
+type route struct {
+	pattern     []string
+	method      string
+	handler     HandlerFunc
+	middlewares []middlewareFunc
 }
 
 type HandlerFunc func(http.ResponseWriter, *http.Request, map[string]string) error
-type MiddlewareFunc func(HandlerFunc) HandlerFunc
+type middlewareFunc func(HandlerFunc) HandlerFunc
 
 /*
 Utility function for creating a new router.
 */
 func NewRouter() *Router {
 	return &Router{
-		Routes:       []*Route{},
-		StaticPrefix: "",
-		StaticPath:   "",
+		routes:       []*route{},
+		staticPrefix: "",
+		staticPath:   "",
 	}
 }
 
@@ -40,60 +40,60 @@ SetStaticPath sets the static path for serving static files.
 Accepts URL prefix and path to the static file directory.
 */
 func (r *Router) SetStaticPath(prefix, path string) {
-	r.StaticPrefix = prefix
-	r.StaticPath = path
+	r.staticPrefix = prefix
+	r.staticPath = path
 }
 
 /*
 Utility function for adding a new route to the router.
 */
-func (r *Router) AddRoute(method string, pattern []string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	for _, route := range r.Routes {
-		if utils.SliceEqual(route.Pattern, pattern) && route.Method == method {
+func (r *Router) addRoute(method string, pattern []string, handler HandlerFunc, middlewares ...middlewareFunc) {
+	for _, route := range r.routes {
+		if utils.SliceEqual(route.pattern, pattern) && route.method == method {
 			return
 		}
 	}
 
-	newRoute := &Route{
+	newRoute := &route{
 		pattern,
 		method,
 		handler,
 		middlewares,
 	}
 
-	r.Routes = append(r.Routes, newRoute)
+	r.routes = append(r.routes, newRoute)
 }
 
 /*
 Adds a new GET route to the router.
 */
-func (r *Router) GET(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) GET(s string, handler HandlerFunc, middlewares ...middlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.AddRoute("GET", pattern, handler, middlewares...)
+	r.addRoute("GET", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new POST route to the router.
 */
-func (r *Router) POST(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) POST(s string, handler HandlerFunc, middlewares ...middlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.AddRoute("POST", pattern, handler, middlewares...)
+	r.addRoute("POST", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new PATCH route to the router.
 */
-func (r *Router) PATCH(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) PATCH(s string, handler HandlerFunc, middlewares ...middlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.AddRoute("PATCH", pattern, handler, middlewares...)
+	r.addRoute("PATCH", pattern, handler, middlewares...)
 }
 
 /*
 Adds a new DELETE route to the router.
 */
-func (r *Router) DELETE(s string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (r *Router) DELETE(s string, handler HandlerFunc, middlewares ...middlewareFunc) {
 	pattern := utils.GetPatternFromStr(s)
-	r.AddRoute("DELETE", pattern, handler, middlewares...)
+	r.addRoute("DELETE", pattern, handler, middlewares...)
 }
 
 /*
@@ -105,11 +105,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	method := req.Method
 
 	// handle static files
-	if r.StaticPrefix != "" && strings.HasPrefix(pathStr, r.StaticPrefix) {
+	if r.staticPrefix != "" && strings.HasPrefix(pathStr, r.staticPrefix) {
 		// w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		fs := http.FileServer(http.Dir(r.StaticPath))
-		staticHandler := http.StripPrefix(r.StaticPrefix, fs)
+		fs := http.FileServer(http.Dir(r.staticPath))
+		staticHandler := http.StripPrefix(r.staticPrefix, fs)
 		staticHandler.ServeHTTP(w, req)
 
 		return
@@ -119,7 +119,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := utils.GetPatternFromStr(pathStr)
 
 	// same length routes
-	sameLengthRoutes := GetSameLengthRoutes(r.Routes, path)
+	sameLengthRoutes := GetSameLengthRoutes(r.routes, path)
 
 	// [account :id] -> [account 1]
 	matchingRoutes, matchErr := MatchRoutes(sameLengthRoutes, path)
@@ -140,30 +140,32 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// [account 1], [account :id] -> {id: 1}
-	variables := utils.GetPathVariables(route.Pattern, path)
+	variables := utils.GetPathVariables(route.pattern, path)
 
-	handler := route.Handler
+	handler := route.handler
 
 	// apply middlewares backwards
-	for i := len(route.Middlewares) - 1; i >= 0; i-- {
-		handler = route.Middlewares[i](handler)
+	for i := len(route.middlewares) - 1; i >= 0; i-- {
+		handler = route.middlewares[i](handler)
 	}
+
+	log := logger.Get()
 
 	// call handler
 	handlerErr := handler(w, req, variables)
 	if handlerErr != nil {
-		logger.Error(handlerErr.Error())
+		log.Error(handlerErr.Error())
 	}
 }
 
 /*
 GetSameLengthRoutes returns routes with the same length as path.
 */
-func GetSameLengthRoutes(routes []*Route, path []string) []*Route {
-	possible := []*Route{}
+func GetSameLengthRoutes(routes []*route, path []string) []*route {
+	possible := []*route{}
 
 	for _, route := range routes {
-		if len(route.Pattern) != len(path) {
+		if len(route.pattern) != len(path) {
 			continue
 		}
 		possible = append(possible, route)
@@ -177,15 +179,15 @@ MatchRoutes returns the route that matches the path.
 Works only for same length routes.
 You must filter routes by getSameLengthRoutes first.
 */
-func MatchRoutes(routes []*Route, path []string) ([]*Route, error) {
+func MatchRoutes(routes []*route, path []string) ([]*route, error) {
 	result := routes
 
 	// get possible routes (should be only one)
 	for i, pathSegment := range path {
-		newPossible := []*Route{}
+		newPossible := []*route{}
 		// check for exact match
 		for _, route := range result {
-			patternSegment := route.Pattern[i]
+			patternSegment := route.pattern[i]
 			if pathSegment == patternSegment {
 				newPossible = append(newPossible, route)
 			}
@@ -193,7 +195,7 @@ func MatchRoutes(routes []*Route, path []string) ([]*Route, error) {
 		// if no exact match, check for variable match
 		if len(newPossible) == 0 {
 			for _, route := range result {
-				patternSegment := route.Pattern[i]
+				patternSegment := route.pattern[i]
 				if strings.HasPrefix(patternSegment, ":") {
 					newPossible = append(newPossible, route)
 				}
@@ -212,9 +214,9 @@ func MatchRoutes(routes []*Route, path []string) ([]*Route, error) {
 /*
 MatchMethod returns the route that matches the method.
 */
-func MatchMethod(routes []*Route, method string) (*Route, error) {
+func MatchMethod(routes []*route, method string) (*route, error) {
 	for _, route := range routes {
-		if route.Method == method {
+		if route.method == method {
 			return route, nil
 		}
 	}

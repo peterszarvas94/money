@@ -19,7 +19,7 @@ import (
 type DashboardProps struct {
 	Title                string
 	Description          string
-	SelectedAccountId    int
+	SelectedAccountId    string
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
 }

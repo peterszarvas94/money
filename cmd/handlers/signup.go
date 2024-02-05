@@ -7,8 +7,10 @@ import (
 	"html"
 	"net/http"
 	"net/mail"
+	"pengoe/internal/logger"
 	"pengoe/internal/router"
 	"pengoe/internal/services"
+	"pengoe/internal/utils"
 	"pengoe/web/templates/pages"
 
 	"github.com/a-h/templ"
@@ -66,54 +68,52 @@ func Signup(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		return err
 	}
 
-  form := r.Form
+	form := r.Form
 
-  username := html.EscapeString(form.Get("username"))
-  if username == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Username is required")
-  }
+	username := html.EscapeString(form.Get("username"))
+	if username == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Username is required")
+	}
 
-  email := html.EscapeString(form.Get("email"))
-  if email == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Email is required")
-  }
+	email := html.EscapeString(form.Get("email"))
+	if email == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Email is required")
+	}
 
-  firstname := html.EscapeString(form.Get("firstname"))
-  if firstname == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Firstname is required")
-  }
+	firstname := html.EscapeString(form.Get("firstname"))
+	if firstname == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Firstname is required")
+	}
 
-  lastname := html.EscapeString(form.Get("lastname"))
-  if lastname == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Lastname is required")
-  }
+	lastname := html.EscapeString(form.Get("lastname"))
+	if lastname == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Lastname is required")
+	}
 
-  password := html.EscapeString(form.Get("password"))
-  if password == "" {
-    router.BadRequest(w, r, p)
-    return errors.New("Password is required")
-  }
+	password := html.EscapeString(form.Get("password"))
+	if password == "" {
+		router.BadRequest(w, r, p)
+		return errors.New("Password is required")
+	}
 
 	// create user service
 	userService := services.NewUserService(db)
 
 	// add user
-	newUser := &services.User{
-		Username: username,
-		Email:    email,
-		Fistname: firstname,
-		Lastname: lastname,
-		Password: password,
-	}
+	id := utils.NewUUID("usr")
 
-	_, err = userService.Signup(newUser)
+	err = userService.Signup(id, username, email, firstname, lastname, password)
 
 	// unsuccessful signup, render signup page with error message
 	if err != nil {
+		log := logger.Get()
+
+		log.Error(err.Error())
+
 		_, parseErr := mail.ParseAddress(email)
 		_, usernameQueryErr := userService.GetByUsername(username)
 		_, emailQueryErr := userService.GetByEmail(email)
@@ -166,7 +166,7 @@ func Signup(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		handler := templ.Handler(component)
 		handler.ServeHTTP(w, r)
 
-		return nil
+		return err
 	}
 
 	// successful signup, redirect to signin page

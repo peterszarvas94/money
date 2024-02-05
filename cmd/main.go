@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	flag.StringVar(&logger.LogLevelStr, "log", "INFO", "-log DEBUG|INFO|WARNING|ERROR")
+	flag.StringVar(&logger.LogLevelFlag, "log", "INFO", "-log DEBUG|INFO|WARNING|ERROR")
 	flag.Parse()
 
 	// create router
@@ -57,10 +57,14 @@ func main() {
 
 	port := ":8080"
 
-	logger.Info("Server started on port " + port)
+	log := logger.Get()
+
+	if config.Env.ENVIRONMENT == "production" {
+		log.Info("Server started on port " + port)
+	}
 
 	err := http.ListenAndServe(port, r)
 	if err != nil && config.Env.ENVIRONMENT == "production" {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 }

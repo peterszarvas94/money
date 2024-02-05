@@ -1,12 +1,11 @@
-package tests
+package utils
 
 import (
-	"pengoe/internal/utils"
 	"testing"
 )
 
 func TestGenerateCSRFToken(t *testing.T) {
-	token, err := utils.GenerateCSRFToken()
+	token, err := GenerateCSRFToken()
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}

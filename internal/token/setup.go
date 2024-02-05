@@ -8,33 +8,32 @@ import (
 	"pengoe/internal/logger"
 	"pengoe/internal/services"
 	"pengoe/internal/utils"
-	"strconv"
 	"sync"
 	"time"
 )
 
 type Token struct {
-	SessionID int
+	SessionID string
 	Value     string
 	Valid     time.Time
 }
 
 type tokenManagerInterface interface {
-	Create(sessionID int) (*Token, error)
-	Get(sessionID int) (*Token, error)
-	Delete(sessionID int) error
-	RenewToken(sessionID int) (*Token, error)
-	VerifyOrRenewCSRFToken(sessionId int, tokenFromRequest string) (*Token, error)
+	Create(sessionId string) (*Token, error)
+	Get(sessionId string) (*Token, error)
+	Delete(sessionId string) error
+	RenewToken(sessionId string) (*Token, error)
+	VerifyOrRenewCSRFToken(sessionId string, tokenFromRequest string) (*Token, error)
 }
 
 type TokenManager struct {
-	tokens map[int]Token // sessionID -> token
+	tokens map[string]Token // sessionID -> token
 	mutex  sync.Mutex
 }
 
 func newManager() tokenManagerInterface {
 	return &TokenManager{
-		tokens: make(map[int]Token),
+		tokens: make(map[string]Token),
 		mutex:  sync.Mutex{},
 	}
 }
@@ -45,7 +44,7 @@ var Manager tokenManagerInterface = newManager()
 Create creates a new token in memory. Server session and
 tokens are linked by the sessionID, they should be in sync.
 */
-func (m *TokenManager) Create(sessionID int) (*Token, error) {
+func (m *TokenManager) Create(sessionID string) (*Token, error) {
 	csrfToken, tokenErr := utils.GenerateCSRFToken()
 	if tokenErr != nil {
 		return &Token{}, tokenErr
@@ -73,16 +72,16 @@ func (m *TokenManager) Create(sessionID int) (*Token, error) {
 /*
 Get returns the token with the given sessionID.
 */
-func (m *TokenManager) Get(sessionID int) (*Token, error) {
+func (m *TokenManager) Get(sessionId string) (*Token, error) {
 	locked := m.mutex.TryLock()
 	if !locked {
 		return &Token{}, errors.New("Could not lock token manager")
 	}
 	defer m.mutex.Unlock()
 
-	token, ok := m.tokens[sessionID]
+	token, ok := m.tokens[sessionId]
 	if !ok {
-		return &Token{}, errors.New(fmt.Sprintf("Session %d not found", sessionID))
+		return &Token{}, errors.New(fmt.Sprintf("Session %s not found", sessionId))
 	}
 
 	return &token, nil
@@ -91,14 +90,14 @@ func (m *TokenManager) Get(sessionID int) (*Token, error) {
 /*
 Delete deletes the token with the given sessionID.
 */
-func (m *TokenManager) Delete(sessionID int) error {
+func (m *TokenManager) Delete(sessionId string) error {
 	locked := m.mutex.TryLock()
 	if !locked {
 		return errors.New("Could not lock token manager")
 	}
 	defer m.mutex.Unlock()
 
-	delete(m.tokens, sessionID)
+	delete(m.tokens, sessionId)
 
 	return nil
 }
@@ -106,8 +105,8 @@ func (m *TokenManager) Delete(sessionID int) error {
 /*
 RenewCSRFToken generates a new token for the given sessionID.
 */
-func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
-	token, tokenErr := m.Get(sessionID)
+func (m *TokenManager) RenewToken(sessionId string) (*Token, error) {
+	token, tokenErr := m.Get(sessionId)
 	if tokenErr != nil {
 		return nil, tokenErr
 	}
@@ -124,7 +123,7 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 	}
 
 	newCsrfToken := &Token{
-		SessionID: sessionID,
+		SessionID: sessionId,
 		Value:     newToken,
 		// TODO: change to 10 minutes
 		Valid: time.Now().Add(10 * time.Second).UTC(),
@@ -132,7 +131,7 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 
 	token = newCsrfToken
 
-	m.tokens[sessionID] = *token
+	m.tokens[sessionId] = *token
 
 	return newCsrfToken, nil
 }
@@ -140,7 +139,7 @@ func (m *TokenManager) RenewToken(sessionID int) (*Token, error) {
 /*
 GetOrRenewCSRFToken returns a new token or nothing if the token is valid.
 */
-func (m *TokenManager) VerifyOrRenewCSRFToken(sessionId int, tokenFromRequest string) (*Token, error) {
+func (m *TokenManager) VerifyOrRenewCSRFToken(sessionId string, tokenFromRequest string) (*Token, error) {
 	// check if there is a server session
 	token, tokenErr := m.Get(sessionId)
 	if tokenErr != nil {
@@ -175,12 +174,7 @@ func GetSessionFromCookie(r *http.Request) (*Token, error) {
 		return nil, cookieErr
 	}
 
-	sessionId, idErr := strconv.Atoi(cookie.Value)
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	token, tokenErr := Manager.Get(sessionId)
+	token, tokenErr := Manager.Get(cookie.Value)
 	if tokenErr != nil {
 		return nil, tokenErr
 	}
@@ -189,26 +183,28 @@ func GetSessionFromCookie(r *http.Request) (*Token, error) {
 }
 
 func init() {
+	log := logger.Get()
+
 	// connect to the database
 	dbManager := db.NewDBManager()
 	db, dbErr := dbManager.GetDB()
 	if dbErr != nil {
-		logger.Fatal(dbErr.Error())
+		log.Fatal(dbErr.Error())
 	}
 	defer db.Close()
 	sessionService := services.NewSessionService(db)
 
 	// get all active sessions from the database
-	sessions, sessionsErr := sessionService.GetActiveSessions()
-	if sessionsErr != nil {
-		logger.Fatal(sessionsErr.Error())
+	sessions, err := sessionService.GetActives()
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
 	// create a new token for each active session
 	for _, session := range sessions {
-		_, createErr := Manager.Create(session.Id)
-		if createErr != nil {
-			logger.Fatal(createErr.Error())
+		_, err = Manager.Create(session.Id)
+		if err != nil {
+			log.Fatal(err.Error())
 		}
 	}
 }

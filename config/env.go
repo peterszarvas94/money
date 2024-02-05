@@ -2,9 +2,7 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"pengoe/internal/logger"
-	"pengoe/internal/utils"
 
 	"github.com/peterszarvas94/envloader"
 )
@@ -17,14 +15,9 @@ type appConfig struct {
 }
 
 func newAppConfig() *appConfig {
-	rootDir, err := utils.GetRootDir()
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
+	log := logger.Get()
 
-	envFilePath := filepath.Join(rootDir, ".env")
-
-	file, err := os.Open(envFilePath)
+	file, err := os.Open(".env")
 	if err == nil {
 		envloader.File(file)
 	}
@@ -33,7 +26,7 @@ func newAppConfig() *appConfig {
 
 	err = envloader.Load(&config)
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	return &config

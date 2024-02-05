@@ -18,7 +18,7 @@ import (
 
 type EventCardProps struct {
 	Currency    string
-	EventId     int
+	EventId     string
 	Name        string
 	Description string
 	Income      int
@@ -104,7 +104,7 @@ func EventCard(props EventCardProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/ui/edit-event-form/%d", props.EventId)))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/ui/edit-event-form/%s", props.EventId)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

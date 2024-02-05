@@ -10,35 +10,36 @@ import (
 // TODO maybe better structure for account id not this mess
 type EventFormProps struct {
 	New         bool
-	EventId     int
+	EventId     string
 	Currency    string
 	Name        string
 	Description string
 	Income      int
 	Reserved    int
 	DeliveredAt time.Time
-  HxTarget    string
+	HxTarget    string
 }
 
 templ EventForm(props EventFormProps ) {
 	if props.New {
 		<form
- 			hx-post="/event"
- 			class="m-0 flex w-full flex-col"
- 			hx-trigger="submit,new-event"
- 			hx-target={ props.HxTarget }
- 			hx-swap="outerHTML"
+			hx-post="/event"
+			class="m-0 flex w-full flex-col"
+			hx-trigger="submit,new-event"
+			hx-target={ props.HxTarget }
+			hx-swap="outerHTML"
 			hx-include="#csrf,#account_id"
 		>
 			@EventFormContent(props)
 		</form>
 	} else {
 		<form
- 			hx-patch={ fmt.Sprintf("/event/%d", props.EventId) }
- 			hx-trigger={ fmt.Sprintf("submit,edit-event-%d", props.EventId) }
- 			hx-target={ props.HxTarget }
- 			hx-swap="outerHTML"
- 			class="m-0 flex w-full flex-col"
+			hx-patch={ fmt.Sprintf("/event/%s", props.EventId) }
+			hx-trigger={ fmt.Sprintf("submit,edit-event-%s",
+	props.EventId) }
+			hx-target={ props.HxTarget }
+			hx-swap="outerHTML"
+			class="m-0 flex w-full flex-col"
 			hx-include="#csrf,#account_id"
 		>
 			@EventFormContent(props)
@@ -58,14 +59,14 @@ templ EventFormContent(props EventFormProps) {
 					</div>
 				</div>
 				<input
- 					type="text"
- 					id="name"
- 					name="name"
- 					value={ props.Name }
- 					placeholder="Cool Festival"
- 					required
- 					minlength="3"
- 					class="w-full min-w-0 rounded-md border border-gray-300 p-2"
+					type="text"
+					id="name"
+					name="name"
+					value={ props.Name }
+					placeholder="Cool Festival"
+					required
+					minlength="3"
+					class="w-full min-w-0 rounded-md border border-gray-300 p-2"
 				/>
 			</div>
 			/* DeliveredAt */
@@ -77,12 +78,12 @@ templ EventFormContent(props EventFormProps) {
 					</div>
 				</div>
 				<input
- 					type="date"
- 					id="delivered_at"
- 					name="delivered_at"
- 					value={ props.DeliveredAt.Format("2006-01-02") }
- 					required
- 					class="rounded-md border border-gray-300 p-2"
+					type="date"
+					id="delivered_at"
+					name="delivered_at"
+					value={ props.DeliveredAt.Format("2006-01-02") }
+					required
+					class="rounded-md border border-gray-300 p-2"
 				/>
 			</div>
 			/* Description */
@@ -91,10 +92,10 @@ templ EventFormContent(props EventFormProps) {
 					<label for="name" class="font-semibold">Event description</label>
 				</div>
 				<textarea
- 					id="description"
- 					name="description"
- 					placeholder="2023 balance sheet"
- 					class="resize-y rounded-md border border-gray-300 p-2"
+					id="description"
+					name="description"
+					placeholder="2023 balance sheet"
+					class="resize-y rounded-md border border-gray-300 p-2"
 				>
 					{ props.Description }
 				</textarea>
@@ -110,14 +111,14 @@ templ EventFormContent(props EventFormProps) {
 					</div>
 				</div>
 				<input
- 					type="number"
- 					min="0"
- 					step="1"
- 					id="income"
- 					name="income"
- 					value={ strconv.Itoa(props.Income) }
- 					required
- 					class="rounded-md border border-gray-300 p-2"
+					type="number"
+					min="0"
+					step="1"
+					id="income"
+					name="income"
+					value={ strconv.Itoa(props.Income) }
+					required
+					class="rounded-md border border-gray-300 p-2"
 				/>
 			</div>
 			/* Reserved */
@@ -126,13 +127,13 @@ templ EventFormContent(props EventFormProps) {
 					<label for="name" class="font-semibold">Reserved ({ props.Currency }) </label>
 				</div>
 				<input
- 					type="number"
- 					min="0"
- 					step="1"
- 					id="reserved"
- 					name="reserved"
- 					value={ strconv.Itoa(props.Reserved) }
- 					class="rounded-md border border-gray-300 p-2"
+					type="number"
+					min="0"
+					step="1"
+					id="reserved"
+					name="reserved"
+					value={ strconv.Itoa(props.Reserved) }
+					class="rounded-md border border-gray-300 p-2"
 				/>
 			</div>
 		</div>
@@ -140,8 +141,8 @@ templ EventFormContent(props EventFormProps) {
 	/* Submit */
 	<div class="flex justify-center">
 		<button
- 			type="submit"
- 			class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
+			type="submit"
+			class="bg-primary text-text hover:bg-accent hover:text-secondary focus:bg-accent focus:text-secondary w-fit rounded-md p-2 font-semibold"
 		>
 			if props.New {
 				Create new event

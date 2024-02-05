@@ -42,7 +42,7 @@ func getAccountCurrency(account *services.Account) string {
 type NewAccountProps struct {
 	Title                string
 	Description          string
-	SelectedAccountId    int
+	SelectedAccountId    string
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
 	Token                *token.Token

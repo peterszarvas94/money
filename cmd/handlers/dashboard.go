@@ -37,7 +37,6 @@ func DashboardPage(w http.ResponseWriter, r *http.Request, p map[string]string) 
 		Title:                "pengoe - Dashboard",
 		Description:          "Dashboard for pengoe",
 		Accounts:             accounts,
-		SelectedAccountId:    0,
 		ShowNewAccountButton: true,
 	}
 

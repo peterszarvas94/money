@@ -1,7 +1,6 @@
-package tests
+package utils
 
 import (
-	"pengoe/internal/utils"
 	"testing"
 	"time"
 )
@@ -10,7 +9,7 @@ func TestConvertToTime(t *testing.T) {
 	expected := time.Date(2026, 1, 2, 15, 4, 5, 0, time.UTC)
 	expectedStr := expected.Format(time.RFC3339Nano)
 
-	converted, err := utils.ConvertToTime(expectedStr)
+	converted, err := ConvertToTime(expectedStr)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}

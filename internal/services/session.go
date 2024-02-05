@@ -3,25 +3,25 @@ package services
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
+	"pengoe/internal/utils"
 	"time"
 )
 
 type Session struct {
-	Id         int
-	UserId     int
+	Id         string
 	ValidUntil time.Time
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+	UserId     string
 }
 
 type SessionServiceInterface interface {
-	New(user *User) (*Session, error)
-	GetActiveSessions() ([]*Session, error)
-	GetById(sessionId int) (*Session, error)
-	GetByUserID(userId int) (*Session, error)
-	Delete(sessionId int) error
-	CheckCookie(r *http.Request) (*Session, error)
+	New(id, userId string) (*Session, error)
+	GetActives() ([]*Session, error)
+	GetById(id string) (*Session, error)
+	GetByUserID(usedId string) (*Session, error)
+	Delete(id string) error
+	CheckFromCookie(*http.Request) (*Session, error)
 }
 
 type sessionService struct {
@@ -35,65 +35,36 @@ func NewSessionService(db *sql.DB) SessionServiceInterface {
 /*
 New creates a new session for the given user in the database.
 */
-func (s *sessionService) New(user *User) (*Session, error) {
+func (s *sessionService) New(id, userId string) (*Session, error) {
 	now := time.Now().UTC()
 
 	validUntil := now.Add(time.Hour * 24 * 7)
 
-	existingSession, existingSessionErr := s.GetByUserID(user.Id)
-	if existingSessionErr == nil && existingSession != nil {
-		// session already exists, update it
-		_, mutationErr := s.db.Exec(
-			`UPDATE session
-      SET valid_until = ?
-      WHERE id = ?`,
-			validUntil,
-			existingSession.Id,
-		)
-
-		if mutationErr != nil {
-			return nil, mutationErr
-		}
-
-		newSession := &Session{
-			Id:         existingSession.Id,
-			UserId:     user.Id,
-			ValidUntil: validUntil,
-			UpdatedAt:  now,
-			CreatedAt:  existingSession.CreatedAt,
-		}
-
-		return newSession, nil
-	}
-
-	mutation, mutationErr := s.db.Exec(
+	_, err := s.db.Exec(
 		`INSERT INTO session (
-      user_id,
-      valid_until,
-      created_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?)`,
-		user.Id,
+			id,
+			valid_until,
+			created_at,
+			updated_at,
+			user_id
+		) VALUES (?, ?, ?, ?, ?)`,
+		id,
 		validUntil,
 		now,
 		now,
+		userId,
 	)
 
-	if mutationErr != nil {
-		return nil, mutationErr
-	}
-
-	id, idErr := mutation.LastInsertId()
-	if idErr != nil {
-		return nil, idErr
+	if err != nil {
+		return nil, err
 	}
 
 	newSession := &Session{
-		Id:         int(id),
-		UserId:     user.Id,
+		Id:         id,
 		ValidUntil: validUntil,
 		CreatedAt:  now,
 		UpdatedAt:  now,
+		UserId:     userId,
 	}
 
 	return newSession, nil
@@ -102,40 +73,61 @@ func (s *sessionService) New(user *User) (*Session, error) {
 /*
 GetActiveSessions returns all active sessions from the database.
 */
-func (s *sessionService) GetActiveSessions() ([]*Session, error) {
-	rows, queryErr := s.db.Query(
+func (s *sessionService) GetActives() ([]*Session, error) {
+	rows, err := s.db.Query(
 		`SELECT
       id,
-      user_id,
       valid_until,
       created_at,
-      updated_at
+      updated_at,
+			user_id
     FROM session
     WHERE valid_until > ?`,
 		time.Now().UTC(),
 	)
 
-	if queryErr != nil {
-		return nil, queryErr
+	if err != nil {
+		return nil, err
 	}
 
 	sessions := []*Session{}
 
 	for rows.Next() {
-
 		session := &Session{}
+		var validUntilStr string
+		var createdAtStr string
+		var updatedAtStr string
 
-		scanErr := rows.Scan(
+		err := rows.Scan(
 			&session.Id,
+			&validUntilStr,
+			&createdAtStr,
+			&updatedAtStr,
 			&session.UserId,
-			&session.ValidUntil,
-			&session.CreatedAt,
-			&session.UpdatedAt,
 		)
 
-		if scanErr != nil {
-			return nil, scanErr
+		if err != nil {
+			return nil, err
 		}
+
+		validUntil, err := utils.ConvertToTime(validUntilStr)
+		if err != nil {
+			return nil, err
+		}
+
+		createdAt, err := utils.ConvertToTime(createdAtStr)
+		if err != nil {
+			return nil, err
+		}
+
+		updatedAt, err := utils.ConvertToTime(updatedAtStr)
+		if err != nil {
+			return nil, err
+		}
+
+		session.ValidUntil = validUntil
+		session.CreatedAt = createdAt
+		session.UpdatedAt = updatedAt
 
 		sessions = append(sessions, session)
 	}
@@ -146,32 +138,55 @@ func (s *sessionService) GetActiveSessions() ([]*Session, error) {
 /*
 GetById returns the session with the given sessionID from the database.
 */
-func (s *sessionService) GetById(sessionId int) (*Session, error) {
+func (s *sessionService) GetById(id string) (*Session, error) {
 	row := s.db.QueryRow(
 		`SELECT
-      id,
-      user_id,
-      valid_until,
-      created_at,
-      updated_at
-    FROM session
-    WHERE id = ?`,
-		sessionId,
+			id,
+			valid_until,
+			created_at,
+			updated_at,
+			user_id
+		FROM session
+		WHERE id = ?`,
+		id,
 	)
 
 	session := &Session{}
 
-	scanErr := row.Scan(
+	var validUntilStr string
+	var createdAtStr string
+	var updatedAtStr string
+
+	err := row.Scan(
 		&session.Id,
+		&validUntilStr,
+		&createdAtStr,
+		&updatedAtStr,
 		&session.UserId,
-		&session.ValidUntil,
-		&session.CreatedAt,
-		&session.UpdatedAt,
 	)
 
-	if scanErr != nil {
-		return nil, scanErr
+	if err != nil {
+		return nil, err
 	}
+
+	validUntil, err := utils.ConvertToTime(validUntilStr)
+	if err != nil {
+		return nil, err
+	}
+
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	session.ValidUntil = validUntil
+	session.CreatedAt = createdAt
+	session.UpdatedAt = updatedAt
 
 	return session, nil
 }
@@ -179,32 +194,55 @@ func (s *sessionService) GetById(sessionId int) (*Session, error) {
 /*
 GetByUserID returns the session with the given userID from the database.
 */
-func (s *sessionService) GetByUserID(userId int) (*Session, error) {
+func (s *sessionService) GetByUserID(userId string) (*Session, error) {
 	row := s.db.QueryRow(
 		`SELECT
-      id,
-      user_id,
-      valid_until,
-      created_at,
-      updated_at
-    FROM session
-    WHERE user_id = ?`,
+			id,
+			valid_until,
+			created_at,
+			updated_at,
+			user_id
+		FROM session
+		WHERE user_id = ?`,
 		userId,
 	)
 
 	session := &Session{}
 
-	scanErr := row.Scan(
+	var validUntilStr string
+	var createdAtStr string
+	var updatedAtStr string
+
+	err := row.Scan(
 		&session.Id,
+		&validUntilStr,
+		&createdAtStr,
+		&updatedAtStr,
 		&session.UserId,
-		&session.ValidUntil,
-		&session.CreatedAt,
-		&session.UpdatedAt,
 	)
 
-	if scanErr != nil {
-		return nil, scanErr
+	if err != nil {
+		return nil, err
 	}
+
+	validUntil, err := utils.ConvertToTime(validUntilStr)
+	if err != nil {
+		return nil, err
+	}
+
+	createdAt, err := utils.ConvertToTime(createdAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := utils.ConvertToTime(updatedAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	session.ValidUntil = validUntil
+	session.CreatedAt = createdAt
+	session.UpdatedAt = updatedAt
 
 	return session, nil
 }
@@ -212,15 +250,15 @@ func (s *sessionService) GetByUserID(userId int) (*Session, error) {
 /*
 Delete deletes the session with the given sessionID from the database.
 */
-func (s *sessionService) Delete(sessionId int) error {
-	_, mutationErr := s.db.Exec(
+func (s *sessionService) Delete(id string) error {
+	_, err := s.db.Exec(
 		`DELETE FROM session
-    WHERE id = ?`,
-		sessionId,
+		WHERE id = ?`,
+		id,
 	)
 
-	if mutationErr != nil {
-		return mutationErr
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -229,20 +267,15 @@ func (s *sessionService) Delete(sessionId int) error {
 /*
 CheckCookie returns the session from the cookie in the request.
 */
-func (s *sessionService) CheckCookie(r *http.Request) (*Session, error) {
-	cookie, cookieErr := r.Cookie("session")
-	if cookieErr != nil {
-		return nil, cookieErr
+func (s *sessionService) CheckFromCookie(r *http.Request) (*Session, error) {
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		return nil, err
 	}
 
-	sessionId, idErr := strconv.Atoi(cookie.Value)
-	if idErr != nil {
-		return nil, idErr
-	}
-
-	session, sessionErr := s.GetById(sessionId)
-	if sessionErr != nil {
-		return nil, sessionErr
+	session, err := s.GetById(cookie.Value)
+	if err != nil {
+		return nil, err
 	}
 
 	return session, nil

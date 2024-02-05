@@ -16,15 +16,17 @@ import (
 	"pengoe/internal/token"
 	"pengoe/web/templates/components"
 	"pengoe/web/templates/layouts"
-	"strconv"
 )
 
 type AccountProps struct {
 	Title                string
-	Description          string
+	PageDescription      string
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
-	Account              *services.Account
+	Id                   string
+	Name                 string
+	Description          string
+	Currency             string
 	Token                *token.Token
 	Events               []*services.Event
 }
@@ -56,19 +58,6 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!--")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var3 := ` content `
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("-->")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			templ_7745c5c3_Err = components.Csrf(components.CsrfProps{
 				Token: props.Token,
 			}).Render(ctx, templ_7745c5c3_Buffer)
@@ -79,7 +68,7 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(strconv.Itoa(props.Account.Id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.Id))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,7 +77,7 @@ func Account(props AccountProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.Topbar(components.TopbarProps{
-				SelectedAccountId:    props.Account.Id,
+				SelectedAccountId:    props.Id,
 				Accounts:             props.Accounts,
 				ShowNewAccountButton: props.ShowNewAccountButton,
 			}).Render(ctx, templ_7745c5c3_Buffer)
@@ -99,8 +88,8 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string = props.Account.Name
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			var templ_7745c5c3_Var3 string = props.Name
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -108,8 +97,8 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string = props.Account.Description
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			var templ_7745c5c3_Var4 string = props.Description
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -117,7 +106,7 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/account/%d", props.Account.Id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/account/%s", props.Id)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,8 +114,8 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var6 := `Delete`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
+			templ_7745c5c3_Var5 := `Delete`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -140,12 +129,13 @@ func Account(props AccountProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = components.EventCard(components.EventCardProps{
-					Currency:    props.Account.Currency,
+					Currency:    props.Currency,
 					EventId:     event.Id,
 					Name:        event.Name,
 					Description: event.Description,
 					Income:      event.Income,
 					Reserved:    event.Reserved,
+					DeliveredAt: event.DeliveredAt,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -163,16 +153,7 @@ func Account(props AccountProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li></ul></main><!--")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var7 := ` end of content `
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li></ul></main></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -183,7 +164,7 @@ func Account(props AccountProps) templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Base(layouts.BaseProps{
 			Title:       props.Title,
-			Description: props.Description,
+			Description: props.PageDescription,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

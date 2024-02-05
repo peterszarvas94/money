@@ -1,55 +1,56 @@
 package pages
 
 import (
+	"fmt"
 	"pengoe/web/templates/layouts"
 	"pengoe/web/templates/components"
 	"pengoe/internal/services"
 	"pengoe/internal/token"
-	"fmt"
-	"strconv"
 )
 
 type AccountProps struct {
 	Title                string
-	Description          string
+	PageDescription      string
 	Accounts             []*services.Account
 	ShowNewAccountButton bool
-	Account              *services.Account
+	Id                   string
+	Name                 string
+	Description          string
+	Currency             string
 	Token                *token.Token
 	Events               []*services.Event
 }
 
 templ Account(props AccountProps) {
 	@layouts.Base(layouts.BaseProps{
-		Title: props.Title,
-		Description: props.Description,
+		Title:       props.Title,
+		Description: props.PageDescription,
 	}) {
 		<div hx-ext="description" id="page">
 			@components.Leftpanel()
-			<!-- content -->
-      @components.Csrf(components.CsrfProps{
-        Token: props.Token,
-      })
-      <input type="hidden" id="account_id" name="account_id" value={ strconv.Itoa(props.Account.Id) } />
+			@components.Csrf(components.CsrfProps{
+				Token: props.Token,
+			})
+			<input type="hidden" id="account_id" name="account_id" value={ props.Id }/>
 			<main class="absolute z-0 min-h-screen w-full bg-white text-black">
 				@components.Topbar(components.TopbarProps{
-          SelectedAccountId: props.Account.Id,
-          Accounts: props.Accounts,
-          ShowNewAccountButton: props.ShowNewAccountButton,
-        })
+					SelectedAccountId:    props.Id,
+					Accounts:             props.Accounts,
+					ShowNewAccountButton: props.ShowNewAccountButton,
+				})
 				<div class="flex flex-col items-center justify-center p-10">
-					<h1 class="text-2xl font-semibold">{ props.Account.Name }</h1>
-					<p>{ props.Account.Description }</p>
+					<h1 class="text-2xl font-semibold">{ props.Name }</h1>
+					<p>{ props.Description }</p>
 				</div>
 				<div class="flex justify-center p-4">
 					<button
- 						hx-delete={ fmt.Sprintf("/account/%d", props.Account.Id) }
- 						hx-swap="outerHTML"
-            hx-target="#csrf"
-            hx-include="#csrf"
-            hx-on:click="showConfirm(event, 'Are you sure you want to delete this account?')"
-            hx-trigger="confirmed,delete-account"
- 						class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+						hx-delete={ fmt.Sprintf("/account/%s", props.Id) }
+						hx-swap="outerHTML"
+						hx-target="#csrf"
+						hx-include="#csrf"
+						hx-on:click="showConfirm(event, 'Are you sure you want to delete this account?')"
+						hx-trigger="confirmed,delete-account"
+						class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
 					>
 						Delete
 					</button>
@@ -58,13 +59,14 @@ templ Account(props AccountProps) {
 					for _, event := range props.Events {
 						<li class="flex justify-center">
 							@components.EventCard(components.EventCardProps{
-                Currency: props.Account.Currency,
-                EventId: event.Id,
-                Name: event.Name,
-                Description: event.Description,
-                Income: event.Income,
-                Reserved: event.Reserved,
-              })
+								Currency:    props.Currency,
+								EventId:     event.Id,
+								Name:        event.Name,
+								Description: event.Description,
+								Income:      event.Income,
+								Reserved:    event.Reserved,
+								DeliveredAt: event.DeliveredAt,
+							})
 						</li>
 					}
 					<li class="flex justify-center">
@@ -72,7 +74,6 @@ templ Account(props AccountProps) {
 					</li>
 				</ul>
 			</main>
-			<!-- end of content -->
 		</div>
 	}
 }
