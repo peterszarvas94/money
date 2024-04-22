@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	h "pengoe/cmd/handlers"
 	m "pengoe/cmd/middlewares"
@@ -60,6 +61,7 @@ func main() {
 	log := logger.Get()
 
 	if config.Env.ENVIRONMENT == "production" {
+		fmt.Println("Server started on port " + port);
 		log.Info("Server started on port " + port)
 	}
 
