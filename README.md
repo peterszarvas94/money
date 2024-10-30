@@ -1,3 +1,7 @@
+# Archived
+
+archived, maybe developed furter in the future
+
 # Pengoe
 
 Simple solution for tracking shared accounts.
